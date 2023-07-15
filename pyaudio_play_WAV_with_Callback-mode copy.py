@@ -1,5 +1,5 @@
 # ========================================
-# === Play WAV File with Blocking-mode ===
+# === Play WAV File with Callback-mode ===
 # ========================================
 import wave
 import sys
