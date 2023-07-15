@@ -2,6 +2,7 @@
 # === Play WAV File with Callback-mode ===
 # ========================================
 import wave
+import time
 import sys
 
 import pyaudio
@@ -15,28 +16,47 @@ if len(sys.argv) < 2:
 
 with wave.open(sys.argv[1], 'rb') as wf:  # mode="rb" is read-only mode
 
+    # ====================================
+    # === Define callback for playback ===
+    # ====================================
+    def callback(in_data, frame_count, time_info, status):
+        # PyAudio will call a user-defined callback function whenever it
+        # needs new audio data to play and/or when new recorded audio data
+        # becomes available. PyAudio calls the callback function in a separate
+        # thread. The callback function must have the following signature
+        # callback(<input_data>, <frame_count>, <time_info>, <status_flag>). It
+        # must return a tuple containing frame_count frames of audio data to
+        # output (for output streams) and a flag signifying whether there are
+        # more expected frames to play or record. (For input-only streams, the
+        # audio data portion of the return value is ignored.)
+        data = wf.readframes(frame_count)
+        # If len(data) is less than requested frame_count, PyAudio
+        # automatically assumes the stream is finished, and the stream stops.
+        return (data, pyaudio.paContinue)
+
     # === Instantiate PyAudio and initialize PortAudio system resources ===
     p = pyaudio.PyAudio()
 
-    # === Open stream ===
-    # To record or play audio, open a stream on the desired device with the
-    # desired audio parameters using "pyaudio.PyAudio.open()". This sets up a
-    # "pyaudio.PyAudio.Stream" to play or record audio.
+    # === Open stream using callbac ===
+    # The audio stream starts processing once the stream is opened, which
+    # will call the callback function repeatedly until that function returns
+    # "pyaudio.paComplete" or "pyaudio.paAbort", or until either
+    # "pyaudio.PyAudio.Stream.stop" or "pyaudio.PyAudio.Stream.close" is called.
+    # Note that if the callback returns fewer frames than the frame_count
+    # argument, the stream automatically closes after those frames are played.
     stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
                     channels=wf.getnchannels(),
                     rate=wf.getframerate(),
-                    output=True)
+                    output=True,
+                    stream_callback=callback)
 
-    # === Play Audio from the wave file ===
-    # Play audio by writing audio data to the stream using
-    # "pyaudio.PyAudio.Stream.write()". Note that in “blocking mode”, each
-    # "pyaudio.PyAudio.Stream.write()" or "pyaudio.PyAudio.Stream.read()"
-    # blocks until all frames have been played/recorded. An alternative
-    # approach is “callback mode”, described below, in which PyAudio invokes a
-    # user-defined function to process recorded audio or generate output
-    # audio.
-    while len(data := wf.readframes(CHUNK)):  # Requires Python 3.8+ for :=
-        stream.write(data)
+    # === Wait for stream to finish ===
+    # To keep the stream active, the main thread must remain alive, e.g., by
+    # sleeping. In the example above, once the entire wavefile is read,
+    # "wf.readframes(frame_count)" will eventually return fewer than the
+    # requested frames. The stream will stop, and the while loop will end.
+    while stream.is_active():
+        time.sleep(0.1)
 
     # === Close stream ===
     stream.close()
