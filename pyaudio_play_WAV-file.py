@@ -1,5 +1,3 @@
-"""PyAudio Example: Play a wave file."""
-
 import wave
 import sys
 
