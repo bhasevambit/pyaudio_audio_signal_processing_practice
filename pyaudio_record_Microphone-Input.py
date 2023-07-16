@@ -205,8 +205,11 @@ def plot(t, x, label, xlabel, ylabel, figsize, xlim, ylim, xlog, ylog):
     # レイアウト設定
     fig.tight_layout()
 
-    # グラフ表示
-    plt.show()
+    # グラフ保存
+    now_grf = datetime.datetime.now()
+    filename_grf = 'time-waveform_' + \
+        now_grf.strftime('%Y%m%d_%H%M%S') + '.png'
+    plt.savefig(filename_grf)
     plt.close()
 
     return
@@ -226,6 +229,7 @@ if __name__ == '__main__':
         fs = 512                # フレームサイズ[sampling data count/frame]
     else:
         fs = 1024               # フレームサイズ[sampling data count/frame]
+    print("\nFrameSize[sampling data count/frame] = ", fs, "\n")
     # ------------------------
 
     # === マイクチャンネルを自動取得 ===
@@ -241,20 +245,20 @@ if __name__ == '__main__':
     # time : 録音時間[s]
 
     # === レコーディング音声の時間領域波形表示 ===
-    # plot(
-    #     [t],                    # t
-    #     [data],                 # x
-    #     ['Recorded Sound'],     # label
-    #     'Time [s]',             # xlabel
-    #     'Amplitude',            # ylable
-    #     (8, 4),                 # figsize
-    #     [0, 0],                 # xlim
-    #     [0, 0],                 # ylim
-    #     0,                      # xlog
-    #     0                       # ylog
-    # )
+    plot(
+        [t],                    # t
+        [data],                 # x
+        ['Recorded Sound'],     # label
+        'Time [s]',             # xlabel
+        'Amplitude',            # ylable
+        (8, 4),                 # figsize
+        [0, 0],                 # xlim
+        [0, 0],                 # ylim
+        0,                      # xlog
+        0                       # ylog
+    )
 
     # === レコーディング音声のwavファイル保存 ===
     now = datetime.datetime.now()
-    filename = 'recorded_' + now.strftime('%Y%m%d_%H%M%S') + '.wav'
+    filename = 'recorded-sound_' + now.strftime('%Y%m%d_%H%M%S') + '.wav'
     sf.write(filename, data, samplerate)
