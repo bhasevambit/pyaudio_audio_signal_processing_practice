@@ -5,6 +5,7 @@ import math
 from scipy import fftpack
 import soundfile as sf
 import datetime
+import platform
 
 
 def get_mic_index():
@@ -220,7 +221,11 @@ if __name__ == '__main__':
     mic_mode = 1            # マイクモード (1:モノラル / 2:ステレオ)
     time = 5                # 計測時間[s]
     samplerate = 44100      # サンプリングレート[sampling data count/s)]
-    fs = 1024               # フレームサイズ[sampling data count/frame]
+
+    if platform.machine() == "armv7l":  # Raspi等ARM 32bit版の場合は、フレームサイズを512とする
+        fs = 512                # フレームサイズ[sampling data count/frame]
+    else:
+        fs = 1024               # フレームサイズ[sampling data count/frame]
     # ------------------------
 
     # === マイクチャンネルを自動取得 ===
@@ -236,18 +241,18 @@ if __name__ == '__main__':
     # time : 録音時間[s]
 
     # === レコーディング音声の時間領域波形表示 ===
-    plot(
-        [t],                    # t
-        [data],                 # x
-        ['Recorded Sound'],     # label
-        'Time [s]',             # xlabel
-        'Amplitude',            # ylable
-        (8, 4),                 # figsize
-        [0, 0],                 # xlim
-        [0, 0],                 # ylim
-        0,                      # xlog
-        0                       # ylog
-    )
+    # plot(
+    #     [t],                    # t
+    #     [data],                 # x
+    #     ['Recorded Sound'],     # label
+    #     'Time [s]',             # xlabel
+    #     'Amplitude',            # ylable
+    #     (8, 4),                 # figsize
+    #     [0, 0],                 # xlim
+    #     [0, 0],                 # ylim
+    #     0,                      # xlog
+    #     0                       # ylog
+    # )
 
     # === レコーディング音声のwavファイル保存 ===
     now = datetime.datetime.now()
