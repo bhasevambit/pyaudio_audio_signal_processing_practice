@@ -54,10 +54,11 @@ def get_mic_index():
     return mic_list
 
 
-def record(index, samplerate, fs, time):
+def record(index, mic_mode, samplerate, fs, time):
     ''' 録音する関数 '''
 
     # index : 使用するマイクのdevice index
+    # mic_mode : mic_mode : マイクモード (1:モノラル / 2:ステレオ)
     # samplerate : サンプリングレート[sampling data count/s)]
     # fs : フレームサイズ[sampling data count/frame]
     # time : 録音時間[s]
@@ -70,11 +71,12 @@ def record(index, samplerate, fs, time):
 
     stream = pa.open(
         format=pyaudio.paInt16,
-        channels=1,
+        channels=mic_mode,
         rate=samplerate,
         input=True,
         input_device_index=index,
-        frames_per_buffer=fs)
+        frames_per_buffer=fs
+    )
 
     # フレームサイズ毎に音声を録音していくループ
     print("\nRecording START")
@@ -157,9 +159,10 @@ def plot(t, x, label, xlabel, ylabel, figsize, xlim, ylim, xlog, ylog):
 if __name__ == '__main__':
 
     # --- Sound Parameters ---
+    mic_mode = 1            # マイクモード (1:モノラル / 2:ステレオ)
     time = 5                # 計測時間[s]
-    samplerate = 44100      # サンプリングレート
-    fs = 1024               # フレームサイズ
+    samplerate = 44100      # サンプリングレート[sampling data count/s)]
+    fs = 1024               # フレームサイズ[sampling data count/frame]
     # ------------------------
 
     # === マイクチャンネルを自動取得 ===
@@ -167,8 +170,9 @@ if __name__ == '__main__':
     print("Use Microphone Index :", index, "\n")
 
     # === 録音する関数を実行 ===
-    data, t = record(index, samplerate, fs, time)
+    data, t = record(index, mic_mode, samplerate, fs, time)
     # index : 使用するマイクのdevice index
+    # mic_mode : マイクモード (1:モノラル / 2:ステレオ)
     # samplerate : サンプリングレート[sampling data count/s)]
     # fs : フレームサイズ[sampling data count/frame]
     # time : 録音時間[s]
