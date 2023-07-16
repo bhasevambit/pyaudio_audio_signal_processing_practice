@@ -169,7 +169,8 @@ def plot(t, x, label, xlabel, ylabel, figsize, xlim, ylim, xlog, ylog):
 
     # フォントの種類とサイズを設定
     plt.rcParams['font.size'] = 14
-    plt.rcParams['font.family'] = 'Times New Roman'
+    # plt.rcParams['font.family'] = 'Times New Roman'
+    # Raspiへの対応のためにフォント指定無効化
 
     # 目盛を内側にする。
     plt.rcParams['xtick.direction'] = 'in'

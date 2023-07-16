@@ -9,6 +9,8 @@ __pycache__
 
 # WAV files
 *.WAV
+recorded-sound_*.wav
 
 # png files
 *.png
+
