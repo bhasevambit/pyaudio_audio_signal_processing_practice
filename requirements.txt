@@ -1,3 +1,4 @@
+cffi==1.15.1
 contourpy==1.1.0
 cycler==0.11.0
 fonttools==4.41.0
@@ -7,6 +8,9 @@ numpy==1.25.1
 packaging==23.1
 Pillow==10.0.0
 PyAudio==0.2.13
+pycparser==2.21
 pyparsing==3.0.9
 python-dateutil==2.8.2
+scipy==1.11.1
 six==1.16.0
+soundfile==0.12.1
