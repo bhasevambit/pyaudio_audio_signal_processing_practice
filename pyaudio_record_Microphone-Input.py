@@ -15,13 +15,13 @@ def get_mic_index():
     pa = pyaudio.PyAudio()
     mic_list = []
 
-    print("\n=== Audio Input Devices (Microphone) ===\n")
+    print("=== Audio Input Devices (Microphone) ===\n")
 
     for host_index in range(0, pa.get_host_api_count()):  # Host APIで大分類
 
         host_api_info = pa.get_host_api_info_by_index(host_index)
         print(
-            "--- Host API :",
+            "  --- Host API :",
             host_api_info["name"],
             "[INDEX:",
             host_api_info["index"],
@@ -41,7 +41,7 @@ def get_mic_index():
 
             if dev_info["maxInputChannels"] != 0:
                 print(
-                    "index:",
+                    "  index:",
                     dev_info["index"],
                     " ",
                     dev_info["name"],
@@ -55,8 +55,6 @@ def get_mic_index():
                     pa.get_device_info_by_index(device_index)['index'])
 
         print("")
-
-    print("")
 
     return mic_list
 
@@ -88,12 +86,19 @@ def record(index, mic_mode, samplerate, fs, time):
     )
 
     # フレームサイズ毎に音声を録音していくループ
-    print("\nRecording START")
+    print("Recording START")
 
     for i in range(int(((time / dt) / fs))):
 
         # print("Recorded sampling data count :", i * fs)
-        print("Erapsed Time[s]: ", math.floor(i * fs / samplerate * 100) / 100)
+        print(
+            "  - Erapsed Time[s]: ",
+            math.floor(
+                i *
+                fs /
+                samplerate *
+                100) /
+            100)
 
         frame = stream.read(fs)
         data.append(frame)
@@ -125,14 +130,25 @@ def calc_fft(data, samplerate, dbref, A):
     # ============================================
 
     # 信号のフーリエ変換
+    print("Fourier transform START")
     spectrum = fftpack.fft(data)
-    amp = np.sqrt((spectrum.real ** 2) + (spectrum.imag ** 2))       # 振幅成分
-    # 振幅成分の正規化（辻褄合わせ）
+
+    # 振幅成分算出
+    amp = np.sqrt((spectrum.real ** 2) + (spectrum.imag ** 2))
+    print("  - Amplitude Caluculation END")
+
+    # 振幅成分の正規化
     amp = amp / (len(data) / 2)
-    phase = np.arctan2(spectrum.imag, spectrum.real)                 # 位相を計算
-    # 位相をラジアンから度に変換
+    print("  - Amplitude Normalization END")
+
+    # 位相成分算出 & 位相をラジアンから度に変換
+    phase = np.arctan2(spectrum.imag, spectrum.real)
     phase = np.degrees(phase)
-    freq = np.linspace(0, samplerate, len(data))                     # 周波数軸を作成
+    print("  - Phase Caluculation END")
+
+    # 周波数軸を作成
+    freq = np.linspace(0, samplerate, len(data))
+    print("  - Frequency Axis generation END")
 
     # dbrefが0以上の時にdB変換する
     if dbref > 0:
@@ -142,6 +158,7 @@ def calc_fft(data, samplerate, dbref, A):
         if A:
             amp += aweightings(freq)
 
+    print("Fourier transform END\n")
     return spectrum, amp, phase, freq
 
 
@@ -149,40 +166,46 @@ def aweightings(f):
     # ==================================
     # === 聴感補正関数 (A特性カーブ) ===
     # ==================================
+    print("  - A-weighting START")
+
     if f[0] == 0:
         f[0] = 1e-6
     else:
         pass
+
     ra = (np.power(12194, 2) * np.power(f, 4)) / \
          ((np.power(f, 2) + np.power(20.6, 2)) *
           np.sqrt((np.power(f, 2) + np.power(107.7, 2)) *
                   (np.power(f, 2) + np.power(737.9, 2))) *
           (np.power(f, 2) + np.power(12194, 2)))
+
     a = 20 * np.log10(ra) + 2.00
+
+    print("  - A-weighting END")
     return a
 
 
 def plot(t, x, label, xlabel, ylabel, figsize, xlim, ylim, xlog, ylog):
-    # ===========================================
-    # === 汎用プロット関数(1プロット重ね書き) ===]
-    # ===========================================
+    # ===================================================
+    # === 時間領域波形プロット関数(1プロット重ね書き) ===
+    # ===================================================
 
     # フォントの種類とサイズを設定
     plt.rcParams['font.size'] = 14
     # plt.rcParams['font.family'] = 'Times New Roman'
     # Raspiへの対応のためにフォント指定無効化
 
-    # 目盛を内側にする。
+    # 目盛内側化
     plt.rcParams['xtick.direction'] = 'in'
     plt.rcParams['ytick.direction'] = 'in'
 
-    # Subplot設定とグラフの上下左右に目盛線を付与
+    # Subplot設定、およびグラフの目盛線を付与
     fig = plt.figure(figsize=figsize)
     ax1 = fig.add_subplot(111)
     ax1.yaxis.set_ticks_position('both')
     ax1.xaxis.set_ticks_position('both')
 
-    # 軸のラベルを設定
+    # 軸ラベル設定
     ax1.set_xlabel(xlabel)
     ax1.set_ylabel(ylabel)
 
@@ -216,6 +239,73 @@ def plot(t, x, label, xlabel, ylabel, figsize, xlim, ylim, xlog, ylog):
     return
 
 
+def plot_time_and_freq(t, data, freq, amp):
+    # ====================================================
+    # === 時間領域波形 & 周波数特性 グラフプロット関数 ===
+    # ====================================================
+    print("Graph Plot START")
+
+    # フォント種別、およびサイズ設定
+    plt.rcParams['font.size'] = 14
+    # plt.rcParams['font.family'] = 'Times New Roman'   #
+    # Raspiへの対応のためにフォント指定無効化
+
+    print("  - Graph Axis Setting START")
+
+    # 目盛内側化
+    plt.rcParams['xtick.direction'] = 'in'
+    plt.rcParams['ytick.direction'] = 'in'
+
+    # グラフ目盛線付与
+    fig = plt.figure()
+    ax1 = fig.add_subplot(211)
+    ax1.yaxis.set_ticks_position('both')
+    ax1.xaxis.set_ticks_position('both')
+    ax2 = fig.add_subplot(212)
+    ax2.yaxis.set_ticks_position('both')
+    ax2.xaxis.set_ticks_position('both')
+
+    print("  - Graph Axis Setting END")
+
+    # 軸ラベル設定
+    ax1.set_xlabel('Time [s]')
+    ax1.set_ylabel('Amplitude')
+    ax2.set_xlabel('Frequency [Hz]')
+    ax2.set_ylabel('Amplitude [dBA]')
+    print("  - Graph AxisLable Setting END")
+
+    # スケール設定
+    ax2.set_xticks(np.arange(0, 25600, 1000))
+    ax2.set_xlim(0, 5000)
+    ax2.set_ylim(np.max(amp) - 100, np.max(amp) + 10)
+    print("  - Graph Scale Setting END")
+
+    # 時間領域波形データプロット
+    print("  - Time Waveform Graph DataPlot START")
+    ax1.plot(t, data, label='Time waveform', lw=1, color='red')
+    print("  - Time Waveform Graph DataPlot END")
+
+    # 周波数特性データプロット
+    print("  - Freq Response Graph DataPlot START")
+    ax2.plot(freq, amp, label='Amplitude', lw=1, color='blue')
+    print("  - Freq Response Graph DataPlot END")
+
+    # レイアウト設定
+    fig.tight_layout()
+    print("  - Graph Layout Setting END")
+
+    # グラフ保存
+    print("  - Graph File Save START")
+    now_grf_Tnf = datetime.datetime.now()
+    filename_grf_Tnf = 'time-waveform_and_freq-response_' + \
+        now_grf_Tnf.strftime('%Y%m%d_%H%M%S') + '.png'
+    plt.savefig(filename_grf_Tnf)
+    print("  - Graph File Save END")
+    plt.close()
+
+    print("Graph Plot END\n")
+
+
 if __name__ == '__main__':
     # =================
     # === Main Code ===
@@ -226,7 +316,7 @@ if __name__ == '__main__':
     time = 5                # 計測時間[s]
     samplerate = 44100      # サンプリングレート[sampling data count/s)]
 
-    if platform.machine() == "armv7l":  # Raspi等ARM 32bit版の場合は、フレームサイズを512とする
+    if platform.machine() == "armv7l":  # Raspi等、ARM32bit版の場合は、フレームサイズを512とする(overflow対策)
         fs = 512                # フレームサイズ[sampling data count/frame]
     else:
         fs = 1024               # フレームサイズ[sampling data count/frame]
@@ -245,21 +335,41 @@ if __name__ == '__main__':
     # fs : フレームサイズ[sampling data count/frame]
     # time : 録音時間[s]
 
-    # === レコーディング音声の時間領域波形表示 ===
-    plot(
-        [t],                    # t
-        [data],                 # x
-        ['Recorded Sound'],     # label
-        'Time [s]',             # xlabel
-        'Amplitude',            # ylable
-        (8, 4),                 # figsize
-        [0, 0],                 # xlim
-        [0, 0],                 # ylim
-        0,                      # xlog
-        0                       # ylog
-    )
-
     # === レコーディング音声のwavファイル保存 ===
     now = datetime.datetime.now()
     filename = 'recorded-sound_' + now.strftime('%Y%m%d_%H%M%S') + '.wav'
     sf.write(filename, data, samplerate)
+
+    # === レコーディング音声の時間領域波形保存 ===
+    # plot(
+    #     [t],                    # t
+    #     [data],                 # x
+    #     ['Recorded Sound'],     # label
+    #     'Time [s]',             # xlabel
+    #     'Amplitude',            # ylable
+    #     (8, 4),                 # figsize
+    #     [0, 0],                 # xlim
+    #     [0, 0],                 # ylim
+    #     0,                      # xlog
+    #     0                       # ylog
+    # )
+
+    # === フーリエ変換実行 ===
+    # dBref = デシベル基準値 (0[dB]の時の物理値であり、音圧の場合は最小可聴値である20[μPa]を設定する)
+    dbref = 2e-5
+    # A = 聴感補正(A特性)の有効/無効設定 [True:有効 / False:無効]
+    A = True
+
+    spectrum, amp, phase, freq = calc_fft(data, samplerate, dbref, A)
+    # data : 時間領域波形のAmplitude
+    # samplerate : サンプリングレート[sampling data count/s)]
+    # dbref : デシベル基準値
+    # A : 聴感補正(A特性)の有効/無効設定
+
+    # === レコーディング音声の時間領域波形 & 周波数特性 保存 ===
+    plot_time_and_freq(
+        t,        # time[s]
+        data,     # 時間領域波形 Amplitude
+        freq,     # Frequency[Hz]
+        amp       # 周波数特性 Amplitude
+    )
