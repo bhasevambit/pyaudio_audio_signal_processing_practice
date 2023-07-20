@@ -105,10 +105,14 @@ def read_plot_data(stream, fs):
     plt.rcParams['xtick.direction'] = 'in'
     plt.rcParams['ytick.direction'] = 'in'
 
-    # プロット
+    # ストリームデータの正規化
+    # dataについては、16bit量子化であり、かつ正負符号を持つ事から、
+    # ±32767(=±((2^16 / 2) - 1))の範囲にデータが入る事から、dataを((2^16 / 2) - 1)で割る事で、正規化している
     data = stream.read(fs)
-    audio_data = np.frombuffer(data, dtype='int16')
+    audio_data = np.frombuffer(data, dtype="int16") / \
+        float((np.power(2, 16) / 2) - 1)
 
+    # プロット
     plt.plot(audio_data)
     plt.draw()
     plt.pause(0.001)
@@ -128,7 +132,8 @@ if __name__ == '__main__':
     if platform.machine() == "armv7l":  # ARM32bit向け(Raspi等)
         fs = 512
     elif platform.machine() == "x86_64":  # Intel/AMD64bit向け
-        fs = 4096   # 2048以下の場合、「OSError: [Errno -9981] Input overflowed」が発生したため、4096としている
+        # 2048以下の場合、「OSError: [Errno -9981] Input overflowed」が発生したため、4096としている
+        fs = 4096
     else:
         fs = 1024
     print("\nFrameSize[sampling data count/frame] = ", fs, "\n")

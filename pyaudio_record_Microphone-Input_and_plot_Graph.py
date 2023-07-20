@@ -109,6 +109,8 @@ def record(index, mic_mode, samplerate, fs, time):
     # print("data(after joined) = ", data)
 
     # データをNumpy配列に変換し、時間軸を作成
+    # dataについては、16bit量子化であり、かつ正負符号を持つ事から、
+    # ±32767(=±((2^16 / 2) - 1))の範囲にデータが入る事から、dataを((2^16 / 2) - 1)で割る事で、正規化している
     data = np.frombuffer(data, dtype="int16") / \
         float((np.power(2, 16) / 2) - 1)
     t = np.arange(0, fs * (i + 1) * (1 / samplerate), 1 / samplerate)
