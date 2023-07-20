@@ -2,6 +2,7 @@ import pyaudio
 import numpy as np
 from matplotlib import pyplot as plt
 import platform
+# from scipy import fftpack
 
 
 def get_mic_index():
@@ -80,6 +81,84 @@ def audio_start(index, mic_mode, samplerate, fs):
     return pa, stream
 
 
+def gen_time_domain_data(stream, fs):
+    # ==================================
+    # === 時間領域波形データ生成関数 ===
+    # ==================================
+    audio_data = stream.read(fs)
+    data = np.frombuffer(audio_data, dtype='int16')
+
+    return data
+
+
+def gen_freq_domain_data(data, fs, samplerate):
+    # ================================
+    # === 周波数特性データ生成関数 ===
+    # ================================
+    fft_data = np.fft.fft(data)
+    freq = np.fft.fftfreq(fs, d=1 / samplerate)
+
+    return fft_data, freq
+
+
+def plot_waveform_and_freq_response(
+        data_buffer,
+        data,
+        fs,
+        plot_pause,
+        view_range):
+    # =======================================================
+    # === Microphone入力音声ストリームデータ プロット関数 ===
+    # =======================================================
+    # fs : フレームサイズ[sampling data count/frame]
+
+    # フォント種別、およびサイズ設定
+    plt.rcParams['font.size'] = 14
+    plt.rcParams['font.family'] = 'Times New Roman'
+
+    # 目盛内側化
+    plt.rcParams['xtick.direction'] = 'in'
+    plt.rcParams['ytick.direction'] = 'in'
+
+    # 軸ラベル設定
+    plt.xlabel('Sample Count')
+    plt.ylabel('Amplitude')
+    wave_fig.set_xlabel('Sample Count')
+    wave_fig.set_ylabel('Amplitude')
+    fft_fig.set_xlabel('Frequency [Hz]')
+    fft_fig.set_ylabel('Amplitude')
+
+    # スケール設定
+    wave_fig.set_xlim(len(data_buffer) - view_range, len(data_buffer))
+    wave_fig.set_ylim(-1, 1)
+
+    # レイアウト設定
+    fig.tight_layout()
+
+    # ストリームデータの正規化
+    # dataについては、16bit量子化であり、かつ正負符号を持つ事から、
+    # ±32767(=±((2^16 / 2) - 1))の範囲にデータが入る事から、dataを((2^16 / 2) - 1)で割る事で、正規化している
+    data_normalized = np.frombuffer(data, dtype="int16") / \
+        float((np.power(2, 16) / 2) - 1)
+
+    data_buffer = np.append(data_buffer[fs:], data_normalized)
+
+    # 時間領域波形グラフプロット
+    wave_fig.plot(data_buffer, color='blue')
+
+    # 周波数特性グラフプロット
+    fft_fig.plot(
+        freq[:fs // 20],
+        np.abs(fft_data[:fs // 20]),
+        color='dodgerblue'
+    )
+
+    plt.pause(plot_pause)
+
+    fft_fig.cla()
+    wave_fig.cla()
+
+
 def audio_stop(pa, stream):
     # ============================================
     # === Microphone入力音声ストリーム停止関数 ===
@@ -87,43 +166,6 @@ def audio_stop(pa, stream):
     stream.stop_stream()
     stream.close()
     pa.terminate()
-
-
-def read_plot_data(stream, fs, plot_pause):
-    # =======================================================
-    # === Microphone入力音声ストリームデータ プロット関数 ===
-    # =======================================================
-    # fs : フレームサイズ[sampling data count/frame]
-
-    # フォントの種類とサイズを設定
-    plt.rcParams['font.size'] = 12
-    # plt.rcParams['font.family'] = 'Times New Roman'
-    # Raspiへの対応のためにフォント指定無効化
-
-    # 目盛内側化
-    plt.rcParams['xtick.direction'] = 'in'
-    plt.rcParams['ytick.direction'] = 'in'
-
-    # 軸範囲設定
-    plt.xlim(0, 1000)
-    plt.ylim(-1, 1)
-
-    # 軸ラベル設定
-    plt.xlabel("Sample Count")
-    plt.ylabel("Amplitude")
-
-    # ストリームデータの正規化
-    # dataについては、16bit量子化であり、かつ正負符号を持つ事から、
-    # ±32767(=±((2^16 / 2) - 1))の範囲にデータが入る事から、dataを((2^16 / 2) - 1)で割る事で、正規化している
-    data = stream.read(fs)
-    audio_data = np.frombuffer(data, dtype="int16") / \
-        float((np.power(2, 16) / 2) - 1)
-
-    # プロット
-    plt.plot(audio_data)
-    plt.draw()
-    plt.pause(plot_pause)
-    plt.cla()
 
 
 if __name__ == '__main__':
@@ -134,7 +176,8 @@ if __name__ == '__main__':
     # --- Sound Parameters ---
     mic_mode = 1            # マイクモード (1:モノラル / 2:ステレオ)
     samplerate = 44100      # サンプリングレート[sampling data count/s)]
-    plot_pause = 0.005      # グラフリアルタイム表示のポーズタイム[s]
+    plot_pause = 0.0001     # グラフリアルタイム表示のポーズタイム[s]
+    view_range = 2048       # 時間領域波形グラフ X軸表示レンジ[sample count]
 
     # フレームサイズ[sampling data count/frame]
     if platform.machine() == "armv7l":  # ARM32bit向け(Raspi等)
@@ -144,7 +187,7 @@ if __name__ == '__main__':
         fs = 4096
     elif platform.machine() == "AMD64":  # AMD64bit向け
         # グラフが正常表示されなかったため、8192としている
-        fs = 8192
+        fs = 16384
     else:
         fs = 1024
     print("\nFrameSize[sampling data count/frame] = ", fs, "\n")
@@ -155,19 +198,39 @@ if __name__ == '__main__':
     print("Use Microphone Index :", index, "\n")
 
     # === Microphone入力音声ストリーム生成 ===
-    (audio, stream) = audio_start(index, mic_mode, samplerate, fs)
+    (pa, stream) = audio_start(index, mic_mode, samplerate, fs)
     # index : 使用するマイクのdevice index
     # mic_mode : mic_mode : マイクモード (1:モノラル / 2:ステレオ)
     # samplerate : サンプリングレート[sampling data count/s)]
     # fs : フレームサイズ[sampling data count/frame]
 
-    # === Microphone入力音声ストリーム リアルタイムプロット ===
+    # === 波形プロット用のバッファ生成 ===
+    data_buffer = np.zeros(fs * 16, int)
+
+    # === 時間領域波形と周波数特性向けの2つのグラフ領域を作成
+    fig = plt.figure()
+    wave_fig = fig.add_subplot(2, 1, 1)
+    fft_fig = fig.add_subplot(2, 1, 2)
+
+    # === 時間領域波形 & 周波数特性リアルタイムプロット ===
     # キーボードインタラプトあるまでループ処理継続
     while True:
         try:
-            read_plot_data(stream, fs, plot_pause)
-        except KeyboardInterrupt:
+            # === 時間領域波形データ生成 ===
+            data = gen_time_domain_data(stream, fs)
+            # === 周波数特性データ生成 ===
+            fft_data, freq = gen_freq_domain_data(data, fs, samplerate)
+
+            # === グラフプロット ===
+            plot_waveform_and_freq_response(
+                data_buffer, data, fs, plot_pause, view_range)
+
+        except KeyboardInterrupt:   # Ctrl+c で終了
             break
 
     # Microphone入力音声ストリーム停止
-    audio_stop(audio, stream)
+    audio_stop(pa, stream)
+
+    print("=================")
+    print("= Main Code END =")
+    print("=================\n")
