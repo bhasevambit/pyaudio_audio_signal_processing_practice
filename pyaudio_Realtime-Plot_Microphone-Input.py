@@ -89,7 +89,7 @@ def audio_stop(pa, stream):
     pa.terminate()
 
 
-def read_plot_data(stream, fs):
+def read_plot_data(stream, fs, plot_pause):
     # =======================================================
     # === Microphone入力音声ストリームデータ プロット関数 ===
     # =======================================================
@@ -114,7 +114,7 @@ def read_plot_data(stream, fs):
     # プロット
     plt.plot(audio_data)
     plt.draw()
-    plt.pause(0.001)
+    plt.pause(plot_pause)
     plt.cla()
 
 
@@ -126,13 +126,17 @@ if __name__ == '__main__':
     # --- Sound Parameters ---
     mic_mode = 1            # マイクモード (1:モノラル / 2:ステレオ)
     samplerate = 44100      # サンプリングレート[sampling data count/s)]
+    plot_pause = 0.005      # グラフリアルタイム表示のポーズタイム[s]
 
     # フレームサイズ[sampling data count/frame]
     if platform.machine() == "armv7l":  # ARM32bit向け(Raspi等)
         fs = 512
-    elif platform.machine() == "x86_64":  # Intel/AMD64bit向け
+    elif platform.machine() == "x86_64":  # Intel64bit向け
         # 2048以下の場合、「OSError: [Errno -9981] Input overflowed」が発生したため、4096としている
         fs = 4096
+    elif platform.machine() == "AMD64":  # AMD64bit向け
+        # グラフが正常表示されなかったため、8192としている
+        fs = 8192
     else:
         fs = 1024
     print("\nFrameSize[sampling data count/frame] = ", fs, "\n")
@@ -153,7 +157,7 @@ if __name__ == '__main__':
     # キーボードインタラプトあるまでループ処理継続
     while True:
         try:
-            read_plot_data(stream, fs)
+            read_plot_data(stream, fs, plot_pause)
         except KeyboardInterrupt:
             break
 
