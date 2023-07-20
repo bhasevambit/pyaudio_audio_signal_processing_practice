@@ -104,6 +104,14 @@ def read_plot_data(stream, fs, plot_pause):
     plt.rcParams['xtick.direction'] = 'in'
     plt.rcParams['ytick.direction'] = 'in'
 
+    # 軸範囲設定
+    plt.xlim(0, 1000)
+    plt.ylim(-1, 1)
+
+    # 軸ラベル設定
+    plt.xlabel("Sample Count")
+    plt.ylabel("Amplitude")
+
     # ストリームデータの正規化
     # dataについては、16bit量子化であり、かつ正負符号を持つ事から、
     # ±32767(=±((2^16 / 2) - 1))の範囲にデータが入る事から、dataを((2^16 / 2) - 1)で割る事で、正規化している
