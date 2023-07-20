@@ -89,16 +89,8 @@ def record(index, mic_mode, samplerate, fs, time):
     print("Recording START")
 
     for i in range(int(((time / dt) / fs))):
-
-        # print("Recorded sampling data count :", i * fs)
-        print(
-            "  - Erapsed Time[s]: ",
-            math.floor(
-                i *
-                fs /
-                samplerate *
-                100) /
-            100)
+        erapsed_time = math.floor(((i * fs) / samplerate) * 100) / 100
+        print("  - Erapsed Time[s]: ", erapsed_time)
 
         frame = stream.read(fs)
         data.append(frame)
@@ -316,10 +308,13 @@ if __name__ == '__main__':
     time = 5                # 計測時間[s]
     samplerate = 44100      # サンプリングレート[sampling data count/s)]
 
-    if platform.machine() == "armv7l":  # Raspi等、ARM32bit版の場合は、フレームサイズを512とする(overflow対策)
-        fs = 512                # フレームサイズ[sampling data count/frame]
+    # フレームサイズ[sampling data count/frame]
+    if platform.machine() == "armv7l":  # ARM32bit向け(Raspi等)
+        fs = 512
+    elif platform.machine() == "x86_64":  # Intel/AMD64bit向け
+        fs = 1024
     else:
-        fs = 1024               # フレームサイズ[sampling data count/frame]
+        fs = 1024
     print("\nFrameSize[sampling data count/frame] = ", fs, "\n")
     # ------------------------
 

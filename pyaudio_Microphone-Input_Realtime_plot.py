@@ -96,6 +96,16 @@ def read_plot_data(stream, fs):
     # =======================================================
     # fs : フレームサイズ[sampling data count/frame]
 
+    # フォントの種類とサイズを設定
+    plt.rcParams['font.size'] = 12
+    # plt.rcParams['font.family'] = 'Times New Roman'
+    # Raspiへの対応のためにフォント指定無効化
+
+    # 目盛内側化
+    plt.rcParams['xtick.direction'] = 'in'
+    plt.rcParams['ytick.direction'] = 'in'
+
+    # プロット
     data = stream.read(fs)
     audio_data = np.frombuffer(data, dtype='int16')
 
@@ -114,12 +124,13 @@ if __name__ == '__main__':
     mic_mode = 1            # マイクモード (1:モノラル / 2:ステレオ)
     samplerate = 44100      # サンプリングレート[sampling data count/s)]
 
-    if platform.machine() == "armv7l":  # Raspi等、ARM32bit版の場合は、フレームサイズを512とする(overflow対策)
-        fs = 512                # フレームサイズ[sampling data count/frame]
-    elif platform.machine() == "x86_64":  # Intel/AMD64bit版の場合
-        fs = 512                # フレームサイズ[sampling data count/frame]
+    # フレームサイズ[sampling data count/frame]
+    if platform.machine() == "armv7l":  # ARM32bit向け(Raspi等)
+        fs = 512
+    elif platform.machine() == "x86_64":  # Intel/AMD64bit向け
+        fs = 4096   # 2048以下の場合、「OSError: [Errno -9981] Input overflowed」が発生したため、4096としている
     else:
-        fs = 1024               # フレームサイズ[sampling data count/frame]
+        fs = 1024
     print("\nFrameSize[sampling data count/frame] = ", fs, "\n")
     # ------------------------
 
