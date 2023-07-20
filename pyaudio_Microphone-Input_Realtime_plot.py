@@ -56,71 +56,6 @@ def get_mic_index():
     return mic_list
 
 
-def record(index, mic_mode, samplerate, fs, time):
-    # ============================================
-    # === Microphone入力音声レコーディング関数 ===
-    # ============================================
-    # index : 使用するマイクのdevice index
-    # mic_mode : mic_mode : マイクモード (1:モノラル / 2:ステレオ)
-    # samplerate : サンプリングレート[sampling data count/s)]
-    # fs : フレームサイズ[sampling data count/frame]
-    # time : 録音時間[s]
-
-    pa = pyaudio.PyAudio()
-
-    # ストリームの開始
-    data = []
-    dt = 1 / samplerate
-
-    stream = pa.open(
-        format=pyaudio.paInt16,
-        # pyaudio.paInt16 = 16bit量子化モード (音声時間領域波形の振幅を-32767～+32767に量子化)
-        channels=mic_mode,
-        rate=samplerate,
-        input=True,
-        input_device_index=index,
-        frames_per_buffer=fs
-    )
-
-    # フレームサイズ毎に音声を録音していくループ
-    print("Recording START")
-
-    for i in range(int(((time / dt) / fs))):
-
-        # print("Recorded sampling data count :", i * fs)
-        print(
-            "  - Erapsed Time[s]: ",
-            math.floor(
-                i *
-                fs /
-                samplerate *
-                100) /
-            100)
-
-        frame = stream.read(fs)
-        data.append(frame)
-
-    print("Recording STOP\n")
-
-    # ストリームの終了
-    stream.stop_stream()
-
-    stream.close()
-    pa.terminate()
-
-    # データをまとめる処理
-    # print("data(before joined) = ", data)
-    data = b"".join(data)   # frame毎に、要素が分かれていたdataを、要素間でbyte列連結
-    # print("data(after joined) = ", data)
-
-    # データをNumpy配列に変換し、時間軸を作成
-    data = np.frombuffer(data, dtype="int16") / \
-        float((np.power(2, 16) / 2) - 1)
-    t = np.arange(0, fs * (i + 1) * (1 / samplerate), 1 / samplerate)
-
-    return data, t
-
-
 def audio_start(index, mic_mode, samplerate, fs):
     # ============================================
     # === Microphone入力音声ストリーム生成関数 ===
@@ -180,6 +115,8 @@ if __name__ == '__main__':
     samplerate = 44100      # サンプリングレート[sampling data count/s)]
 
     if platform.machine() == "armv7l":  # Raspi等、ARM32bit版の場合は、フレームサイズを512とする(overflow対策)
+        fs = 512                # フレームサイズ[sampling data count/frame]
+    elif platform.machine() == "x86_64":  # Intel/AMD64bit版の場合
         fs = 512                # フレームサイズ[sampling data count/frame]
     else:
         fs = 1024               # フレームサイズ[sampling data count/frame]
