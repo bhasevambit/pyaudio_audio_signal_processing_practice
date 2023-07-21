@@ -1,12 +1,13 @@
 import pyaudio
+import scipy
 import numpy as np
 from matplotlib import pyplot as plt
 import math
-from scipy import fftpack
-import soundfile as sf
-import datetime
+
 import platform
 import os
+import datetime
+import soundfile as sf
 
 
 def get_mic_index():
@@ -133,7 +134,7 @@ def calc_fft(data, samplerate, dbref, A):
 
     # 信号のフーリエ変換
     print("Fourier transform START")
-    spectrum = fftpack.fft(data)
+    spectrum = scipy.fft.fft(data)
 
     # 振幅成分算出
     amp = np.sqrt((spectrum.real ** 2) + (spectrum.imag ** 2))
