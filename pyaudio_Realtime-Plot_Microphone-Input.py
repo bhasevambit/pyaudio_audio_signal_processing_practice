@@ -91,27 +91,37 @@ def gen_time_domain_data(stream, fs):
     audio_data = stream.read(fs)
     data = np.frombuffer(audio_data, dtype='int16')
 
-    return data
+    # ストリームデータの正規化
+    # dataについては、16bit量子化であり、かつ正負符号を持つ事から、
+    # ±32767(=±((2^16 / 2) - 1))の範囲にデータが入る事から、dataを((2^16 / 2) - 1)で割る事で、正規化している
+    data_normalized = np.frombuffer(data, dtype="int16") / \
+        float((np.power(2, 16) / 2) - 1)
+
+    return data, data_normalized
 
 
-def gen_freq_domain_data(data, fs, samplerate, dbref, A):
+def gen_freq_domain_data(data_normalized, fs, samplerate, dbref, A):
     # ================================
     # === 周波数特性データ生成関数 ===
     # ================================
-    # data : 時間領域波形データ
+    # data_normalized : 時間領域波形データ(正規化済)
     # fs : フレームサイズ[sampling data count/frame]
     # samplerate : サンプリングレート[sampling data count/s)]
     # dbref : デシベル基準値
     # A : 聴感補正(A特性)の有効(True)/無効(False)設定
 
     # 信号のフーリエ変換
-    spectrum = scipy.fft.fft(data)
+    spectrum = scipy.fft.fft(data_normalized)
 
     # 振幅成分算出
     amp = np.abs(spectrum)
 
     # 振幅成分の正規化
-    amp_normalized = amp / (len(data) / 2)
+    amp_normalized = (amp / len(data)) * 2
+    # 離散フーリエ変換の定義から、求まる振幅ampを入力データの振幅に合わせるため 1/N 倍して振幅を計算する。
+    # 加えて、フーリエ変換された N 個のスペクトル（振幅やパワー） は、サンプリング周波数の 1/2
+    # の周波数（ナイキスト周波数）を堺に左右対称となる事から、スペクトルの値は対になる対称成分を足し合わせたものが、
+    # 入力データの実データと一致するため、スペクトル値をさらに2倍する正規化を施す
 
     # 位相成分算出 & 位相をラジアンから度に変換
     # phase_rad = np.angle(spectrum)
@@ -121,19 +131,19 @@ def gen_freq_domain_data(data, fs, samplerate, dbref, A):
     # amp_normalizedは、負の周波数領域データも含むため、「フレームサイズ/2」までの要素をスライス抽出
     fft_data = amp_normalized[1:int(fs / 2)]
 
+    # 周波数軸を作成
+    # freq_bipolarは、負の周波数領域軸データも含むため、「フレームサイズ/2」までの要素をスライス抽出
+    dt = 1 / samplerate  # サンプリング周期[s]
+    freq_bipolar = scipy.fft.fftfreq(fs, d=dt)
+    freq = freq_bipolar[1:int(fs / 2)]
+
     # dbrefが0以上の時にdB変換する
     if dbref > 0:
         fft_data = 20 * np.log10(fft_data / dbref)
 
         # dB変換されていてAがTrueの時に聴感補正する
         if A:
-            fft_data += aweightings(fft_data)
-
-    # 周波数軸を作成
-    # freq_bipolarは、負の周波数領域軸データも含むため、「フレームサイズ/2」までの要素をスライス抽出
-    dt = 1 / samplerate  # サンプリング周期[s]
-    freq_bipolar = scipy.fft.fftfreq(fs, d=dt)
-    freq = freq_bipolar[1:int(fs / 2)]
+            fft_data += aweightings(freq)
 
     return fft_data, freq
 
@@ -160,8 +170,7 @@ def aweightings(f):
 
 
 def plot_waveform_and_freq_response(
-        data_buffer,
-        data,
+        data_normalized,
         fft_data,
         freq,
         fs,
@@ -173,8 +182,7 @@ def plot_waveform_and_freq_response(
     # =======================================================
     # === Microphone入力音声ストリームデータ プロット関数 ===
     # =======================================================
-    # data_buffer : データバッファ
-    # data : 時間領域波形データ
+    # data_normalized : 時間領域波形データ(正規化済)
     # fft_data : 周波数特性データ
     # freq : 周波数領域 軸データ
     # fs : フレームサイズ[sampling data count/frame]
@@ -206,24 +214,16 @@ def plot_waveform_and_freq_response(
         fft_fig.set_ylabel('Amplitude')
 
     # スケール設定
-    wave_fig.set_xlim(len(data_buffer) - view_range, len(data_buffer))
+    wave_fig.set_xlim(0, view_range)
     wave_fig.set_ylim(-1, 1)
     fft_fig.set_xlim(0, 5000)
-    # fft_fig.set_ylim(-10, 5000)
+    fft_fig.set_ylim(-10, 100)
 
     # レイアウト設定
     fig.tight_layout()
 
-    # ストリームデータの正規化
-    # dataについては、16bit量子化であり、かつ正負符号を持つ事から、
-    # ±32767(=±((2^16 / 2) - 1))の範囲にデータが入る事から、dataを((2^16 / 2) - 1)で割る事で、正規化している
-    data_normalized = np.frombuffer(data, dtype="int16") / \
-        float((np.power(2, 16) / 2) - 1)
-
-    data_buffer = np.append(data_buffer[fs:], data_normalized)
-
     # 時間領域波形グラフプロット
-    wave_fig.plot(data_buffer, color="blue")
+    wave_fig.plot(data_normalized, color="blue")
 
     # 周波数特性グラフプロット
     fft_fig.plot(freq, fft_data, color="dodgerblue")
@@ -281,9 +281,6 @@ if __name__ == '__main__':
     # samplerate : サンプリングレート[sampling data count/s)]
     # fs : フレームサイズ[sampling data count/frame]
 
-    # === 波形プロット用のバッファ生成 ===
-    data_buffer = np.zeros(fs * 16, int)    # データバッファ
-
     # === 時間領域波形と周波数特性向けの2つのグラフ領域を作成
     fig = plt.figure()
     wave_fig = fig.add_subplot(2, 1, 1)
@@ -294,17 +291,16 @@ if __name__ == '__main__':
     while True:
         try:
             # === 時間領域波形データ生成 ===
-            data = gen_time_domain_data(stream, fs)
+            data, data_normalized = gen_time_domain_data(stream, fs)
 
             # === 周波数特性データ生成 ===
             fft_data, freq = gen_freq_domain_data(
-                data, fs, samplerate, dbref, A
+                data_normalized, fs, samplerate, dbref, A
             )
 
             # === グラフプロット ===
             plot_waveform_and_freq_response(
-                data_buffer,
-                data,
+                data_normalized,
                 fft_data,
                 freq,
                 fs,
