@@ -99,8 +99,13 @@ def gen_freq_domain_data(data, fs, samplerate):
     # data : 時間領域波形データ
     # fs : フレームサイズ[sampling data count/frame]
     # samplerate : サンプリングレート[sampling data count/s)]
+
+    # 周波数特性データ算出
     fft_data = np.fft.fft(data)
-    freq = np.fft.fftfreq(fs, d=1 / samplerate)
+
+    # 周波数データを取得
+    sampling_period = 1 / samplerate
+    freq = np.fft.fftfreq(fs, d=sampling_period)
 
     return fft_data, freq
 

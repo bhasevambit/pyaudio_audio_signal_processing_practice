@@ -87,6 +87,7 @@ def record(index, mic_mode, samplerate, fs, time):
 
     # フレームサイズ毎に音声を録音していくループ
     print("Recording START")
+    i = 0
 
     for i in range(int(((time / dt) / fs))):
         erapsed_time = math.floor(((i * fs) / samplerate) * 100) / 100
@@ -113,7 +114,13 @@ def record(index, mic_mode, samplerate, fs, time):
     # ±32767(=±((2^16 / 2) - 1))の範囲にデータが入る事から、dataを((2^16 / 2) - 1)で割る事で、正規化している
     data = np.frombuffer(data, dtype="int16") / \
         float((np.power(2, 16) / 2) - 1)
-    t = np.arange(0, fs * (i + 1) * (1 / samplerate), 1 / samplerate)
+
+    # tについては、numpy.arrange()を用いて、
+    #   start : 0
+    #   stop : (録音時間にしめるサンプリングデータ数 / フレームサイズ)の整数部 * フレームサイズ * サンプリング周期[s],
+    #   step : サンプリング周期[s]
+    # とし、配列を作っている
+    t = np.arange(0, int(((time / dt) / fs)) * fs * dt, dt)
 
     return data, t
 
@@ -291,7 +298,8 @@ def plot_time_and_freq(t, data, freq, amp):
     # グラフ保存
     print("  - Graph File Save START")
     now_grf_Tnf = datetime.datetime.now()
-    filename_grf_Tnf = 'time-waveform_and_freq-response_' + \
+    grf_dirname = 'graph/'
+    filename_grf_Tnf = grf_dirname + 'time-waveform_and_freq-response_' + \
         now_grf_Tnf.strftime('%Y%m%d_%H%M%S') + '.png'
     plt.savefig(filename_grf_Tnf)
     print("  - Graph File Save END")
@@ -334,7 +342,9 @@ if __name__ == '__main__':
 
     # === レコーディング音声のwavファイル保存 ===
     now = datetime.datetime.now()
-    filename = 'recorded-sound_' + now.strftime('%Y%m%d_%H%M%S') + '.wav'
+    dirname = 'wav/'
+    filename = dirname + 'recorded-sound_' + \
+        now.strftime('%Y%m%d_%H%M%S') + '.wav'
     sf.write(filename, data, samplerate)
 
     # === レコーディング音声の時間領域波形保存 ===
