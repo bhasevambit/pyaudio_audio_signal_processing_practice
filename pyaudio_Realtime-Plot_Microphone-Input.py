@@ -97,7 +97,7 @@ def gen_time_domain_data(stream, fs):
     data_normalized = np.frombuffer(data, dtype="int16") / \
         float((np.power(2, 16) / 2) - 1)
 
-    return data, data_normalized
+    return data_normalized
 
 
 def gen_freq_domain_data(data_normalized, fs, samplerate, dbref, A):
@@ -117,7 +117,7 @@ def gen_freq_domain_data(data_normalized, fs, samplerate, dbref, A):
     amp = np.abs(spectrum)
 
     # 振幅成分の正規化
-    amp_normalized = (amp / len(data)) * 2
+    amp_normalized = (amp / len(data_normalized)) * 2
     # 離散フーリエ変換の定義から、求まる振幅ampを入力データの振幅に合わせるため 1/N 倍して振幅を計算する。
     # 加えて、フーリエ変換された N 個のスペクトル（振幅やパワー） は、サンプリング周波数の 1/2
     # の周波数（ナイキスト周波数）を堺に左右対称となる事から、スペクトルの値は対になる対称成分を足し合わせたものが、
@@ -217,7 +217,7 @@ def plot_waveform_and_freq_response(
     wave_fig.set_xlim(0, view_range)
     wave_fig.set_ylim(-1, 1)
     fft_fig.set_xlim(0, 5000)
-    fft_fig.set_ylim(-10, 100)
+    fft_fig.set_ylim(-10, 80)
 
     # レイアウト設定
     fig.tight_layout()
@@ -291,7 +291,7 @@ if __name__ == '__main__':
     while True:
         try:
             # === 時間領域波形データ生成 ===
-            data, data_normalized = gen_time_domain_data(stream, fs)
+            data_normalized = gen_time_domain_data(stream, fs)
 
             # === 周波数特性データ生成 ===
             fft_data, freq = gen_freq_domain_data(
