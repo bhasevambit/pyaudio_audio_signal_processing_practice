@@ -6,6 +6,7 @@ from scipy import fftpack
 import soundfile as sf
 import datetime
 import platform
+import os
 
 
 def get_mic_index():
@@ -298,7 +299,11 @@ def plot_time_and_freq(t, data, freq, amp):
     # グラフ保存
     print("  - Graph File Save START")
     now_grf_Tnf = datetime.datetime.now()
+
     grf_dirname = 'graph/'
+    if not os.path.isdir(grf_dirname):
+        os.mkdir(grf_dirname)
+
     filename_grf_Tnf = grf_dirname + 'time-waveform_and_freq-response_' + \
         now_grf_Tnf.strftime('%Y%m%d_%H%M%S') + '.png'
     plt.savefig(filename_grf_Tnf)
@@ -342,7 +347,11 @@ if __name__ == '__main__':
 
     # === レコーディング音声のwavファイル保存 ===
     now = datetime.datetime.now()
+
     dirname = 'wav/'
+    if not os.path.isdir(dirname):
+        os.mkdir(dirname)
+
     filename = dirname + 'recorded-sound_' + \
         now.strftime('%Y%m%d_%H%M%S') + '.wav'
     sf.write(filename, data, samplerate)
