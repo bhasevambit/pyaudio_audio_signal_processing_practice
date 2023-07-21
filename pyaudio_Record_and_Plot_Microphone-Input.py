@@ -242,7 +242,7 @@ def plot(t, x, label, xlabel, ylabel, figsize, xlim, ylim, xlog, ylog):
     return
 
 
-def plot_time_and_freq(t, data, freq, amp):
+def plot_time_and_freq(t, data, freq, amp, dbref, A):
     # ====================================================
     # === 時間領域波形 & 周波数特性 グラフプロット関数 ===
     # ====================================================
@@ -274,7 +274,14 @@ def plot_time_and_freq(t, data, freq, amp):
     ax1.set_xlabel('Time [s]')
     ax1.set_ylabel('Amplitude')
     ax2.set_xlabel('Frequency [Hz]')
-    ax2.set_ylabel('Amplitude [dBA]')
+
+    if (dbref > 0) and not (A):
+        ax2.set_ylabel('Amplitude [dB spl]')
+    elif (dbref > 0) and (A):
+        ax2.set_ylabel('Amplitude [dB spl(A)]')
+    else:
+        ax2.set_ylabel('Amplitude')
+
     print("  - Graph AxisLable Setting END")
 
     # スケール設定
@@ -285,12 +292,12 @@ def plot_time_and_freq(t, data, freq, amp):
 
     # 時間領域波形データプロット
     print("  - Time Waveform Graph DataPlot START")
-    ax1.plot(t, data, label='Time waveform', lw=1, color='red')
+    ax1.plot(t, data, label='Time waveform', lw=1, color="blue")
     print("  - Time Waveform Graph DataPlot END")
 
     # 周波数特性データプロット
     print("  - Freq Response Graph DataPlot START")
-    ax2.plot(freq, amp, label='Amplitude', lw=1, color='blue')
+    ax2.plot(freq, amp, label='Amplitude', lw=1, color="dodgerblue")
     print("  - Freq Response Graph DataPlot END")
 
     # レイアウト設定
@@ -323,6 +330,8 @@ if __name__ == '__main__':
     mic_mode = 1            # マイクモード (1:モノラル / 2:ステレオ)
     time = 5                # 計測時間[s]
     samplerate = 44100      # サンプリングレート[sampling data count/s)]
+    dbref = 2e-5            # デシベル基準値(最小可聴値 20[μPa]を設定)
+    A = True                # 聴感補正(A特性)の有効(True)/無効(False)設定
 
     # フレームサイズ[sampling data count/frame]
     if platform.machine() == "armv7l":  # ARM32bit向け(Raspi等)
@@ -372,11 +381,6 @@ if __name__ == '__main__':
     # )
 
     # === フーリエ変換実行 ===
-    # dBref = デシベル基準値 (0[dB]の時の物理値であり、音圧の場合は最小可聴値である20[μPa]を設定する)
-    dbref = 2e-5
-    # A = 聴感補正(A特性)の有効/無効設定 [True:有効 / False:無効]
-    A = True
-
     spectrum, amp, phase, freq = calc_fft(data, samplerate, dbref, A)
     # data : 時間領域波形のAmplitude
     # samplerate : サンプリングレート[sampling data count/s)]
@@ -385,8 +389,10 @@ if __name__ == '__main__':
 
     # === レコーディング音声の時間領域波形 & 周波数特性 保存 ===
     plot_time_and_freq(
-        t,        # time[s]
-        data,     # 時間領域波形 Amplitude
-        freq,     # Frequency[Hz]
-        amp       # 周波数特性 Amplitude
+        t,          # time[s]
+        data,       # 時間領域波形 Amplitude
+        freq,       # Frequency[Hz]
+        amp,        # 周波数特性 Amplitude
+        dbref,      # デシベル基準値
+        A           # 聴感補正(A特性)の有効/無効設定
     )

@@ -1,6 +1,8 @@
 import pyaudio
+import scipy
 import numpy as np
 from matplotlib import pyplot as plt
+
 import platform
 
 
@@ -92,31 +94,81 @@ def gen_time_domain_data(stream, fs):
     return data
 
 
-def gen_freq_domain_data(data, fs, samplerate):
+def gen_freq_domain_data(data, fs, samplerate, dbref, A):
     # ================================
     # === 周波数特性データ生成関数 ===
     # ================================
     # data : 時間領域波形データ
     # fs : フレームサイズ[sampling data count/frame]
     # samplerate : サンプリングレート[sampling data count/s)]
+    # dbref : デシベル基準値
+    # A : 聴感補正(A特性)の有効(True)/無効(False)設定
 
-    # 周波数特性データ算出
-    fft_data = np.fft.fft(data)
+    # 信号のフーリエ変換
+    spectrum = scipy.fft.fft(data)
 
-    # 周波数データを取得
-    sampling_period = 1 / samplerate
-    freq = np.fft.fftfreq(fs, d=sampling_period)
+    # 振幅成分算出
+    amp = np.abs(spectrum)
+
+    # 振幅成分の正規化
+    amp_normalized = amp / (len(data) / 2)
+
+    # 位相成分算出 & 位相をラジアンから度に変換
+    # phase_rad = np.angle(spectrum)
+    # phase = np.degrees(phase_rad)
+
+    # 正規化した振幅成分をFFTデータとする
+    # amp_normalizedは、負の周波数領域データも含むため、「フレームサイズ/2」までの要素をスライス抽出
+    fft_data = amp_normalized[1:int(fs / 2)]
+
+    # dbrefが0以上の時にdB変換する
+    if dbref > 0:
+        fft_data = 20 * np.log10(fft_data / dbref)
+
+        # dB変換されていてAがTrueの時に聴感補正する
+        if A:
+            fft_data += aweightings(fft_data)
+
+    # 周波数軸を作成
+    # freq_bipolarは、負の周波数領域軸データも含むため、「フレームサイズ/2」までの要素をスライス抽出
+    dt = 1 / samplerate  # サンプリング周期[s]
+    freq_bipolar = scipy.fft.fftfreq(fs, d=dt)
+    freq = freq_bipolar[1:int(fs / 2)]
 
     return fft_data, freq
+
+
+def aweightings(f):
+    # ==================================
+    # === 聴感補正関数 (A特性カーブ) ===
+    # ==================================
+
+    if f[0] == 0:
+        f[0] = 1e-6
+    else:
+        pass
+
+    ra = (np.power(12194, 2) * np.power(f, 4)) / \
+         ((np.power(f, 2) + np.power(20.6, 2)) *
+          np.sqrt((np.power(f, 2) + np.power(107.7, 2)) *
+                  (np.power(f, 2) + np.power(737.9, 2))) *
+          (np.power(f, 2) + np.power(12194, 2)))
+
+    a = 20 * np.log10(ra) + 2.00
+
+    return a
 
 
 def plot_waveform_and_freq_response(
         data_buffer,
         data,
         fft_data,
+        freq,
         fs,
         plot_pause,
-        view_range
+        view_range,
+        dbref,
+        A
 ):
     # =======================================================
     # === Microphone入力音声ストリームデータ プロット関数 ===
@@ -124,9 +176,12 @@ def plot_waveform_and_freq_response(
     # data_buffer : データバッファ
     # data : 時間領域波形データ
     # fft_data : 周波数特性データ
+    # freq : 周波数領域 軸データ
     # fs : フレームサイズ[sampling data count/frame]
     # plot_pause : グラフリアルタイム表示のポーズタイム[s]
     # view_range : 時間領域波形グラフ X軸表示レンジ[sample count]
+    # dbref : デシベル基準値
+    # A : 聴感補正(A特性)の有効(True)/無効(False)設定
 
     # フォント種別、およびサイズ設定
     plt.rcParams['font.size'] = 14
@@ -142,12 +197,19 @@ def plot_waveform_and_freq_response(
     wave_fig.set_xlabel('Sample Count')
     wave_fig.set_ylabel('Amplitude')
     fft_fig.set_xlabel('Frequency [Hz]')
-    fft_fig.set_ylabel('Amplitude')
+
+    if (dbref > 0) and not (A):
+        fft_fig.set_ylabel('Amplitude [dB spl]')
+    elif (dbref > 0) and (A):
+        fft_fig.set_ylabel('Amplitude [dB spl(A)]')
+    else:
+        fft_fig.set_ylabel('Amplitude')
 
     # スケール設定
     wave_fig.set_xlim(len(data_buffer) - view_range, len(data_buffer))
     wave_fig.set_ylim(-1, 1)
     fft_fig.set_xlim(0, 5000)
+    # fft_fig.set_ylim(-10, 5000)
 
     # レイアウト設定
     fig.tight_layout()
@@ -161,14 +223,10 @@ def plot_waveform_and_freq_response(
     data_buffer = np.append(data_buffer[fs:], data_normalized)
 
     # 時間領域波形グラフプロット
-    wave_fig.plot(data_buffer, color='blue')
+    wave_fig.plot(data_buffer, color="blue")
 
     # 周波数特性グラフプロット
-    fft_fig.plot(
-        freq[:fs // 20],
-        np.abs(fft_data[:fs // 20]),
-        color='dodgerblue'
-    )
+    fft_fig.plot(freq, fft_data, color="dodgerblue")
 
     plt.pause(plot_pause)
 
@@ -193,6 +251,8 @@ if __name__ == '__main__':
     # --- Sound Parameters ---
     mic_mode = 1            # マイクモード (1:モノラル / 2:ステレオ)
     samplerate = 44100      # サンプリングレート[sampling data count/s)]
+    dbref = 2e-5            # デシベル基準値(最小可聴値 20[μPa]を設定)
+    A = True                # 聴感補正(A特性)の有効(True)/無効(False)設定
     plot_pause = 0.0001     # グラフリアルタイム表示のポーズタイム[s]
     view_range = 2048       # 時間領域波形グラフ X軸表示レンジ[sample count]
 
@@ -215,7 +275,7 @@ if __name__ == '__main__':
     print("Use Microphone Index :", index, "\n")
 
     # === Microphone入力音声ストリーム生成 ===
-    (pa, stream) = audio_start(index, mic_mode, samplerate, fs)
+    pa, stream = audio_start(index, mic_mode, samplerate, fs)
     # index : 使用するマイクのdevice index
     # mic_mode : mic_mode : マイクモード (1:モノラル / 2:ステレオ)
     # samplerate : サンプリングレート[sampling data count/s)]
@@ -235,12 +295,23 @@ if __name__ == '__main__':
         try:
             # === 時間領域波形データ生成 ===
             data = gen_time_domain_data(stream, fs)
+
             # === 周波数特性データ生成 ===
-            fft_data, freq = gen_freq_domain_data(data, fs, samplerate)
+            fft_data, freq = gen_freq_domain_data(
+                data, fs, samplerate, dbref, A
+            )
 
             # === グラフプロット ===
             plot_waveform_and_freq_response(
-                data_buffer, data, fft_data, fs, plot_pause, view_range)
+                data_buffer,
+                data,
+                fft_data,
+                freq,
+                fs,
+                plot_pause,
+                view_range,
+                dbref,
+                A)
 
         except KeyboardInterrupt:   # Ctrl+c で終了
             break
