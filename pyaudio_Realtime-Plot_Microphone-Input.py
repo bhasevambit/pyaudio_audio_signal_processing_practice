@@ -2,7 +2,6 @@ import pyaudio
 import numpy as np
 from matplotlib import pyplot as plt
 import platform
-# from scipy import fftpack
 
 
 def get_mic_index():
@@ -85,6 +84,8 @@ def gen_time_domain_data(stream, fs):
     # ==================================
     # === 時間領域波形データ生成関数 ===
     # ==================================
+    # stream : マイク入力音声データストリーム
+    # fs : フレームサイズ[sampling data count/frame]
     audio_data = stream.read(fs)
     data = np.frombuffer(audio_data, dtype='int16')
 
@@ -95,6 +96,9 @@ def gen_freq_domain_data(data, fs, samplerate):
     # ================================
     # === 周波数特性データ生成関数 ===
     # ================================
+    # data : 時間領域波形データ
+    # fs : フレームサイズ[sampling data count/frame]
+    # samplerate : サンプリングレート[sampling data count/s)]
     fft_data = np.fft.fft(data)
     freq = np.fft.fftfreq(fs, d=1 / samplerate)
 
@@ -104,13 +108,20 @@ def gen_freq_domain_data(data, fs, samplerate):
 def plot_waveform_and_freq_response(
         data_buffer,
         data,
+        fft_data,
         fs,
         plot_pause,
-        view_range):
+        view_range
+):
     # =======================================================
     # === Microphone入力音声ストリームデータ プロット関数 ===
     # =======================================================
+    # data_buffer : データバッファ
+    # data : 時間領域波形データ
+    # fft_data : 周波数特性データ
     # fs : フレームサイズ[sampling data count/frame]
+    # plot_pause : グラフリアルタイム表示のポーズタイム[s]
+    # view_range : 時間領域波形グラフ X軸表示レンジ[sample count]
 
     # フォント種別、およびサイズ設定
     plt.rcParams['font.size'] = 14
@@ -131,6 +142,7 @@ def plot_waveform_and_freq_response(
     # スケール設定
     wave_fig.set_xlim(len(data_buffer) - view_range, len(data_buffer))
     wave_fig.set_ylim(-1, 1)
+    fft_fig.set_xlim(0, 5000)
 
     # レイアウト設定
     fig.tight_layout()
@@ -183,10 +195,10 @@ if __name__ == '__main__':
     if platform.machine() == "armv7l":  # ARM32bit向け(Raspi等)
         fs = 512
     elif platform.machine() == "x86_64":  # Intel64bit向け
-        # 2048以下の場合、「OSError: [Errno -9981] Input overflowed」が発生したため、4096としている
-        fs = 4096
+        # 4096以下の場合、「OSError: [Errno -9981] Input overflowed」が発生したため、16384としている
+        fs = 16384
     elif platform.machine() == "AMD64":  # AMD64bit向け
-        # グラフが正常表示されなかったため、8192としている
+        # グラフが正常表示されなかったため、16384としている
         fs = 16384
     else:
         fs = 1024
@@ -205,7 +217,7 @@ if __name__ == '__main__':
     # fs : フレームサイズ[sampling data count/frame]
 
     # === 波形プロット用のバッファ生成 ===
-    data_buffer = np.zeros(fs * 16, int)
+    data_buffer = np.zeros(fs * 16, int)    # データバッファ
 
     # === 時間領域波形と周波数特性向けの2つのグラフ領域を作成
     fig = plt.figure()
@@ -223,7 +235,7 @@ if __name__ == '__main__':
 
             # === グラフプロット ===
             plot_waveform_and_freq_response(
-                data_buffer, data, fs, plot_pause, view_range)
+                data_buffer, data, fft_data, fs, plot_pause, view_range)
 
         except KeyboardInterrupt:   # Ctrl+c で終了
             break
