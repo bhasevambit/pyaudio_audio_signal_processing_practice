@@ -42,13 +42,16 @@ if __name__ == '__main__':
 
     # === Microphone入力音声ストリーム生成 ===
     pa, stream = audio_stream_start(index, mic_mode, samplerate, fs)
-    # pa : pyaudioクラスオブジェクト
-    # stream : マイク入力音声ストリーム
+    # pa        : pyaudioクラスオブジェクト
+    # stream    : マイク入力音声ストリーム
 
     # === 時間領域波形と周波数特性向けの2つのグラフ領域を作成
     fig = plt.figure()
     wave_fig = fig.add_subplot(2, 1, 1)
     freq_fig = fig.add_subplot(2, 1, 2)
+    # fig       : リアルタイム更新対象のグラフfigure
+    # wave_fig  : リアルタイム更新対象の時間領域波形グラフfigure
+    # freq_fig  : リアルタイム更新対象の周波数特性グラフfigure
 
     # === 時間領域波形 & 周波数特性リアルタイムプロット ===
     # キーボードインタラプトあるまでループ処理継続

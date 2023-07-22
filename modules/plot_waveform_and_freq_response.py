@@ -20,18 +20,18 @@ def plot_waveform_and_freq_response(
     # =======================================================
     # === Microphone入力音声ストリームデータ プロット関数 ===
     # =======================================================
-    # fig : リアルタイム更新対象のグラフfigure
-    # wave_fig : リアルタイム更新対象の時間領域波形グラフfigure
-    # freq_fig : リアルタイム更新対象の周波数特性グラフfigure
-    # data_normalized : 時間領域 波形データ(正規化済)
-    # t : 時間領域 X軸向けデータ [ms]
-    # amp_normalized : 周波数特性 振幅データ(正規化済)
-    # freq : 周波数特性 X軸向けデータ
-    # fs : フレームサイズ [sampling data count/frame]
-    # plot_pause : グラフリアルタイム表示のポーズタイム [s]
-    # view_range : 時間領域波形グラフ X軸表示レンジ [sample count]
-    # dbref : デシベル基準値
-    # A : 聴感補正(A特性)の有効(True)/無効(False)設定
+    # fig               : リアルタイム更新対象のグラフfigure
+    # wave_fig          : リアルタイム更新対象の時間領域波形グラフfigure
+    # freq_fig          : リアルタイム更新対象の周波数特性グラフfigure
+    # data_normalized   : 時間領域 波形データ(正規化済)
+    # t                 : 時間領域 X軸向けデータ [ms]
+    # amp_normalized    : 周波数特性 振幅データ(正規化済)
+    # freq              : 周波数特性 X軸向けデータ
+    # fs                : フレームサイズ [sampling data count/frame]
+    # plot_pause        : グラフリアルタイム表示のポーズタイム [s]
+    # view_range        : 時間領域波形グラフ X軸表示レンジ [sample count]
+    # dbref             : デシベル基準値
+    # A                 : 聴感補正(A特性)の有効(True)/無効(False)設定
 
     # フォント種別、およびサイズ設定
     plt.rcParams['font.size'] = 14

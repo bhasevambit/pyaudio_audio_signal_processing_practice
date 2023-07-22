@@ -5,10 +5,10 @@ def audio_stream_start(index, mic_mode, samplerate, fs):
     # ============================================
     # === Microphone入力音声ストリーム生成関数 ===
     # ============================================
-    # index : 使用するマイクのdevice index
-    # mic_mode : mic_mode : マイクモード (1:モノラル / 2:ステレオ)
-    # samplerate : サンプリングレート[sampling data count/s)]
-    # fs : フレームサイズ[sampling data count/frame]
+    # index         : 使用するマイクのdevice index
+    # mic_mode      : マイクモード (1:モノラル / 2:ステレオ)
+    # samplerate    : サンプリングレート[sampling data count/s)]
+    # fs            : フレームサイズ[sampling data count/frame]
 
     pa = pyaudio.PyAudio()
 
