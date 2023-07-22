@@ -11,6 +11,7 @@ import soundfile as sf
 from modules.get_mic_index import get_mic_index
 from modules.audio_stream import audio_stream_start
 from modules.audio_stream import audio_stream_stop
+# from modules.gen_freq_domain_data import gen_freq_domain_data
 from modules.a_weighting import a_weighting
 
 
@@ -82,7 +83,7 @@ def calc_fft(data, samplerate, dbref, A):
     print("  - Amplitude Caluculation END")
 
     # 振幅成分の正規化
-    amp = amp / (len(data) / 2)
+    amp_normalized = amp / (len(data) / 2)
     print("  - Amplitude Normalization END")
 
     # 位相成分算出 & 位相をラジアンから度に変換
@@ -96,14 +97,14 @@ def calc_fft(data, samplerate, dbref, A):
 
     # dbrefが0以上の時にdB変換する
     if dbref > 0:
-        amp = 20 * np.log10(amp / dbref)
+        amp_normalized = 20 * np.log10(amp_normalized / dbref)
 
         # dB変換されていてAがTrueの時に聴感補正する
         if A:
-            amp += a_weighting(freq)
+            amp_normalized += a_weighting(freq)
 
     print("Fourier transform END\n")
-    return spectrum, amp, phase, freq
+    return spectrum, amp_normalized, phase, freq
 
 
 def plot_time_and_freq(t, data, freq, amp, dbref, A):
@@ -228,18 +229,26 @@ if __name__ == '__main__':
     sf.write(filename, data, samplerate)
 
     # === フーリエ変換実行 ===
-    spectrum, amp, phase, freq = calc_fft(data, samplerate, dbref, A)
-    # spectrum : 周波数特性データ(複素数データ)
-    # amp : 周波数特性 振幅データ
-    # phase : 周波数特性 位相データ
-    # freq : 周波数特性 周波数データ
+    spectrum, amp_normalized, phase, freq = calc_fft(
+        data, samplerate, dbref, A)
+    # spectrum          : 周波数特性データ(複素数データ)
+    # amp_normalized    : 周波数特性 振幅データ(正規化済)
+    # phase             : 周波数特性 位相データ
+    # freq              : 周波数特性 X軸向けデータ
+    # spectrum, amp_normalized, phase, freq = gen_freq_domain_data(
+    #     data, fs, samplerate, dbref, A
+    # )
+    # spectrum          : 周波数特性データ(複素数データ)
+    # amp_normalized    : 周波数特性 振幅データ(正規化済)
+    # phase             : 周波数特性 位相データ
+    # freq              : 周波数特性 X軸向けデータ
 
     # === レコーディング音声の時間領域波形 & 周波数特性 保存 ===
     plot_time_and_freq(
         t,          # time[s]
         data,       # 時間領域波形 Amplitude
         freq,       # Frequency[Hz]
-        amp,        # 周波数特性 Amplitude
+        amp_normalized,        # 周波数特性 Amplitude
         dbref,      # デシベル基準値
         A           # 聴感補正(A特性)の有効/無効設定
     )

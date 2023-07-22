@@ -7,25 +7,8 @@ import warnings
 from modules.get_mic_index import get_mic_index
 from modules.audio_stream import audio_stream_start
 from modules.audio_stream import audio_stream_stop
+from modules.gen_time_domain_data import gen_time_domain_data
 from modules.gen_freq_domain_data import gen_freq_domain_data
-
-
-def gen_time_domain_data(stream, fs):
-    # ==================================
-    # === 時間領域波形データ生成関数 ===
-    # ==================================
-    # stream : マイク入力音声データストリーム
-    # fs : フレームサイズ[sampling data count/frame]
-    audio_data = stream.read(fs)
-    data = np.frombuffer(audio_data, dtype='int16')
-
-    # ストリームデータの正規化
-    # dataについては、16bit量子化であり、かつ正負符号を持つ事から、
-    # ±32767(=±((2^16 / 2) - 1))の範囲にデータが入る事から、dataを((2^16 / 2) - 1)で割る事で、正規化している
-    data_normalized = np.frombuffer(data, dtype="int16") / \
-        float((np.power(2, 16) / 2) - 1)
-
-    return data_normalized
 
 
 def plot_waveform_and_freq_response(
@@ -148,6 +131,7 @@ if __name__ == '__main__':
         try:
             # === 時間領域波形データ生成 ===
             data_normalized = gen_time_domain_data(stream, fs)
+            # data_normalized   : 時間領域 波形データ(正規化済)
 
             # === 周波数特性データ生成 ===
             spectrum, amp_normalized, phase, freq = gen_freq_domain_data(
