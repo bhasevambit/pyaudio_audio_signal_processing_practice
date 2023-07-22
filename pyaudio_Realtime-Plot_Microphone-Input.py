@@ -7,6 +7,7 @@ import platform
 import warnings
 
 from modules.get_mic_index import get_mic_index
+from modules.a_weighting import a_weighting
 
 
 def audio_start(index, mic_mode, samplerate, fs):
@@ -96,30 +97,9 @@ def gen_freq_domain_data(data_normalized, fs, samplerate, dbref, A):
 
         # dB変換されていてAがTrueの時に聴感補正する
         if A:
-            fft_data += aweightings(freq)
+            fft_data += a_weighting(freq)
 
     return fft_data, freq
-
-
-def aweightings(f):
-    # ==================================
-    # === 聴感補正関数 (A特性カーブ) ===
-    # ==================================
-
-    if f[0] == 0:
-        f[0] = 1e-6
-    else:
-        pass
-
-    ra = (np.power(12194, 2) * np.power(f, 4)) / \
-         ((np.power(f, 2) + np.power(20.6, 2)) *
-          np.sqrt((np.power(f, 2) + np.power(107.7, 2)) *
-                  (np.power(f, 2) + np.power(737.9, 2))) *
-          (np.power(f, 2) + np.power(12194, 2)))
-
-    a = 20 * np.log10(ra) + 2.00
-
-    return a
 
 
 def plot_waveform_and_freq_response(

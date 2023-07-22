@@ -10,6 +10,7 @@ import datetime
 import soundfile as sf
 
 from modules.get_mic_index import get_mic_index
+from modules.a_weighting import a_weighting
 
 
 def record(index, mic_mode, samplerate, fs, time):
@@ -110,33 +111,10 @@ def calc_fft(data, samplerate, dbref, A):
 
         # dB変換されていてAがTrueの時に聴感補正する
         if A:
-            amp += aweightings(freq)
+            amp += a_weighting(freq)
 
     print("Fourier transform END\n")
     return spectrum, amp, phase, freq
-
-
-def aweightings(f):
-    # ==================================
-    # === 聴感補正関数 (A特性カーブ) ===
-    # ==================================
-    print("  - A-weighting START")
-
-    if f[0] == 0:
-        f[0] = 1e-6
-    else:
-        pass
-
-    ra = (np.power(12194, 2) * np.power(f, 4)) / \
-         ((np.power(f, 2) + np.power(20.6, 2)) *
-          np.sqrt((np.power(f, 2) + np.power(107.7, 2)) *
-                  (np.power(f, 2) + np.power(737.9, 2))) *
-          (np.power(f, 2) + np.power(12194, 2)))
-
-    a = 20 * np.log10(ra) + 2.00
-
-    print("  - A-weighting END")
-    return a
 
 
 def plot(t, x, label, xlabel, ylabel, figsize, xlim, ylim, xlog, ylog):
