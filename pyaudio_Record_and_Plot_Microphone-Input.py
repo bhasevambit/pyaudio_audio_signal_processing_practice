@@ -1,7 +1,7 @@
 import scipy
 import numpy as np
 from matplotlib import pyplot as plt
-import math
+
 
 import platform
 import os
@@ -10,63 +10,9 @@ import soundfile as sf
 
 from modules.get_mic_index import get_mic_index
 from modules.audio_stream import audio_stream_start
-from modules.audio_stream import audio_stream_stop
+from modules.audio_recode import audio_recode
 # from modules.gen_freq_domain_data import gen_freq_domain_data
 from modules.a_weighting import a_weighting
-
-
-def record(index, mic_mode, samplerate, fs, time):
-    # ============================================
-    # === Microphone入力音声レコーディング関数 ===
-    # ============================================
-    # index : 使用するマイクのdevice index
-    # mic_mode : mic_mode : マイクモード (1:モノラル / 2:ステレオ)
-    # samplerate : サンプリングレート[sampling data count/s)]
-    # fs : フレームサイズ[sampling data count/frame]
-    # time : 録音時間[s]
-
-    # === Microphone入力音声ストリーム生成 ===
-    pa, stream = audio_stream_start(index, mic_mode, samplerate, fs)
-    # pa : pyaudioクラスオブジェクト
-    # stream : マイク入力音声ストリーム
-
-    # フレームサイズ毎に音声を録音していくループ
-    print("Recording START")
-    data = []
-    dt = 1 / samplerate
-    i = 0
-
-    for i in range(int(((time / dt) / fs))):
-        erapsed_time = math.floor(((i * fs) / samplerate) * 100) / 100
-        print("  - Erapsed Time[s]: ", erapsed_time)
-
-        frame = stream.read(fs)
-        data.append(frame)
-
-    print("Recording STOP\n")
-
-    # === Microphone入力音声ストリーム停止 ===
-    audio_stream_stop(pa, stream)
-
-    # データをまとめる処理
-    # print("data(before joined) = ", data)
-    data = b"".join(data)   # frame毎に、要素が分かれていたdataを、要素間でbyte列連結
-    # print("data(after joined) = ", data)
-
-    # データをNumpy配列に変換し、時間軸を作成
-    # dataについては、16bit量子化であり、かつ正負符号を持つ事から、
-    # ±32767(=±((2^16 / 2) - 1))の範囲にデータが入る事から、dataを((2^16 / 2) - 1)で割る事で、正規化している
-    data = np.frombuffer(data, dtype="int16") / \
-        float((np.power(2, 16) / 2) - 1)
-
-    # tについては、numpy.arrange()を用いて、
-    #   start : 0
-    #   stop : (録音時間にしめるサンプリングデータ数 / フレームサイズ)の整数部 * フレームサイズ * サンプリング周期[s],
-    #   step : サンプリング周期[s]
-    # とし、配列を作っている
-    t = np.arange(0, int(((time / dt) / fs)) * fs * dt, dt)
-
-    return data, t
 
 
 def calc_fft(data, samplerate, dbref, A):
@@ -212,8 +158,13 @@ if __name__ == '__main__':
     index = get_mic_index()[0]
     print("Use Microphone Index :", index, "\n")
 
+    # === Microphone入力音声ストリーム生成 ===
+    pa, stream = audio_stream_start(index, mic_mode, samplerate, fs)
+    # pa : pyaudioクラスオブジェクト
+    # stream : マイク入力音声ストリーム
+
     # === マイク音声レコーディング実行 ===
-    data, t = record(index, mic_mode, samplerate, fs, time)
+    data, t = audio_recode(samplerate, fs, pa, stream, time)
     # data : 時間領域波形データ
     # t : 時間領域時刻データ
 
