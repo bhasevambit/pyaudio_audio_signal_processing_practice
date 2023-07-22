@@ -71,12 +71,16 @@ def gen_time_domain_data_fixed_period(stream, fs, samplerate, time):
     dt = 1 / samplerate
     i = 0
 
+    print("Audio Stream Recording START")
+
     for i in range(int(((time / dt) / fs))):
         erapsed_time = math.floor(((i * fs) / samplerate) * 100) / 100
         print("  - Erapsed Time[s]: ", erapsed_time)
 
         audio_data_fs = stream.read(fs)
         audio_data_united.append(audio_data_fs)
+
+    print("Audio Stream Recording END\n")
 
     # フレームサイズ毎音声ストリームデータを連結
     # frame毎に、要素が分かれていたdataを、要素間でbyte列連結
