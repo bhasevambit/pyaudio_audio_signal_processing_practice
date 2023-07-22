@@ -11,7 +11,7 @@ import soundfile as sf
 from modules.get_mic_index import get_mic_index
 from modules.audio_stream import audio_stream_start
 from modules.audio_stream import audio_stream_stop
-from modules.audio_recode import audio_recode
+from modules.gen_time_domain_data import gen_time_domain_data_fixed_period
 # from modules.gen_freq_domain_data import gen_freq_domain_data
 from modules.a_weighting import a_weighting
 
@@ -188,7 +188,7 @@ if __name__ == '__main__':
     # stream : マイク入力音声ストリーム
 
     # === マイク音声レコーディング実行 ===
-    data = audio_recode(stream, samplerate, fs, time)
+    data = gen_time_domain_data_fixed_period(stream, fs, samplerate, time)
     # data : 時間領域波形データ
 
     # === 音声データ結合実行 ===

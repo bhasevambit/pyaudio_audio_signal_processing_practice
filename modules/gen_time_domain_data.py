@@ -1,10 +1,11 @@
 import numpy as np
+import math
 
 
-def gen_time_domain_data(stream, fs, samplerate):
-    # ==================================
-    # === 時間領域波形データ生成関数 ===
-    # ==================================
+def gen_time_domain_data_realtime(stream, fs, samplerate):
+    # ==================================================
+    # === 時間領域波形データ生成関数(リアルタイム版) ===
+    # ==================================================
     # stream     : マイク入力音声データストリーム
     # fs         : フレームサイズ [sampling data count/frame]
     # samplerate : サンプリングレート [sampling data count/s)]
@@ -24,3 +25,30 @@ def gen_time_domain_data(stream, fs, samplerate):
     t = t * 1000    # msに単位変換
 
     return data_normalized, t
+
+
+def gen_time_domain_data_fixed_period(stream, fs, samplerate, time):
+    # ==============================================
+    # === 時間領域波形データ生成関数(時間指定版) ===
+    # ==============================================
+    # stream     : マイク入力音声データストリーム
+    # fs         : フレームサイズ [sampling data count/frame]
+    # samplerate : サンプリングレート [sampling data count/s)]
+    # time       : 録音時間[s]
+
+    # フレームサイズ毎に音声を録音していくループ
+    print("Recording START")
+    data = []
+    dt = 1 / samplerate
+    i = 0
+
+    for i in range(int(((time / dt) / fs))):
+        erapsed_time = math.floor(((i * fs) / samplerate) * 100) / 100
+        print("  - Erapsed Time[s]: ", erapsed_time)
+
+        frame = stream.read(fs)
+        data.append(frame)
+
+    print("Recording STOP\n")
+
+    return data

@@ -5,7 +5,7 @@ import platform
 from modules.get_mic_index import get_mic_index
 from modules.audio_stream import audio_stream_start
 from modules.audio_stream import audio_stream_stop
-from modules.gen_time_domain_data import gen_time_domain_data
+from modules.gen_time_domain_data import gen_time_domain_data_realtime
 from modules.gen_freq_domain_data import gen_freq_domain_data
 from modules.plot_waveform_and_freq_response import plot_waveform_and_freq_response
 
@@ -58,7 +58,7 @@ if __name__ == '__main__':
     while True:
         try:
             # === 時間領域波形データ生成 ===
-            data_normalized, t = gen_time_domain_data(stream, fs, samplerate)
+            data_normalized, t = gen_time_domain_data_realtime(stream, fs, samplerate)
             # data_normalized   : 時間領域 波形データ(正規化済)
             # t                 : 時間領域 X軸向けデータ[ms]
 
