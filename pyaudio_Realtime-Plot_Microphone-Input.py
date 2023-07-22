@@ -4,6 +4,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 import platform
+import warnings
 
 
 def get_mic_index():
@@ -139,7 +140,8 @@ def gen_freq_domain_data(data_normalized, fs, samplerate, dbref, A):
 
     # dbrefが0以上の時にdB変換する
     if dbref > 0:
-        fft_data = 20 * np.log10(fft_data / dbref)
+        with np.errstate(divide='ignore'):
+            fft_data = 20 * np.log10(fft_data / dbref)
 
         # dB変換されていてAがTrueの時に聴感補正する
         if A:
@@ -216,8 +218,16 @@ def plot_waveform_and_freq_response(
     # スケール設定
     wave_fig.set_xlim(0, view_range)
     wave_fig.set_ylim(-1, 1)
+    wave_fig.set_yticks([-1, -0.5, 0, 0.5, 1])
+
+    # fft_fig.set_xscale("log")
     fft_fig.set_xlim(0, 5000)
-    fft_fig.set_ylim(-10, 80)
+    fft_fig.set_ylim(-10, 90)
+    fft_fig.set_yticks(np.arange(0, 100, 20))
+
+    # plot.figure.tight_layout()実行時の「UserWarning: The figure layout has
+    # changed to tight」Warning文の抑止
+    warnings.simplefilter('ignore', UserWarning)
 
     # レイアウト設定
     fig.tight_layout()
