@@ -7,7 +7,7 @@ from modules.audio_stream import audio_stream_start
 from modules.audio_stream import audio_stream_stop
 from modules.gen_time_domain_data import gen_time_domain_data_realtime
 from modules.gen_freq_domain_data import gen_freq_domain_data
-from modules.plot_waveform_and_freq_response import plot_waveform_and_freq_response
+from modules.plot_time_and_freq import plot_time_and_freq_realtime
 
 if __name__ == '__main__':
     # =================
@@ -58,7 +58,8 @@ if __name__ == '__main__':
     while True:
         try:
             # === 時間領域波形データ生成 ===
-            data_normalized, t = gen_time_domain_data_realtime(stream, fs, samplerate)
+            data_normalized, t = gen_time_domain_data_realtime(
+                stream, fs, samplerate)
             # data_normalized   : 時間領域 波形データ(正規化済)
             # t                 : 時間領域 X軸向けデータ[ms]
 
@@ -71,8 +72,8 @@ if __name__ == '__main__':
             # phase             : 周波数特性 位相データ
             # freq              : 周波数特性 X軸向けデータ
 
-            # === グラフプロット ===
-            plot_waveform_and_freq_response(
+            # === 時間領域波形 & 周波数特性 グラフ表示 ===
+            plot_time_and_freq_realtime(
                 fig,
                 wave_fig,
                 freq_fig,
