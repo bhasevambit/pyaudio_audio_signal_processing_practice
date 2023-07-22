@@ -13,9 +13,9 @@ from modules.gen_freq_domain_data import gen_freq_domain_data
 
 def plot_waveform_and_freq_response(
         data_normalized,
+        t,
         amp_normalized,
         freq,
-        fs,
         plot_pause,
         view_range,
         dbref,
@@ -24,12 +24,13 @@ def plot_waveform_and_freq_response(
     # =======================================================
     # === Microphone入力音声ストリームデータ プロット関数 ===
     # =======================================================
-    # data_normalized : 時間領域波形データ(正規化済)
-    # amp_normalized : 周波数特性データ
-    # freq : 周波数領域 軸データ
-    # fs : フレームサイズ[sampling data count/frame]
-    # plot_pause : グラフリアルタイム表示のポーズタイム[s]
-    # view_range : 時間領域波形グラフ X軸表示レンジ[sample count]
+    # data_normalized : 時間領域 波形データ(正規化済)
+    # t : 時間領域 X軸向けデータ [ms]
+    # amp_normalized : 周波数特性 振幅データ(正規化済)
+    # freq : 周波数特性 X軸向けデータ
+    # fs : フレームサイズ [sampling data count/frame]
+    # plot_pause : グラフリアルタイム表示のポーズタイム [s]
+    # view_range : 時間領域波形グラフ X軸表示レンジ [sample count]
     # dbref : デシベル基準値
     # A : 聴感補正(A特性)の有効(True)/無効(False)設定
 
@@ -44,7 +45,7 @@ def plot_waveform_and_freq_response(
     # 軸ラベル設定
     plt.xlabel('Sample Count')
     plt.ylabel('Amplitude')
-    wave_fig.set_xlabel('Sample Count')
+    wave_fig.set_xlabel('time[s]')
     wave_fig.set_ylabel('Amplitude')
     fft_fig.set_xlabel('Frequency [Hz]')
 
@@ -73,7 +74,7 @@ def plot_waveform_and_freq_response(
     fig.tight_layout()
 
     # 時間領域波形グラフプロット
-    wave_fig.plot(data_normalized, color="blue")
+    wave_fig.plot(t, data_normalized, color="blue")
 
     # 周波数特性グラフプロット
     fft_fig.plot(freq, amp_normalized, color="dodgerblue")
@@ -95,7 +96,7 @@ if __name__ == '__main__':
     dbref = 2e-5            # デシベル基準値(最小可聴値 20[μPa]を設定)
     A = True                # 聴感補正(A特性)の有効(True)/無効(False)設定
     plot_pause = 0.0001     # グラフリアルタイム表示のポーズタイム[s]
-    view_range = 2048       # 時間領域波形グラフ X軸表示レンジ[sample count]
+    view_range = 50         # 時間領域波形グラフ X軸表示レンジ[ms]
 
     # フレームサイズ[sampling data count/frame]
     if platform.machine() == "armv7l":  # ARM32bit向け(Raspi等)
@@ -130,8 +131,9 @@ if __name__ == '__main__':
     while True:
         try:
             # === 時間領域波形データ生成 ===
-            data_normalized = gen_time_domain_data(stream, fs)
+            data_normalized, t = gen_time_domain_data(stream, fs, samplerate)
             # data_normalized   : 時間領域 波形データ(正規化済)
+            # t                 : 時間領域 X軸向けデータ[ms]
 
             # === 周波数特性データ生成 ===
             spectrum, amp_normalized, phase, freq = gen_freq_domain_data(
@@ -145,9 +147,9 @@ if __name__ == '__main__':
             # === グラフプロット ===
             plot_waveform_and_freq_response(
                 data_normalized,
+                t,
                 amp_normalized,
                 freq,
-                fs,
                 plot_pause,
                 view_range,
                 dbref,
