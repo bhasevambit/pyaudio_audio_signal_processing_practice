@@ -1,4 +1,3 @@
-import scipy
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -8,7 +7,7 @@ import warnings
 from modules.get_mic_index import get_mic_index
 from modules.audio_stream import audio_stream_start
 from modules.audio_stream import audio_stream_stop
-from modules.a_weighting import a_weighting
+from modules.gen_freq_domain_data import gen_freq_domain_data
 
 
 def gen_time_domain_data(stream, fs):
@@ -29,58 +28,9 @@ def gen_time_domain_data(stream, fs):
     return data_normalized
 
 
-def gen_freq_domain_data(data_normalized, fs, samplerate, dbref, A):
-    # ================================
-    # === 周波数特性データ生成関数 ===
-    # ================================
-    # data_normalized : 時間領域波形データ(正規化済)
-    # fs : フレームサイズ[sampling data count/frame]
-    # samplerate : サンプリングレート[sampling data count/s)]
-    # dbref : デシベル基準値
-    # A : 聴感補正(A特性)の有効(True)/無効(False)設定
-
-    # 信号のフーリエ変換
-    spectrum = scipy.fft.fft(data_normalized)
-
-    # 振幅成分算出
-    amp = np.abs(spectrum)
-
-    # 振幅成分の正規化
-    amp_normalized = (amp / len(data_normalized)) * 2
-    # 離散フーリエ変換の定義から、求まる振幅ampを入力データの振幅に合わせるため 1/N 倍して振幅を計算する。
-    # 加えて、フーリエ変換された N 個のスペクトル（振幅やパワー） は、サンプリング周波数の 1/2
-    # の周波数（ナイキスト周波数）を堺に左右対称となる事から、スペクトルの値は対になる対称成分を足し合わせたものが、
-    # 入力データの実データと一致するため、スペクトル値をさらに2倍する正規化を施す
-
-    # 位相成分算出 & 位相をラジアンから度に変換
-    # phase_rad = np.angle(spectrum)
-    # phase = np.degrees(phase_rad)
-
-    # 正規化した振幅成分をFFTデータとする
-    # amp_normalizedは、負の周波数領域データも含むため、「フレームサイズ/2」までの要素をスライス抽出
-    fft_data = amp_normalized[1:int(fs / 2)]
-
-    # 周波数軸を作成
-    # freq_bipolarは、負の周波数領域軸データも含むため、「フレームサイズ/2」までの要素をスライス抽出
-    dt = 1 / samplerate  # サンプリング周期[s]
-    freq_bipolar = scipy.fft.fftfreq(fs, d=dt)
-    freq = freq_bipolar[1:int(fs / 2)]
-
-    # dbrefが0以上の時にdB変換する
-    if dbref > 0:
-        with np.errstate(divide='ignore'):
-            fft_data = 20 * np.log10(fft_data / dbref)
-
-        # dB変換されていてAがTrueの時に聴感補正する
-        if A:
-            fft_data += a_weighting(freq)
-
-    return fft_data, freq
-
-
 def plot_waveform_and_freq_response(
         data_normalized,
-        fft_data,
+        amp_normalized,
         freq,
         fs,
         plot_pause,
@@ -92,7 +42,7 @@ def plot_waveform_and_freq_response(
     # === Microphone入力音声ストリームデータ プロット関数 ===
     # =======================================================
     # data_normalized : 時間領域波形データ(正規化済)
-    # fft_data : 周波数特性データ
+    # amp_normalized : 周波数特性データ
     # freq : 周波数領域 軸データ
     # fs : フレームサイズ[sampling data count/frame]
     # plot_pause : グラフリアルタイム表示のポーズタイム[s]
@@ -143,7 +93,7 @@ def plot_waveform_and_freq_response(
     wave_fig.plot(data_normalized, color="blue")
 
     # 周波数特性グラフプロット
-    fft_fig.plot(freq, fft_data, color="dodgerblue")
+    fft_fig.plot(freq, amp_normalized, color="dodgerblue")
 
     plt.pause(plot_pause)
 
@@ -200,14 +150,18 @@ if __name__ == '__main__':
             data_normalized = gen_time_domain_data(stream, fs)
 
             # === 周波数特性データ生成 ===
-            fft_data, freq = gen_freq_domain_data(
+            spectrum, amp_normalized, phase, freq = gen_freq_domain_data(
                 data_normalized, fs, samplerate, dbref, A
             )
+            # spectrum          : 周波数特性データ(複素数データ)
+            # amp_normalized    : 周波数特性 振幅データ(正規化済)
+            # phase             : 周波数特性 位相データ
+            # freq              : 周波数特性 X軸向けデータ
 
             # === グラフプロット ===
             plot_waveform_and_freq_response(
                 data_normalized,
-                fft_data,
+                amp_normalized,
                 freq,
                 fs,
                 plot_pause,
