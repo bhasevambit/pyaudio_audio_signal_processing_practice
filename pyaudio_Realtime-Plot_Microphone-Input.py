@@ -1,4 +1,4 @@
-import pyaudio
+# import pyaudio
 import scipy
 import numpy as np
 from matplotlib import pyplot as plt
@@ -7,32 +7,8 @@ import platform
 import warnings
 
 from modules.get_mic_index import get_mic_index
+from modules.audio_stream_start import audio_stream_start
 from modules.a_weighting import a_weighting
-
-
-def audio_start(index, mic_mode, samplerate, fs):
-    # ============================================
-    # === Microphone入力音声ストリーム生成関数 ===
-    # ============================================
-    # index : 使用するマイクのdevice index
-    # mic_mode : mic_mode : マイクモード (1:モノラル / 2:ステレオ)
-    # samplerate : サンプリングレート[sampling data count/s)]
-    # fs : フレームサイズ[sampling data count/frame]
-
-    pa = pyaudio.PyAudio()
-
-    # ストリームの開始
-    stream = pa.open(
-        format=pyaudio.paInt16,
-        # pyaudio.paInt16 = 16bit量子化モード (音声時間領域波形の振幅を-32767～+32767に量子化)
-        channels=mic_mode,
-        rate=samplerate,
-        input=True,
-        input_device_index=index,
-        frames_per_buffer=fs
-    )
-
-    return pa, stream
 
 
 def gen_time_domain_data(stream, fs):
@@ -175,7 +151,7 @@ def plot_waveform_and_freq_response(
     wave_fig.cla()
 
 
-def audio_stop(pa, stream):
+def audio_stream_stop(pa, stream):
     # ============================================
     # === Microphone入力音声ストリーム停止関数 ===
     # ============================================
@@ -216,7 +192,7 @@ if __name__ == '__main__':
     print("Use Microphone Index :", index, "\n")
 
     # === Microphone入力音声ストリーム生成 ===
-    pa, stream = audio_start(index, mic_mode, samplerate, fs)
+    pa, stream = audio_stream_start(index, mic_mode, samplerate, fs)
     # index : 使用するマイクのdevice index
     # mic_mode : mic_mode : マイクモード (1:モノラル / 2:ステレオ)
     # samplerate : サンプリングレート[sampling data count/s)]
@@ -254,7 +230,7 @@ if __name__ == '__main__':
             break
 
     # Microphone入力音声ストリーム停止
-    audio_stop(pa, stream)
+    audio_stream_stop(pa, stream)
 
     print("=================")
     print("= Main Code END =")
