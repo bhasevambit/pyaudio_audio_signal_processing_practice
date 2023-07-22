@@ -1,4 +1,3 @@
-import pyaudio
 import scipy
 import numpy as np
 from matplotlib import pyplot as plt
@@ -10,6 +9,8 @@ import datetime
 import soundfile as sf
 
 from modules.get_mic_index import get_mic_index
+from modules.audio_stream import audio_stream_start
+from modules.audio_stream import audio_stream_stop
 from modules.a_weighting import a_weighting
 
 
@@ -23,24 +24,15 @@ def record(index, mic_mode, samplerate, fs, time):
     # fs : フレームサイズ[sampling data count/frame]
     # time : 録音時間[s]
 
-    pa = pyaudio.PyAudio()
-
-    # ストリームの開始
-    data = []
-    dt = 1 / samplerate
-
-    stream = pa.open(
-        format=pyaudio.paInt16,
-        # pyaudio.paInt16 = 16bit量子化モード (音声時間領域波形の振幅を-32767～+32767に量子化)
-        channels=mic_mode,
-        rate=samplerate,
-        input=True,
-        input_device_index=index,
-        frames_per_buffer=fs
-    )
+    # === Microphone入力音声ストリーム生成 ===
+    pa, stream = audio_stream_start(index, mic_mode, samplerate, fs)
+    # pa : pyaudioクラスオブジェクト
+    # stream : マイク入力音声ストリーム
 
     # フレームサイズ毎に音声を録音していくループ
     print("Recording START")
+    data = []
+    dt = 1 / samplerate
     i = 0
 
     for i in range(int(((time / dt) / fs))):
@@ -52,11 +44,8 @@ def record(index, mic_mode, samplerate, fs, time):
 
     print("Recording STOP\n")
 
-    # ストリームの終了
-    stream.stop_stream()
-
-    stream.close()
-    pa.terminate()
+    # === Microphone入力音声ストリーム停止 ===
+    audio_stream_stop(pa, stream)
 
     # データをまとめる処理
     # print("data(before joined) = ", data)
@@ -224,11 +213,8 @@ if __name__ == '__main__':
 
     # === マイク音声レコーディング実行 ===
     data, t = record(index, mic_mode, samplerate, fs, time)
-    # index : 使用するマイクのdevice index
-    # mic_mode : マイクモード (1:モノラル / 2:ステレオ)
-    # samplerate : サンプリングレート[sampling data count/s)]
-    # fs : フレームサイズ[sampling data count/frame]
-    # time : 録音時間[s]
+    # data : 時間領域波形データ
+    # t : 時間領域時刻データ
 
     # === レコーディング音声のwavファイル保存 ===
     now = datetime.datetime.now()
@@ -243,10 +229,10 @@ if __name__ == '__main__':
 
     # === フーリエ変換実行 ===
     spectrum, amp, phase, freq = calc_fft(data, samplerate, dbref, A)
-    # data : 時間領域波形のAmplitude
-    # samplerate : サンプリングレート[sampling data count/s)]
-    # dbref : デシベル基準値
-    # A : 聴感補正(A特性)の有効/無効設定
+    # spectrum : 周波数特性データ(複素数データ)
+    # amp : 周波数特性 振幅データ
+    # phase : 周波数特性 位相データ
+    # freq : 周波数特性 周波数データ
 
     # === レコーディング音声の時間領域波形 & 周波数特性 保存 ===
     plot_time_and_freq(

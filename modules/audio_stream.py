@@ -24,3 +24,12 @@ def audio_stream_start(index, mic_mode, samplerate, fs):
     )
 
     return pa, stream
+
+
+def audio_stream_stop(pa, stream):
+    # ============================================
+    # === Microphone入力音声ストリーム停止関数 ===
+    # ============================================
+    stream.stop_stream()
+    stream.close()
+    pa.terminate()

@@ -1,4 +1,3 @@
-# import pyaudio
 import scipy
 import numpy as np
 from matplotlib import pyplot as plt
@@ -7,7 +6,8 @@ import platform
 import warnings
 
 from modules.get_mic_index import get_mic_index
-from modules.audio_stream_start import audio_stream_start
+from modules.audio_stream import audio_stream_start
+from modules.audio_stream import audio_stream_stop
 from modules.a_weighting import a_weighting
 
 
@@ -151,15 +151,6 @@ def plot_waveform_and_freq_response(
     wave_fig.cla()
 
 
-def audio_stream_stop(pa, stream):
-    # ============================================
-    # === Microphone入力音声ストリーム停止関数 ===
-    # ============================================
-    stream.stop_stream()
-    stream.close()
-    pa.terminate()
-
-
 if __name__ == '__main__':
     # =================
     # === Main Code ===
@@ -193,10 +184,8 @@ if __name__ == '__main__':
 
     # === Microphone入力音声ストリーム生成 ===
     pa, stream = audio_stream_start(index, mic_mode, samplerate, fs)
-    # index : 使用するマイクのdevice index
-    # mic_mode : mic_mode : マイクモード (1:モノラル / 2:ステレオ)
-    # samplerate : サンプリングレート[sampling data count/s)]
-    # fs : フレームサイズ[sampling data count/frame]
+    # pa : pyaudioクラスオブジェクト
+    # stream : マイク入力音声ストリーム
 
     # === 時間領域波形と周波数特性向けの2つのグラフ領域を作成
     fig = plt.figure()
@@ -229,7 +218,7 @@ if __name__ == '__main__':
         except KeyboardInterrupt:   # Ctrl+c で終了
             break
 
-    # Microphone入力音声ストリーム停止
+    # === Microphone入力音声ストリーム停止 ===
     audio_stream_stop(pa, stream)
 
     print("=================")
