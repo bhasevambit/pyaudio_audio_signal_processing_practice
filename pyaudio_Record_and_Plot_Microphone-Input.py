@@ -16,29 +16,6 @@ from modules.gen_time_domain_data import gen_time_domain_data_fixed_period
 from modules.a_weighting import a_weighting
 
 
-def unite_time_domain_data(data, samplerate):
-    # データをまとめる処理
-    # print("data(before joined) = ", data)
-    data = b"".join(data)   # frame毎に、要素が分かれていたdataを、要素間でbyte列連結
-    # print("data(after joined) = ", data)
-
-    # データをNumpy配列に変換し、時間軸を作成
-    # dataについては、16bit量子化であり、かつ正負符号を持つ事から、
-    # ±32767(=±((2^16 / 2) - 1))の範囲にデータが入る事から、dataを((2^16 / 2) - 1)で割る事で、正規化している
-    data = np.frombuffer(data, dtype="int16") / \
-        float((np.power(2, 16) / 2) - 1)
-
-    # tについては、numpy.arrange()を用いて、
-    #   start : 0
-    #   stop : (録音時間にしめるサンプリングデータ数 / フレームサイズ)の整数部 * フレームサイズ * サンプリング周期[s],
-    #   step : サンプリング周期[s]
-    # とし、配列を作っている
-    dt = 1 / samplerate
-    t = np.arange(0, int(((time / dt) / fs)) * fs * dt, dt)
-
-    return data, t
-
-
 def calc_fft(data, samplerate, dbref, A):
     # ============================================
     # === フーリエ変換関数 (dB変換とA補正付き) ===
@@ -187,14 +164,11 @@ if __name__ == '__main__':
     # pa : pyaudioクラスオブジェクト
     # stream : マイク入力音声ストリーム
 
-    # === マイク音声レコーディング実行 ===
-    data = gen_time_domain_data_fixed_period(stream, fs, samplerate, time)
-    # data : 時間領域波形データ
-
-    # === 音声データ結合実行 ===
-    data, t = unite_time_domain_data(data, samplerate)
-    # data : 時間領域波形データ
-    # t : 時間領域時刻データ
+    # === 時間領域波形データ生成 ===
+    data_normalized, t = gen_time_domain_data_fixed_period(
+        stream, fs, samplerate, time)
+    # data_normalized   : 時間領域 波形データ(正規化済)
+    # t                 : 時間領域 X軸向けデータ[s]
 
     # === Microphone入力音声ストリーム停止 ===
     audio_stream_stop(pa, stream)
@@ -208,11 +182,11 @@ if __name__ == '__main__':
 
     filename = dirname + 'recorded-sound_' + \
         now.strftime('%Y%m%d_%H%M%S') + '.wav'
-    sf.write(filename, data, samplerate)
+    sf.write(filename, data_normalized, samplerate)
 
     # === フーリエ変換実行 ===
     spectrum, amp_normalized, phase, freq = calc_fft(
-        data, samplerate, dbref, A)
+        data_normalized, samplerate, dbref, A)
     # spectrum          : 周波数特性データ(複素数データ)
     # amp_normalized    : 周波数特性 振幅データ(正規化済)
     # phase             : 周波数特性 位相データ
@@ -227,10 +201,10 @@ if __name__ == '__main__':
 
     # === レコーディング音声の時間領域波形 & 周波数特性 保存 ===
     plot_time_and_freq(
-        t,          # time[s]
-        data,       # 時間領域波形 Amplitude
-        freq,       # Frequency[Hz]
-        amp_normalized,        # 周波数特性 Amplitude
-        dbref,      # デシベル基準値
-        A           # 聴感補正(A特性)の有効/無効設定
+        t,                  # time[s]
+        data_normalized,    # 時間領域波形 Amplitude
+        freq,               # Frequency[Hz]
+        amp_normalized,     # 周波数特性 Amplitude
+        dbref,              # デシベル基準値
+        A                   # 聴感補正(A特性)の有効/無効設定
     )
