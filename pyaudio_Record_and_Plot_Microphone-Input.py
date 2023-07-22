@@ -117,60 +117,6 @@ def calc_fft(data, samplerate, dbref, A):
     return spectrum, amp, phase, freq
 
 
-def plot(t, x, label, xlabel, ylabel, figsize, xlim, ylim, xlog, ylog):
-    # ===================================================
-    # === 時間領域波形プロット関数(1プロット重ね書き) ===
-    # ===================================================
-
-    # フォントの種類とサイズを設定
-    plt.rcParams['font.size'] = 14
-    # plt.rcParams['font.family'] = 'Times New Roman'
-    # Raspiへの対応のためにフォント指定無効化
-
-    # 目盛内側化
-    plt.rcParams['xtick.direction'] = 'in'
-    plt.rcParams['ytick.direction'] = 'in'
-
-    # Subplot設定、およびグラフの目盛線を付与
-    fig = plt.figure(figsize=figsize)
-    ax1 = fig.add_subplot(111)
-    ax1.yaxis.set_ticks_position('both')
-    ax1.xaxis.set_ticks_position('both')
-
-    # 軸ラベル設定
-    ax1.set_xlabel(xlabel)
-    ax1.set_ylabel(ylabel)
-
-    # スケールを設定
-    if xlim != [0, 0]:
-        ax1.set_xlim(xlim[0], xlim[1])
-    if ylim != [0, 0]:
-        ax1.set_ylim(ylim[0], ylim[1])
-
-    # 対数スケール化
-    if xlog == 1:
-        ax1.set_xscale('log')
-    if ylog == 1:
-        ax1.set_yscale('log')
-
-    # プロット
-    for i in range(len(x)):
-        ax1.plot(t[i], x[i], label=label[i], lw=1)
-    ax1.legend()
-
-    # レイアウト設定
-    fig.tight_layout()
-
-    # グラフ保存
-    now_grf = datetime.datetime.now()
-    filename_grf = 'time-waveform_' + \
-        now_grf.strftime('%Y%m%d_%H%M%S') + '.png'
-    plt.savefig(filename_grf)
-    plt.close()
-
-    return
-
-
 def plot_time_and_freq(t, data, freq, amp, dbref, A):
     # ====================================================
     # === 時間領域波形 & 周波数特性 グラフプロット関数 ===
@@ -294,20 +240,6 @@ if __name__ == '__main__':
     filename = dirname + 'recorded-sound_' + \
         now.strftime('%Y%m%d_%H%M%S') + '.wav'
     sf.write(filename, data, samplerate)
-
-    # === レコーディング音声の時間領域波形保存 ===
-    # plot(
-    #     [t],                    # t
-    #     [data],                 # x
-    #     ['Recorded Sound'],     # label
-    #     'Time [s]',             # xlabel
-    #     'Amplitude',            # ylable
-    #     (8, 4),                 # figsize
-    #     [0, 0],                 # xlim
-    #     [0, 0],                 # ylim
-    #     0,                      # xlog
-    #     0                       # ylog
-    # )
 
     # === フーリエ変換実行 ===
     spectrum, amp, phase, freq = calc_fft(data, samplerate, dbref, A)
