@@ -1,10 +1,7 @@
-import numpy as np
 import math
 
-from modules.audio_stream import audio_stream_stop
 
-
-def audio_recode(samplerate, fs, pa, stream, time):
+def audio_recode(stream, samplerate, fs, time):
     # ============================================
     # === Microphone入力音声レコーディング関数 ===
     # ============================================
@@ -29,25 +26,4 @@ def audio_recode(samplerate, fs, pa, stream, time):
 
     print("Recording STOP\n")
 
-    # === Microphone入力音声ストリーム停止 ===
-    audio_stream_stop(pa, stream)
-
-    # データをまとめる処理
-    # print("data(before joined) = ", data)
-    data = b"".join(data)   # frame毎に、要素が分かれていたdataを、要素間でbyte列連結
-    # print("data(after joined) = ", data)
-
-    # データをNumpy配列に変換し、時間軸を作成
-    # dataについては、16bit量子化であり、かつ正負符号を持つ事から、
-    # ±32767(=±((2^16 / 2) - 1))の範囲にデータが入る事から、dataを((2^16 / 2) - 1)で割る事で、正規化している
-    data = np.frombuffer(data, dtype="int16") / \
-        float((np.power(2, 16) / 2) - 1)
-
-    # tについては、numpy.arrange()を用いて、
-    #   start : 0
-    #   stop : (録音時間にしめるサンプリングデータ数 / フレームサイズ)の整数部 * フレームサイズ * サンプリング周期[s],
-    #   step : サンプリング周期[s]
-    # とし、配列を作っている
-    t = np.arange(0, int(((time / dt) / fs)) * fs * dt, dt)
-
-    return data, t
+    return data

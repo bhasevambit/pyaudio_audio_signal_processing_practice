@@ -10,9 +10,33 @@ import soundfile as sf
 
 from modules.get_mic_index import get_mic_index
 from modules.audio_stream import audio_stream_start
+from modules.audio_stream import audio_stream_stop
 from modules.audio_recode import audio_recode
 # from modules.gen_freq_domain_data import gen_freq_domain_data
 from modules.a_weighting import a_weighting
+
+
+def unite_time_domain_data(data, samplerate):
+    # データをまとめる処理
+    # print("data(before joined) = ", data)
+    data = b"".join(data)   # frame毎に、要素が分かれていたdataを、要素間でbyte列連結
+    # print("data(after joined) = ", data)
+
+    # データをNumpy配列に変換し、時間軸を作成
+    # dataについては、16bit量子化であり、かつ正負符号を持つ事から、
+    # ±32767(=±((2^16 / 2) - 1))の範囲にデータが入る事から、dataを((2^16 / 2) - 1)で割る事で、正規化している
+    data = np.frombuffer(data, dtype="int16") / \
+        float((np.power(2, 16) / 2) - 1)
+
+    # tについては、numpy.arrange()を用いて、
+    #   start : 0
+    #   stop : (録音時間にしめるサンプリングデータ数 / フレームサイズ)の整数部 * フレームサイズ * サンプリング周期[s],
+    #   step : サンプリング周期[s]
+    # とし、配列を作っている
+    dt = 1 / samplerate
+    t = np.arange(0, int(((time / dt) / fs)) * fs * dt, dt)
+
+    return data, t
 
 
 def calc_fft(data, samplerate, dbref, A):
@@ -164,9 +188,16 @@ if __name__ == '__main__':
     # stream : マイク入力音声ストリーム
 
     # === マイク音声レコーディング実行 ===
-    data, t = audio_recode(samplerate, fs, pa, stream, time)
+    data = audio_recode(stream, samplerate, fs, time)
+    # data : 時間領域波形データ
+
+    # === 音声データ結合実行 ===
+    data, t = unite_time_domain_data(data, samplerate)
     # data : 時間領域波形データ
     # t : 時間領域時刻データ
+
+    # === Microphone入力音声ストリーム停止 ===
+    audio_stream_stop(pa, stream)
 
     # === レコーディング音声のwavファイル保存 ===
     now = datetime.datetime.now()
