@@ -6,8 +6,8 @@ from modules.get_mic_index import get_mic_index
 from modules.audio_stream import audio_stream_start
 from modules.audio_stream import audio_stream_stop
 from modules.gen_time_domain_data import gen_time_domain_data
-from modules.plot_time_and_freq import gen_graph_figure
-from modules.plot_time_and_freq import plot_time_and_spectrogram
+from modules.plot_matplot_graph import gen_graph_figure
+from modules.plot_matplot_graph import plot_time_and_spectrogram
 from modules.save_audio_to_wav_file import save_audio_to_wav_file
 from modules.save_matplot_graph import save_matplot_graph
 
@@ -26,6 +26,9 @@ if __name__ == '__main__':
     dbref = 2e-5            # デシベル基準値(最小可聴値 20[μPa]を設定)
     A = True                # 聴感補正(A特性)の有効(True)/無効(False)設定
     plot_pause = -1         # グラフ表示のpause時間 [s] (非リアルタイムモード(指定時間録音)の場合は"-1"を設定)
+
+    # スペクトログラムデータ算出モード (0:scipy.signal.spectrogram()関数を使用 / 1:自作STFT関数を使用)
+    spctrgrm_mode = 0
 
     # 入力音声ストリームバッファあたりのサンプリングデータ数
     if platform.machine() == "armv7l":  # ARM32bit向け(Raspi等)
@@ -69,14 +72,20 @@ if __name__ == '__main__':
     # === レコーディング音声のwavファイル保存 ===
     save_audio_to_wav_file(samplerate, data_normalized)
 
-    # === スペクトログラム分析実行 ===
-    freq_spctrgrm, time_spctrgrm, spectrogram = scipy.signal.spectrogram(
-        data_normalized,
-        fs=samplerate
-    )
-    # freq_spctrgrm          : Array of sample frequencies
-    # time_spctrgrm          : Array of segment times
-    # spectrogram            : Spectrogram
+    # === スペクトログラムデータ算出実行 ===
+    if spctrgrm_mode == 0:
+        # scipy.signal.spectrogram()を使用する場合
+        freq_spctrgrm, time_spctrgrm, spectrogram = scipy.signal.spectrogram(
+            data_normalized,
+            fs=samplerate
+        )
+        # freq_spctrgrm          : Array of sample frequencies
+        # time_spctrgrm          : Array of segment times
+        # spectrogram            : Spectrogram
+
+    else:
+        # 自作STFT関数を使用する場合
+        pass
 
     # === 時間領域波形 & スペクトログラム グラフ表示 ===
     plot_time_and_spectrogram(

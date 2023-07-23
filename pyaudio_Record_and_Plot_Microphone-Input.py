@@ -5,8 +5,8 @@ from modules.audio_stream import audio_stream_start
 from modules.audio_stream import audio_stream_stop
 from modules.gen_time_domain_data import gen_time_domain_data
 from modules.gen_freq_domain_data import gen_freq_domain_data
-from modules.plot_time_and_freq import gen_graph_figure
-from modules.plot_time_and_freq import plot_time_and_freq
+from modules.plot_matplot_graph import gen_graph_figure
+from modules.plot_matplot_graph import plot_time_and_freq
 from modules.save_audio_to_wav_file import save_audio_to_wav_file
 from modules.save_matplot_graph import save_matplot_graph
 
