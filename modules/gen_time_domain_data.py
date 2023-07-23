@@ -70,7 +70,12 @@ def gen_time_domain_data(
                 ((i * frames_per_buffer) / samplerate) * 100) / 100
             print("  - Erapsed Time[s]: ", erapsed_time)
 
-            audio_data_per_buffer = stream.read(frames_per_buffer)
+            # 「OSError: [Errno -9981] Input overflowed」エラー対策のために「exception_on_overflow = False」を設定
+            audio_data_per_buffer = stream.read(
+                frames_per_buffer,
+                exception_on_overflow=False
+            )
+
             audio_data_united.append(audio_data_per_buffer)
 
         print("Audio Stream Recording END\n")
@@ -85,7 +90,11 @@ def gen_time_domain_data(
         # ==========================
 
         # 時間領域波形データの生成
-        audio_data = stream.read(frames_per_buffer)
+        # 「OSError: [Errno -9981] Input overflowed」エラー対策のために「exception_on_overflow = False」を設定
+        audio_data = stream.read(
+            frames_per_buffer,
+            exception_on_overflow=False
+        )
 
     # 時間領域波形データの正規化
     data_normalized = normalize_time_domain_data(audio_data, "int16")
