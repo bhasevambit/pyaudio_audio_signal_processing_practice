@@ -71,6 +71,7 @@ def gen_time_domain_data(stream, fs, samplerate, time_unit, time):
         # フレームサイズ毎音声ストリームデータを連結
         # frame毎に、要素が分かれていたdataを、要素間でbyte列連結
         audio_data = b"".join(audio_data_united)
+
     else:
         # ==========================
         # === リアルタイムモード ===

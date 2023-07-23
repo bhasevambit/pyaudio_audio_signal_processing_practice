@@ -65,7 +65,7 @@ if __name__ == '__main__':
 
             # === 周波数特性データ生成 ===
             spectrum, amp_normalized, phase, freq = gen_freq_domain_data(
-                data_normalized, fs, samplerate, dbref, A
+                data_normalized, samplerate, dbref, A
             )
             # spectrum          : 周波数特性データ(複素数データ)
             # amp_normalized    : 周波数特性 振幅データ(正規化済)

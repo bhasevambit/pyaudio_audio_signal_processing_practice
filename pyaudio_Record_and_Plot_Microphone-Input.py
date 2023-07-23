@@ -4,7 +4,7 @@ from modules.get_mic_index import get_mic_index
 from modules.audio_stream import audio_stream_start
 from modules.audio_stream import audio_stream_stop
 from modules.gen_time_domain_data import gen_time_domain_data
-from modules.gen_freq_domain_data import gen_freq_domain_data_fixed_period
+from modules.gen_freq_domain_data import gen_freq_domain_data
 from modules.plot_time_and_freq import gen_graph_figure
 from modules.plot_time_and_freq import plot_time_and_freq
 from modules.save_audio_to_wav_file import save_audio_to_wav_file
@@ -64,7 +64,7 @@ if __name__ == '__main__':
     save_audio_to_wav_file(samplerate, data_normalized)
 
     # === フーリエ変換実行 ===
-    spectrum, amp_normalized, phase, freq = gen_freq_domain_data_fixed_period(
+    spectrum, amp_normalized, phase, freq = gen_freq_domain_data(
         data_normalized, samplerate, dbref, A)
     # spectrum          : 周波数特性データ(複素数データ)
     # amp_normalized    : 周波数特性 振幅データ(正規化済)
