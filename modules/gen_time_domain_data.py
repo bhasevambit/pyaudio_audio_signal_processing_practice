@@ -37,28 +37,7 @@ def gen_time_domain_x_axis_data(samplerate, data_normalized, time_unit):
     return t
 
 
-def gen_time_domain_data_realtime(stream, fs, samplerate, time_unit):
-    # ==================================================
-    # === 時間領域波形データ生成関数(リアルタイム版) ===
-    # ==================================================
-    # stream     : マイク入力音声データストリーム
-    # fs         : フレームサイズ [sampling data count/frame]
-    # samplerate : サンプリングレート [sampling data count/s)]
-    # time_unit  : 時間軸単位
-
-    # 時間領域波形データの生成
-    audio_data = stream.read(fs)
-
-    # 時間領域波形データの正規化
-    data_normalized = normalize_time_domain_data(audio_data, "int16")
-
-    # 時間領域 X軸データの生成
-    t = gen_time_domain_x_axis_data(samplerate, data_normalized, time_unit)
-
-    return data_normalized, t
-
-
-def gen_time_domain_data_fixed_period(stream, fs, samplerate, time_unit, time):
+def gen_time_domain_data(stream, fs, samplerate, time_unit, time):
     # ==============================================
     # === 時間領域波形データ生成関数(時間指定版) ===
     # ==============================================
@@ -66,27 +45,39 @@ def gen_time_domain_data_fixed_period(stream, fs, samplerate, time_unit, time):
     # fs         : フレームサイズ [sampling data count/frame]
     # samplerate : サンプリングレート [sampling data count/s)]
     # time_unit  : 時間軸単位
-    # time       : 録音時間[s]
+    # time       : 録音時間[s] ("0"の場合は、リアルタイムモードとしてデータ生成)
 
-    # フレームサイズ毎にマイク入力音声ストリームデータ生成
-    audio_data_united = []
-    dt = 1 / samplerate
-    i = 0
+    if time > 0:
+        # ==========================
+        # === 録音時間指定モード ===
+        # ==========================
 
-    print("Audio Stream Recording START")
+        # フレームサイズ毎にマイク入力音声ストリームデータ生成
+        audio_data_united = []
+        dt = 1 / samplerate
+        i = 0
 
-    for i in range(int(((time / dt) / fs))):
-        erapsed_time = math.floor(((i * fs) / samplerate) * 100) / 100
-        print("  - Erapsed Time[s]: ", erapsed_time)
+        print("Audio Stream Recording START")
 
-        audio_data_fs = stream.read(fs)
-        audio_data_united.append(audio_data_fs)
+        for i in range(int(((time / dt) / fs))):
+            erapsed_time = math.floor(((i * fs) / samplerate) * 100) / 100
+            print("  - Erapsed Time[s]: ", erapsed_time)
 
-    print("Audio Stream Recording END\n")
+            audio_data_fs = stream.read(fs)
+            audio_data_united.append(audio_data_fs)
 
-    # フレームサイズ毎音声ストリームデータを連結
-    # frame毎に、要素が分かれていたdataを、要素間でbyte列連結
-    audio_data = b"".join(audio_data_united)
+        print("Audio Stream Recording END\n")
+
+        # フレームサイズ毎音声ストリームデータを連結
+        # frame毎に、要素が分かれていたdataを、要素間でbyte列連結
+        audio_data = b"".join(audio_data_united)
+    else:
+        # ==========================
+        # === リアルタイムモード ===
+        # ==========================
+
+        # 時間領域波形データの生成
+        audio_data = stream.read(fs)
 
     # 時間領域波形データの正規化
     data_normalized = normalize_time_domain_data(audio_data, "int16")

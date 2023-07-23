@@ -3,7 +3,7 @@ import platform
 from modules.get_mic_index import get_mic_index
 from modules.audio_stream import audio_stream_start
 from modules.audio_stream import audio_stream_stop
-from modules.gen_time_domain_data import gen_time_domain_data_realtime
+from modules.gen_time_domain_data import gen_time_domain_data
 from modules.gen_freq_domain_data import gen_freq_domain_data
 from modules.plot_time_and_freq import gen_graph_figure
 from modules.plot_time_and_freq import plot_time_and_freq_realtime
@@ -18,6 +18,7 @@ if __name__ == '__main__':
     mic_mode = 1            # マイクモード (1:モノラル / 2:ステレオ)
     samplerate = 44100      # サンプリングレート [sampling data count/s)]
     time_unit = "ms"        # 時間軸単位設定 ("s" or "ms")
+    time = 0                # 計測時間 [[s] or [ms]]  (リアルタイムモードの場合は"0"を設定)
     view_range = 50         # 時間領域波形グラフ X軸表示レンジ [[s] or [ms]]
     dbref = 2e-5            # デシベル基準値(最小可聴値 20[μPa]を設定)
     A = True                # 聴感補正(A特性)の有効(True)/無効(False)設定
@@ -57,8 +58,8 @@ if __name__ == '__main__':
     while True:
         try:
             # === 時間領域波形データ生成 ===
-            data_normalized, t = gen_time_domain_data_realtime(
-                stream, fs, samplerate, time_unit)
+            data_normalized, t = gen_time_domain_data(
+                stream, fs, samplerate, time_unit, time)
             # data_normalized   : 時間領域 波形データ(正規化済)
             # t                 : 時間領域 X軸向けデータ[ms]
 
