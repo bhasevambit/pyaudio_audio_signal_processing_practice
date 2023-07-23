@@ -72,10 +72,7 @@ if __name__ == '__main__':
     # === スペクトログラム分析実行 ===
     freq_spctrgrm, time_spctrgrm, spectrogram = scipy.signal.spectrogram(
         data_normalized,
-        fs=samplerate,
-        detrend=False,
-        scaling="spectrum",
-        mode="magnitude"
+        fs=samplerate
     )
     # freq_spctrgrm          : Array of sample frequencies
     # time_spctrgrm          : Array of segment times

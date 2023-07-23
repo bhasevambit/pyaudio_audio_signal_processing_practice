@@ -161,7 +161,7 @@ def plot_time_and_spectrogram(
 
     # スペクトログラム 軸目盛り設定
     spctrgrm_fig.set_xlim(0, view_range)
-    spctrgrm_fig.set_ylim(0, 2000)
+    spctrgrm_fig.set_ylim(0, 3000)  # 0 ～ 3000[Hz]の範囲
 
     # plot.figure.tight_layout()実行時の「UserWarning: The figure layout has
     # changed to tight」Warning文の抑止
@@ -179,6 +179,7 @@ def plot_time_and_spectrogram(
         color="blue")
 
     # スペクトログラムデータプロット
+    # スペクトログラムデータはログスケール表示 (= 10 * log10(spectrogram))
     spctrgrm_fig.pcolormesh(
         time_spctrgrm,
         freq_spctrgrm,
