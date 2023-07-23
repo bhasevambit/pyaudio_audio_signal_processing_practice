@@ -1,5 +1,3 @@
-from matplotlib import pyplot as plt
-
 import platform
 
 from modules.get_mic_index import get_mic_index
@@ -7,7 +5,9 @@ from modules.audio_stream import audio_stream_start
 from modules.audio_stream import audio_stream_stop
 from modules.gen_time_domain_data import gen_time_domain_data_realtime
 from modules.gen_freq_domain_data import gen_freq_domain_data
+from modules.plot_time_and_freq import gen_graph_figure
 from modules.plot_time_and_freq import plot_time_and_freq_realtime
+
 
 if __name__ == '__main__':
     # =================
@@ -16,11 +16,12 @@ if __name__ == '__main__':
 
     # --- Sound Parameters ---
     mic_mode = 1            # マイクモード (1:モノラル / 2:ステレオ)
-    samplerate = 44100      # サンプリングレート[sampling data count/s)]
+    samplerate = 44100      # サンプリングレート [sampling data count/s)]
+    time_unit = "ms"        # 時間軸単位設定 ("s" or "ms")
+    view_range = 50         # 時間領域波形グラフ X軸表示レンジ [[s] or [ms]]
     dbref = 2e-5            # デシベル基準値(最小可聴値 20[μPa]を設定)
     A = True                # 聴感補正(A特性)の有効(True)/無効(False)設定
-    plot_pause = 0.0001     # グラフリアルタイム表示のポーズタイム[s]
-    view_range = 50         # 時間領域波形グラフ X軸表示レンジ[ms]
+    plot_pause = 0.0001     # グラフリアルタイム表示のポーズタイム [s]
 
     # フレームサイズ[sampling data count/frame]
     if platform.machine() == "armv7l":  # ARM32bit向け(Raspi等)
@@ -40,18 +41,16 @@ if __name__ == '__main__':
     index = get_mic_index()[0]
     print("Use Microphone Index :", index, "\n")
 
+    # === 時間領域波形と周波数特性向けの2つのグラフ領域を作成
+    fig, wave_fig, freq_fig = gen_graph_figure()
+    # fig       : リアルタイム更新対象のグラフfigure
+    # wave_fig  : リアルタイム更新対象の時間領域波形グラフfigure
+    # freq_fig  : リアルタイム更新対象の周波数特性グラフfigure
+
     # === Microphone入力音声ストリーム生成 ===
     pa, stream = audio_stream_start(index, mic_mode, samplerate, fs)
     # pa        : pyaudioクラスオブジェクト
     # stream    : マイク入力音声ストリーム
-
-    # === 時間領域波形と周波数特性向けの2つのグラフ領域を作成
-    fig = plt.figure()
-    wave_fig = fig.add_subplot(2, 1, 1)
-    freq_fig = fig.add_subplot(2, 1, 2)
-    # fig       : リアルタイム更新対象のグラフfigure
-    # wave_fig  : リアルタイム更新対象の時間領域波形グラフfigure
-    # freq_fig  : リアルタイム更新対象の周波数特性グラフfigure
 
     # === 時間領域波形 & 周波数特性リアルタイムプロット ===
     # キーボードインタラプトあるまでループ処理継続
@@ -59,7 +58,7 @@ if __name__ == '__main__':
         try:
             # === 時間領域波形データ生成 ===
             data_normalized, t = gen_time_domain_data_realtime(
-                stream, fs, samplerate)
+                stream, fs, samplerate, time_unit)
             # data_normalized   : 時間領域 波形データ(正規化済)
             # t                 : 時間領域 X軸向けデータ[ms]
 

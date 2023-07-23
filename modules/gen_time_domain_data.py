@@ -37,13 +37,14 @@ def gen_time_domain_x_axis_data(samplerate, data_normalized, time_unit):
     return t
 
 
-def gen_time_domain_data_realtime(stream, fs, samplerate):
+def gen_time_domain_data_realtime(stream, fs, samplerate, time_unit):
     # ==================================================
     # === 時間領域波形データ生成関数(リアルタイム版) ===
     # ==================================================
     # stream     : マイク入力音声データストリーム
     # fs         : フレームサイズ [sampling data count/frame]
     # samplerate : サンプリングレート [sampling data count/s)]
+    # time_unit  : 時間軸単位
 
     # 時間領域波形データの生成
     audio_data = stream.read(fs)
@@ -52,18 +53,19 @@ def gen_time_domain_data_realtime(stream, fs, samplerate):
     data_normalized = normalize_time_domain_data(audio_data, "int16")
 
     # 時間領域 X軸データの生成
-    t = gen_time_domain_x_axis_data(samplerate, data_normalized, "ms")
+    t = gen_time_domain_x_axis_data(samplerate, data_normalized, time_unit)
 
     return data_normalized, t
 
 
-def gen_time_domain_data_fixed_period(stream, fs, samplerate, time):
+def gen_time_domain_data_fixed_period(stream, fs, samplerate, time_unit, time):
     # ==============================================
     # === 時間領域波形データ生成関数(時間指定版) ===
     # ==============================================
     # stream     : マイク入力音声データストリーム
     # fs         : フレームサイズ [sampling data count/frame]
     # samplerate : サンプリングレート [sampling data count/s)]
+    # time_unit  : 時間軸単位
     # time       : 録音時間[s]
 
     # フレームサイズ毎にマイク入力音声ストリームデータ生成
@@ -90,6 +92,6 @@ def gen_time_domain_data_fixed_period(stream, fs, samplerate, time):
     data_normalized = normalize_time_domain_data(audio_data, "int16")
 
     # 時間領域 X軸データの生成
-    t = gen_time_domain_x_axis_data(samplerate, data_normalized, "s")
+    t = gen_time_domain_x_axis_data(samplerate, data_normalized, time_unit)
 
     return data_normalized, t
