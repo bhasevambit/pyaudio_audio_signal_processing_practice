@@ -1,56 +1,14 @@
-import scipy
-import numpy as np
-
 import platform
 
 from modules.get_mic_index import get_mic_index
 from modules.audio_stream import audio_stream_start
 from modules.audio_stream import audio_stream_stop
 from modules.gen_time_domain_data import gen_time_domain_data
-# from modules.gen_freq_domain_data import gen_freq_domain_data
-from modules.a_weighting import a_weighting
+from modules.gen_freq_domain_data import gen_freq_domain_data_fixed_period
 from modules.plot_time_and_freq import gen_graph_figure
 from modules.plot_time_and_freq import plot_time_and_freq
 from modules.save_audio_to_wav_file import save_audio_to_wav_file
 from modules.save_matplot_graph import save_matplot_graph
-
-
-def calc_fft(data, samplerate, dbref, A):
-    # ============================================
-    # === フーリエ変換関数 (dB変換とA補正付き) ===
-    # ============================================
-
-    # 信号のフーリエ変換
-    print("Fourier transform START")
-    spectrum = scipy.fft.fft(data)
-
-    # 振幅成分算出
-    amp = np.sqrt((spectrum.real ** 2) + (spectrum.imag ** 2))
-    print("  - Amplitude Caluculation END")
-
-    # 振幅成分の正規化
-    amp_normalized = amp / (len(data) / 2)
-    print("  - Amplitude Normalization END")
-
-    # 位相成分算出 & 位相をラジアンから度に変換
-    phase = np.arctan2(spectrum.imag, spectrum.real)
-    phase = np.degrees(phase)
-    print("  - Phase Caluculation END")
-
-    # 周波数軸を作成
-    freq = np.linspace(0, samplerate, len(data))
-    print("  - Frequency Axis generation END")
-
-    # dbrefが0以上の時にdB変換する
-    if dbref > 0:
-        amp_normalized = 20 * np.log10(amp_normalized / dbref)
-
-        # dB変換されていてAがTrueの時に聴感補正する
-        if A:
-            amp_normalized += a_weighting(freq)
-
-    print("Fourier transform END\n")
-    return spectrum, amp_normalized, phase, freq
 
 
 if __name__ == '__main__':
@@ -106,15 +64,8 @@ if __name__ == '__main__':
     save_audio_to_wav_file(samplerate, data_normalized)
 
     # === フーリエ変換実行 ===
-    spectrum, amp_normalized, phase, freq = calc_fft(
+    spectrum, amp_normalized, phase, freq = gen_freq_domain_data_fixed_period(
         data_normalized, samplerate, dbref, A)
-    # spectrum          : 周波数特性データ(複素数データ)
-    # amp_normalized    : 周波数特性 振幅データ(正規化済)
-    # phase             : 周波数特性 位相データ
-    # freq              : 周波数特性 X軸向けデータ
-    # spectrum, amp_normalized, phase, freq = gen_freq_domain_data(
-    #     data, fs, samplerate, dbref, A
-    # )
     # spectrum          : 周波数特性データ(複素数データ)
     # amp_normalized    : 周波数特性 振幅データ(正規化済)
     # phase             : 周波数特性 位相データ

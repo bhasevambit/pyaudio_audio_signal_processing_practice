@@ -50,3 +50,41 @@ def gen_freq_domain_data(data_normalized, fs, samplerate, dbref, A):
             amp_normalized += a_weighting(freq)
 
     return spectrum, amp_normalized, phase, freq
+
+
+def gen_freq_domain_data_fixed_period(data, samplerate, dbref, A):
+    # ============================================
+    # === フーリエ変換関数 (dB変換とA補正付き) ===
+    # ============================================
+
+    # 信号のフーリエ変換
+    print("Fourier transform START")
+    spectrum = scipy.fft.fft(data)
+
+    # 振幅成分算出
+    amp = np.sqrt((spectrum.real ** 2) + (spectrum.imag ** 2))
+    print("  - Amplitude Caluculation END")
+
+    # 振幅成分の正規化
+    amp_normalized = amp / (len(data) / 2)
+    print("  - Amplitude Normalization END")
+
+    # 位相成分算出 & 位相をラジアンから度に変換
+    phase = np.arctan2(spectrum.imag, spectrum.real)
+    phase = np.degrees(phase)
+    print("  - Phase Caluculation END")
+
+    # 周波数軸を作成
+    freq = np.linspace(0, samplerate, len(data))
+    print("  - Frequency Axis generation END")
+
+    # dbrefが0以上の時にdB変換する
+    if dbref > 0:
+        amp_normalized = 20 * np.log10(amp_normalized / dbref)
+
+        # dB変換されていてAがTrueの時に聴感補正する
+        if A:
+            amp_normalized += a_weighting(freq)
+
+    print("Fourier transform END\n")
+    return spectrum, amp_normalized, phase, freq
