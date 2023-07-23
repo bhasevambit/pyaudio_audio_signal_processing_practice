@@ -26,14 +26,18 @@ if __name__ == '__main__':
     A = True                # 聴感補正(A特性)の有効(True)/無効(False)設定
     plot_pause = -1         # グラフ表示のpause時間 [s] (非リアルタイムモード(指定時間録音)の場合は"-1"を設定)
 
-    # フレームサイズ[sampling data count/frame]
+    # 入力音声ストリームバッファあたりのサンプリングデータ数
     if platform.machine() == "armv7l":  # ARM32bit向け(Raspi等)
-        fs = 512
+        frames_per_buffer = 512
     elif platform.machine() == "x86_64":  # Intel/AMD64bit向け
-        fs = 1024
+        frames_per_buffer = 1024
     else:
-        fs = 1024
-    print("\nFrameSize[sampling data count/frame] = ", fs, "\n")
+        frames_per_buffer = 1024
+    print(
+        "\nframes_per_buffer [sampling data count/stream buffer] = ",
+        frames_per_buffer,
+        "\n"
+    )
     # ------------------------
 
     # === マイクチャンネルを自動取得 ===
@@ -47,13 +51,14 @@ if __name__ == '__main__':
     # freq_fig  : リアルタイム更新対象の周波数特性グラフfigure
 
     # === Microphone入力音声ストリーム生成 ===
-    pa, stream = audio_stream_start(index, mic_mode, samplerate, fs)
+    pa, stream = audio_stream_start(
+        index, mic_mode, samplerate, frames_per_buffer)
     # pa : pyaudioクラスオブジェクト
     # stream : マイク入力音声ストリーム
 
     # === 時間領域波形データ生成 ===
     data_normalized, t = gen_time_domain_data(
-        stream, fs, samplerate, time_unit, time)
+        stream, frames_per_buffer, samplerate, time_unit, time)
     # data_normalized   : 時間領域 波形データ(正規化済)
     # t                 : 時間領域 X軸向けデータ[s]
 

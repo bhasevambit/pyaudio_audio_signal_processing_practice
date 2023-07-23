@@ -37,15 +37,21 @@ def gen_time_domain_x_axis_data(samplerate, data_normalized, time_unit):
     return t
 
 
-def gen_time_domain_data(stream, fs, samplerate, time_unit, time):
+def gen_time_domain_data(
+    stream,
+    frames_per_buffer,
+    samplerate,
+    time_unit,
+    time
+):
     # ==============================================
     # === 時間領域波形データ生成関数(時間指定版) ===
     # ==============================================
-    # stream     : マイク入力音声データストリーム
-    # fs         : フレームサイズ [sampling data count/frame]
-    # samplerate : サンプリングレート [sampling data count/s)]
-    # time_unit  : 時間軸単位
-    # time       : 録音時間[s] ("0"の場合は、リアルタイムモードとしてデータ生成)
+    # stream                : マイク入力音声データストリーム
+    # frames_per_buffer     : 入力音声ストリームバッファあたりのサンプリングデータ数
+    # samplerate            : サンプリングレート [sampling data count/s)]
+    # time_unit             : 時間軸単位
+    # time                  : 録音時間[s] ("0"の場合は、リアルタイムモードとしてデータ生成)
 
     if time > 0:
         # ==========================
@@ -59,12 +65,13 @@ def gen_time_domain_data(stream, fs, samplerate, time_unit, time):
 
         print("Audio Stream Recording START")
 
-        for i in range(int(((time / dt) / fs))):
-            erapsed_time = math.floor(((i * fs) / samplerate) * 100) / 100
+        for i in range(int(((time / dt) / frames_per_buffer))):
+            erapsed_time = math.floor(
+                ((i * frames_per_buffer) / samplerate) * 100) / 100
             print("  - Erapsed Time[s]: ", erapsed_time)
 
-            audio_data_fs = stream.read(fs)
-            audio_data_united.append(audio_data_fs)
+            audio_data_per_buffer = stream.read(frames_per_buffer)
+            audio_data_united.append(audio_data_per_buffer)
 
         print("Audio Stream Recording END\n")
 
@@ -78,7 +85,7 @@ def gen_time_domain_data(stream, fs, samplerate, time_unit, time):
         # ==========================
 
         # 時間領域波形データの生成
-        audio_data = stream.read(fs)
+        audio_data = stream.read(frames_per_buffer)
 
     # 時間領域波形データの正規化
     data_normalized = normalize_time_domain_data(audio_data, "int16")
