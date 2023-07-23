@@ -7,11 +7,12 @@ from modules.get_mic_index import get_mic_index
 from modules.audio_stream import audio_stream_start
 from modules.audio_stream import audio_stream_stop
 from modules.gen_time_domain_data import gen_time_domain_data
-from modules.save_audio_to_wav_file import save_audio_to_wav_file
 # from modules.gen_freq_domain_data import gen_freq_domain_data
 from modules.a_weighting import a_weighting
 from modules.plot_time_and_freq import gen_graph_figure
-from modules.plot_time_and_freq import plot_time_and_freq_fixed_period
+from modules.plot_time_and_freq import plot_time_and_freq
+from modules.save_audio_to_wav_file import save_audio_to_wav_file
+from modules.save_matplot_graph import save_matplot_graph
 
 
 def calc_fft(data, samplerate, dbref, A):
@@ -61,10 +62,11 @@ if __name__ == '__main__':
     mic_mode = 1            # マイクモード (1:モノラル / 2:ステレオ)
     samplerate = 44100      # サンプリングレート [sampling data count/s)]
     time_unit = "s"         # 時間軸単位設定 ("s" or "ms")
-    time = 5                # 計測時間 [[s] or [ms]]  (リアルタイムモードの場合は"0"を設定)
+    time = 5                # 計測時間 [[s] or [ms]] (リアルタイムモードの場合は"0"を設定)
     view_range = time       # 時間領域波形グラフ X軸表示レンジ [[s] or [ms]]
     dbref = 2e-5            # デシベル基準値(最小可聴値 20[μPa]を設定)
     A = True                # 聴感補正(A特性)の有効(True)/無効(False)設定
+    plot_pause = -1         # グラフ表示のpause時間 [s] (非リアルタイムモード(指定時間録音)の場合は"-1"を設定)
 
     # フレームサイズ[sampling data count/frame]
     if platform.machine() == "armv7l":  # ARM32bit向け(Raspi等)
@@ -118,16 +120,20 @@ if __name__ == '__main__':
     # phase             : 周波数特性 位相データ
     # freq              : 周波数特性 X軸向けデータ
 
-    # === 時間領域波形 & 周波数特性 グラフ保存 ===
-    plot_time_and_freq_fixed_period(
+    # === 時間領域波形 & 周波数特性 グラフ表示 ===
+    plot_time_and_freq(
         fig,
         wave_fig,
         freq_fig,
-        t,
         data_normalized,
-        freq,
+        t,
         amp_normalized,
+        freq,
         view_range,
         dbref,
-        A
+        A,
+        plot_pause
     )
+
+    # === 時間領域波形 & 周波数特性 グラフ保存 ===
+    save_matplot_graph()
