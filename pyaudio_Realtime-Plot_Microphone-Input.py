@@ -28,8 +28,9 @@ if __name__ == '__main__':
     if platform.machine() == "armv7l":  # ARM32bit向け(Raspi等)
         fs = 512
     elif platform.machine() == "x86_64":  # Intel64bit向け
-        # 4096以下の場合、「OSError: [Errno -9981] Input overflowed」が発生したため、16384としている
-        fs = 16384
+        # 16384以下の場合、「OSError: [Errno -9981] Input
+        # overflowed」が発生したため、16384としている
+        fs = 32768
     elif platform.machine() == "AMD64":  # AMD64bit向け
         # グラフが正常表示されなかったため、16384としている
         fs = 16384
