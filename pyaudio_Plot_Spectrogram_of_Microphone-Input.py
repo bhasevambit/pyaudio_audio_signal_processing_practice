@@ -1,12 +1,13 @@
+import scipy
+
 import platform
 
 from modules.get_mic_index import get_mic_index
 from modules.audio_stream import audio_stream_start
 from modules.audio_stream import audio_stream_stop
 from modules.gen_time_domain_data import gen_time_domain_data
-from modules.gen_freq_domain_data import gen_freq_domain_data
 from modules.plot_time_and_freq import gen_graph_figure
-from modules.plot_time_and_freq import plot_time_and_freq
+from modules.plot_time_and_freq import plot_time_and_spectrogram
 from modules.save_audio_to_wav_file import save_audio_to_wav_file
 from modules.save_matplot_graph import save_matplot_graph
 
@@ -45,10 +46,10 @@ if __name__ == '__main__':
     print("Use Microphone Index :", index, "\n")
 
     # === 時間領域波形と周波数特性向けの2つのグラフ領域を作成
-    fig, wave_fig, freq_fig = gen_graph_figure()
-    # fig       : matplotlib グラフfigure
-    # wave_fig  : matplotlib 時間領域波形グラフfigure
-    # freq_fig  : matplotlib 周波数特性グラフfigure
+    fig, wave_fig, spctrgrm_fig = gen_graph_figure()
+    # fig           : matplotlib グラフfigure
+    # wave_fig      : matplotlib 時間領域波形グラフfigure
+    # spctrgrm_fig  : matplotlib スペクトログラムグラフfigure
 
     # === Microphone入力音声ストリーム生成 ===
     pa, stream = audio_stream_start(
@@ -68,28 +69,30 @@ if __name__ == '__main__':
     # === レコーディング音声のwavファイル保存 ===
     save_audio_to_wav_file(samplerate, data_normalized)
 
-    # === フーリエ変換実行 ===
-    spectrum, amp_normalized, phase, freq = gen_freq_domain_data(
-        data_normalized, samplerate, dbref, A)
-    # spectrum          : 周波数特性データ(複素数データ)
-    # amp_normalized    : 周波数特性 振幅データ(正規化済)
-    # phase             : 周波数特性 位相データ
-    # freq              : 周波数特性 X軸向けデータ
+    # === スペクトログラム分析実行 ===
+    freq_spctrgrm, time_spctrgrm, spectrogram = scipy.signal.spectrogram(
+        data_normalized,
+        fs=samplerate,
+        detrend=False,
+        scaling="spectrum",
+        mode="magnitude"
+    )
+    # freq_spctrgrm          : Array of sample frequencies
+    # time_spctrgrm          : Array of segment times
+    # spectrogram            : Spectrogram
 
-    # === 時間領域波形 & 周波数特性 グラフ表示 ===
-    plot_time_and_freq(
+    # === 時間領域波形 & スペクトログラム グラフ表示 ===
+    plot_time_and_spectrogram(
         fig,
         wave_fig,
-        freq_fig,
+        spctrgrm_fig,
         data_normalized,
         t,
-        amp_normalized,
-        freq,
         view_range,
-        dbref,
-        A,
-        plot_pause
+        freq_spctrgrm,
+        time_spctrgrm,
+        spectrogram
     )
 
-    # === 時間領域波形 & 周波数特性 グラフ保存 ===
+    # === 時間領域波形 & スペクトログラム グラフ保存 ===
     save_matplot_graph()

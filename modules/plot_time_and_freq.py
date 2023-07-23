@@ -37,9 +37,9 @@ def plot_time_and_freq(
     # ====================================================
     # === 時間領域波形 & 周波数特性 グラフプロット関数 ===
     # ====================================================
-    # fig               : リアルタイム更新対象のグラフfigure
-    # wave_fig          : リアルタイム更新対象の時間領域波形グラフfigure
-    # freq_fig          : リアルタイム更新対象の周波数特性グラフfigure
+    # fig               : matplotlib グラフfigure
+    # wave_fig          : matplotlib 時間領域波形グラフfigure
+    # freq_fig          : matplotlib 周波数特性グラフfigure
     # data_normalized   : 時間領域 波形データ(正規化済)
     # t                 : 時間領域 X軸向けデータ [ms]
     # amp_normalized    : 周波数特性 振幅データ(正規化済)
@@ -113,3 +113,75 @@ def plot_time_and_freq(
 
         freq_fig.cla()
         wave_fig.cla()
+
+
+def plot_time_and_spectrogram(
+    fig,
+    wave_fig,
+    spctrgrm_fig,
+    data_normalized,
+    t,
+    view_range,
+    freq_spctrgrm,
+    time_spctrgrm,
+    spectrogram
+):
+    # ==========================================================
+    # === 時間領域波形 & スペクトログラム グラフプロット関数 ===
+    # ==========================================================
+    # fig               : matplotlib グラフfigure
+    # wave_fig          : matplotlib 時間領域波形グラフfigure
+    # spctrgrm_fig      : matplotlib スペクトログラムグラフfigure
+    # data_normalized   : 時間領域 波形データ(正規化済)
+    # t                 : 時間領域 X軸向けデータ [ms]
+    # view_range        : 時間領域波形グラフ X軸表示レンジ [sample count]
+    # freq_spctrgrm     : Array of sample frequencies
+    # time_spctrgrm     : Array of segment times
+    # spectrogram       : Spectrogram
+
+    # フォントサイズ設定
+    plt.rcParams['font.size'] = 10
+
+    # 目盛内側化
+    plt.rcParams['xtick.direction'] = 'in'
+    plt.rcParams['ytick.direction'] = 'in'
+
+    # 時間領域波形 軸ラベル設定
+    wave_fig.set_xlabel('Time [s]')
+    wave_fig.set_ylabel('Amplitude')
+
+    # スペクトログラム 軸ラベル設定
+    spctrgrm_fig.set_xlabel('Time [s]')
+    spctrgrm_fig.set_ylabel('Frequency [Hz]')
+
+    # 時間領域波形 軸目盛り設定
+    wave_fig.set_xlim(0, view_range)
+    wave_fig.set_ylim(-1, 1)
+    wave_fig.set_yticks([-1, -0.5, 0, 0.5, 1])
+
+    # スペクトログラム 軸目盛り設定
+    spctrgrm_fig.set_xlim(0, view_range)
+    spctrgrm_fig.set_ylim(0, 2000)
+
+    # plot.figure.tight_layout()実行時の「UserWarning: The figure layout has
+    # changed to tight」Warning文の抑止
+    warnings.simplefilter('ignore', UserWarning)
+
+    # レイアウト設定
+    fig.tight_layout()
+
+    # 時間領域波形データプロット
+    wave_fig.plot(
+        t,
+        data_normalized,
+        label='Time Waveform',
+        lw=1,
+        color="blue")
+
+    # スペクトログラムデータプロット
+    spctrgrm_fig.pcolormesh(
+        time_spctrgrm,
+        freq_spctrgrm,
+        10 * np.log10(spectrogram),
+        cmap='viridis'
+    )

@@ -49,9 +49,9 @@ if __name__ == '__main__':
 
     # === 時間領域波形と周波数特性向けの2つのグラフ領域を作成
     fig, wave_fig, freq_fig = gen_graph_figure()
-    # fig       : リアルタイム更新対象のグラフfigure
-    # wave_fig  : リアルタイム更新対象の時間領域波形グラフfigure
-    # freq_fig  : リアルタイム更新対象の周波数特性グラフfigure
+    # fig       : matplotlib グラフfigure
+    # wave_fig  : matplotlib 時間領域波形グラフfigure
+    # freq_fig  : matplotlib 周波数特性グラフfigure
 
     # === Microphone入力音声ストリーム生成 ===
     pa, stream = audio_stream_start(
