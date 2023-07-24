@@ -15,10 +15,14 @@ if __name__ == '__main__':
     # =================
 
     # --- Parameters ---
+
+    # サンプリングレート [sampling data count/s]
+    # スペクトログラムのSTFTの周波数分解能を上げるために、サンプリング周波数を16kHzとしている
+    samplerate = 16000
+
     mic_mode = 1            # マイクモード (1:モノラル / 2:ステレオ)
-    samplerate = 44100      # サンプリングレート [sampling data count/s)]
     time_unit = "s"         # 時間軸単位設定 ("s" or "ms")
-    time = 1                # 計測時間 [[s] or [ms]] (リアルタイムモードの場合は"0"を設定)
+    time = 5                # 計測時間 [[s] or [ms]] (リアルタイムモードの場合は"0"を設定)
     view_range = time       # 時間領域波形グラフ X軸表示レンジ [[s] or [ms]]
     dbref = 2e-5            # デシベル基準値(最小可聴値 20[μPa]を設定)
     A = True                # 聴感補正(A特性)の有効(True)/無効(False)設定

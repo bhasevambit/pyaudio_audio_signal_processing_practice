@@ -135,7 +135,7 @@ def plot_time_and_spectrogram(
     # spectrogram       : Spectrogram
 
     # グラフfigure設定
-    fig = plt.figure(figsize=[8, 7])
+    fig = plt.figure(figsize=[8, 8])
     # add_axesの引数パラメータは「left，bottom，width，height」
     axes_left_common = 0.12
     axes_height_spctrgrm = 0.5
@@ -162,12 +162,17 @@ def plot_time_and_spectrogram(
         )
     )
 
+    # 上下左右にグラフ目盛線を付与
+    wave_fig.yaxis.set_ticks_position('both')
+    wave_fig.xaxis.set_ticks_position('both')
+    spctrgrm_fig.yaxis.set_ticks_position('both')
+    spctrgrm_fig.xaxis.set_ticks_position('both')
+
     # フォントサイズ設定
     plt.rcParams['font.size'] = 10
 
     # 目盛内側化
-    plt.rcParams['xtick.direction'] = 'in'
-    plt.rcParams['ytick.direction'] = 'in'
+    wave_fig.tick_params(axis="both", direction="in")
 
     # 時間領域波形 軸ラベル設定
     wave_fig.set_xlabel('Time [s]')
@@ -207,10 +212,11 @@ def plot_time_and_spectrogram(
     spctrgrm_im = spctrgrm_fig.pcolormesh(
         time_spctrgrm,
         freq_spctrgrm,
-        10 * np.log10(spectrogram),
+        spectrogram,
+        # 10 * np.log10(spectrogram),
         cmap='jet'
     )
 
     # カラーバー設定
     cbar = fig.colorbar(spctrgrm_im)
-    cbar.set_label("???")
+    cbar.set_label("Sound Pressure [Pa]")
