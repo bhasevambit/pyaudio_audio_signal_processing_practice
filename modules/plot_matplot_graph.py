@@ -5,20 +5,21 @@ import warnings
 
 
 def gen_graph_figure():
-    # =========================================================
-    # === 時間領域波形 & 周波数特性向けのグラフ領域作成関数 ===
-    # =========================================================
+    # ==========================
+    # === グラフ領域作成関数 ===
+    # ==========================
+
     fig = plt.figure()
-    wave_fig = fig.add_subplot(2, 1, 1)
-    freq_fig = fig.add_subplot(2, 1, 2)
+    sub_fig1 = fig.add_subplot(2, 1, 1)
+    sub_fig2 = fig.add_subplot(2, 1, 2)
 
     # 上下左右にグラフ目盛線を付与
-    wave_fig.yaxis.set_ticks_position('both')
-    wave_fig.xaxis.set_ticks_position('both')
-    freq_fig.yaxis.set_ticks_position('both')
-    freq_fig.xaxis.set_ticks_position('both')
+    sub_fig1.yaxis.set_ticks_position('both')
+    sub_fig1.xaxis.set_ticks_position('both')
+    sub_fig2.yaxis.set_ticks_position('both')
+    sub_fig2.xaxis.set_ticks_position('both')
 
-    return fig, wave_fig, freq_fig
+    return fig, sub_fig1, sub_fig2
 
 
 def plot_time_and_freq(
@@ -116,9 +117,6 @@ def plot_time_and_freq(
 
 
 def plot_time_and_spectrogram(
-    fig,
-    wave_fig,
-    spctrgrm_fig,
     data_normalized,
     t,
     view_range,
@@ -129,15 +127,40 @@ def plot_time_and_spectrogram(
     # ==========================================================
     # === 時間領域波形 & スペクトログラム グラフプロット関数 ===
     # ==========================================================
-    # fig               : matplotlib グラフfigure
-    # wave_fig          : matplotlib 時間領域波形グラフfigure
-    # spctrgrm_fig      : matplotlib スペクトログラムグラフfigure
     # data_normalized   : 時間領域 波形データ(正規化済)
     # t                 : 時間領域 X軸向けデータ [ms]
     # view_range        : 時間領域波形グラフ X軸表示レンジ [sample count]
     # freq_spctrgrm     : Array of sample frequencies
     # time_spctrgrm     : Array of segment times
     # spectrogram       : Spectrogram
+
+    # グラフfigure設定
+    fig = plt.figure(figsize=[8, 7])
+    # add_axesの引数パラメータは「left，bottom，width，height」
+    axes_left_common = 0.12
+    axes_height_spctrgrm = 0.5
+    axes_height_wave = 0.25
+    axes_bottom_spctrgrm = 0.1
+    axes_bottom_wave = axes_bottom_spctrgrm + axes_height_spctrgrm + 0.1
+    axes_width_spctrgrm = 0.89  # 時間領域波形とスペクトログラムの横軸メモリが合うように微調整
+    axes_width_wave = 0.71  # 時間領域波形とスペクトログラムの横軸メモリが合うように微調整
+
+    wave_fig = fig.add_axes(
+        (
+            axes_left_common,
+            axes_bottom_wave,
+            axes_width_wave,
+            axes_height_wave
+        )
+    )
+    spctrgrm_fig = fig.add_axes(
+        (
+            axes_left_common,
+            axes_bottom_spctrgrm,
+            axes_width_spctrgrm,
+            axes_height_spctrgrm
+        )
+    )
 
     # フォントサイズ設定
     plt.rcParams['font.size'] = 10
@@ -161,7 +184,7 @@ def plot_time_and_spectrogram(
 
     # スペクトログラム 軸目盛り設定
     spctrgrm_fig.set_xlim(0, view_range)
-    spctrgrm_fig.set_ylim(0, 3000)  # 0 ～ 3000[Hz]の範囲
+    spctrgrm_fig.set_ylim(0, 2000)  # 0 ～ 2000[Hz]の範囲
 
     # plot.figure.tight_layout()実行時の「UserWarning: The figure layout has
     # changed to tight」Warning文の抑止
@@ -176,13 +199,18 @@ def plot_time_and_spectrogram(
         data_normalized,
         label='Time Waveform',
         lw=1,
-        color="blue")
+        color="blue"
+    )
 
     # スペクトログラムデータプロット
     # スペクトログラムデータはログスケール表示 (= 10 * log10(spectrogram))
-    spctrgrm_fig.pcolormesh(
+    spctrgrm_im = spctrgrm_fig.pcolormesh(
         time_spctrgrm,
         freq_spctrgrm,
         10 * np.log10(spectrogram),
-        cmap='viridis'
+        cmap='jet'
     )
+
+    # カラーバー設定
+    cbar = fig.colorbar(spctrgrm_im)
+    cbar.set_label("???")

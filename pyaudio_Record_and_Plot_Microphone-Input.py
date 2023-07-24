@@ -16,7 +16,7 @@ if __name__ == '__main__':
     # === Main Code ===
     # =================
 
-    # --- Sound Parameters ---
+    # --- Parameters ---
     mic_mode = 1            # マイクモード (1:モノラル / 2:ステレオ)
     samplerate = 44100      # サンプリングレート [sampling data count/s)]
     time_unit = "s"         # 時間軸単位設定 ("s" or "ms")
@@ -25,6 +25,7 @@ if __name__ == '__main__':
     dbref = 2e-5            # デシベル基準値(最小可聴値 20[μPa]を設定)
     A = True                # 聴感補正(A特性)の有効(True)/無効(False)設定
     plot_pause = -1         # グラフ表示のpause時間 [s] (非リアルタイムモード(指定時間録音)の場合は"-1"を設定)
+    filename_prefix = "time-waveform_and_freq-response_"    # グラフ保存時のファイル名プレフィックス
 
     # 入力音声ストリームバッファあたりのサンプリングデータ数
     if platform.machine() == "armv7l":  # ARM32bit向け(Raspi等)
@@ -92,4 +93,4 @@ if __name__ == '__main__':
     )
 
     # === 時間領域波形 & 周波数特性 グラフ保存 ===
-    save_matplot_graph()
+    save_matplot_graph(filename_prefix)

@@ -14,7 +14,7 @@ if __name__ == '__main__':
     # === Main Code ===
     # =================
 
-    # --- Sound Parameters ---
+    # --- Parameters ---
     mic_mode = 1            # マイクモード (1:モノラル / 2:ステレオ)
     samplerate = 44100      # サンプリングレート [sampling data count/s)]
     time_unit = "ms"        # 時間軸単位設定 ("s" or "ms")
