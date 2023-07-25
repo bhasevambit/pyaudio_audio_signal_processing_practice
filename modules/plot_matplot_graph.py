@@ -137,7 +137,7 @@ def plot_time_and_spectrogram(
     # グラフfigure設定
     fig = plt.figure(figsize=[8, 8])
     # add_axesの引数パラメータは「left，bottom，width，height」
-    axes_left_common = 0.12
+    axes_left_common = 0.1
     axes_height_spctrgrm = 0.5
     axes_height_wave = 0.25
     axes_bottom_spctrgrm = 0.1

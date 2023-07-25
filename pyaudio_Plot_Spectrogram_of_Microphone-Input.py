@@ -74,6 +74,14 @@ if __name__ == '__main__':
         # time_spctrgrm          : Array of segment times
         # spectrogram            : Spectrogram
 
+        # print("freq_spctrgrm = ", freq_spctrgrm)
+        # print("time_spctrgrm = ", time_spctrgrm)
+        # print("spectrogram = ", spectrogram)
+
+        print("freq_spctrgrm.shape = ", freq_spctrgrm.shape)
+        print("time_spctrgrm.shape = ", time_spctrgrm.shape)
+        print("spectrogram.shape = ", spectrogram.shape)
+
     else:
         # 自作STFT関数を使用する場合
         pass
