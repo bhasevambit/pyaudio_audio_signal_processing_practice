@@ -4,6 +4,7 @@ from modules.get_mic_index import get_mic_index
 from modules.audio_stream import audio_stream_start
 from modules.audio_stream import audio_stream_stop
 from modules.gen_time_domain_data import gen_time_domain_data
+from modules.gen_freq_domain_data import gen_freq_domain_data_of_stft
 from modules.overlap import overlap
 from modules.window import hanning
 from modules.plot_matplot_graph import plot_time_and_spectrogram
@@ -99,10 +100,24 @@ if __name__ == '__main__':
             data_normalized, samplerate, frames_per_buffer, overlap_rate
         )
 
-        # Hanning窓関数の
+        # Hanning窓関数の適用
         time_array_after_window, acf = hanning(
             time_array, frames_per_buffer, N_ave
         )
+
+        # STFT(Short-Time Fourier Transform)の実行
+        fft_array, fft_mean, freq = gen_freq_domain_data_of_stft(
+            time_array_after_window,
+            samplerate,
+            frames_per_buffer,
+            N_ave,
+            acf,
+            dbref,
+            A
+        )
+        # fft_array         : STFTデータ
+        # fft_mean          : 全てのFFT波形の平均値
+        # freq              : 周波数軸データ
 
     # === 時間領域波形 & スペクトログラム グラフ表示 ===
     plot_time_and_spectrogram(

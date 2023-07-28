@@ -51,3 +51,80 @@ def gen_freq_domain_data(data_normalized, samplerate, dbref, A):
             amp_normalized += a_weighting(freq)
 
     return spectrum, amp_normalized, phase, freq
+
+
+def gen_freq_domain_data_of_stft(
+    time_array_after_window,
+    samplerate,
+    frames_per_buffer,
+    N_ave,
+    acf,
+    dbref,
+    A
+):
+    # time_array_after_window   : 時間領域 波形データ(正規化/オーバーラップ処理/hanning窓関数適用済)
+    # samplerate                : サンプリングレート [sampling data count/s)]
+    # frames_per_buffer         : 入力音声ストリームバッファあたりのサンプリングデータ数
+    # N_ave                     : オーバーラップ処理における切り出しフレーム数
+    # acf                       : 振幅補正係数(Amplitude Correction Factor)
+    # dbref                     : デシベル基準値
+    # A                         : 聴感補正(A特性)の有効(True)/無効(False)設定
+
+    # dB(デシベル）演算する関数
+    def db(x, dbref):
+        y = 20 * np.log10(x / dbref)                   # 変換式
+        return y                                       # dB値を返す
+
+    if dbref > 0 and A:
+        # デシベル基準値設定あり、かつ、聴感補正(A特性)の有効の場合
+        no_db_a = False
+    else:
+        no_db_a = True
+
+    # 平均化FFTする関数
+    fft_array = []
+
+    # 周波数軸を作成
+    freq = np.linspace(0, samplerate, frames_per_buffer)
+
+    # 聴感補正曲線を計算
+    a_scale = a_weighting(freq)
+
+    # FFTをして配列にdBで追加、窓関数補正値をかけ、(frames_per_buffer/2)の正規化を実施
+    for i in range(N_ave):
+
+        if no_db_a:
+            # 非dB(A)モード
+            fft_array.append(
+                acf *
+                np.abs(scipy.fft.fft(time_array_after_window[i]) /
+                       (frames_per_buffer / 2))
+            )
+
+        else:
+            # dB(A)モード
+            fft_array.append(
+                db(
+                    acf *
+                    np.abs(scipy.fft.fft(time_array_after_window[i]) /
+                           (frames_per_buffer / 2)),
+                    dbref
+                )
+            )
+
+    # 型をndarrayに変換し、A特性をかける
+    # (A特性はdB表示しない場合はかけない）
+    if no_db_a:
+        # 非dB(A)モード
+        fft_array = np.array(fft_array)
+    else:
+        # dB(A)モード
+        fft_array = np.array(fft_array) + a_scale
+
+    # 全てのFFT波形の平均を計算
+    fft_mean = np.mean(
+        np.sqrt(
+            fft_array ** 2),
+        axis=0)
+
+    return fft_array, fft_mean, freq
