@@ -220,3 +220,41 @@ def plot_time_and_spectrogram(
     # カラーバー設定
     cbar = fig.colorbar(spctrgrm_im)
     cbar.set_label("Sound Pressure [Pa]")
+
+
+def plot_spectrogram_by_stft(fft_array, samplerate, final_time, dbref, A):
+    # ===================================================
+    # === スペクトログラム(STFT版) グラフプロット関数 ===
+    # ===================================================
+
+    # ここからグラフ描画
+    # グラフをオブジェクト指向で作成する。
+    fig = plt.figure()
+    ax1 = fig.add_subplot(111)
+
+    # データをプロットする。
+    im = ax1.imshow(fft_array,
+                    vmin=0, vmax=np.max(fft_array),
+                    extent=[0, final_time, 0, samplerate],
+                    aspect='auto',
+                    cmap='jet')
+
+    # カラーバーを設定する。
+    cbar = fig.colorbar(im)
+
+    if (dbref > 0) and not (A):
+        cbar.set_label('Sound Pressure [dB spl]')
+    elif (dbref > 0) and (A):
+        cbar.set_label('Sound Pressure [dB spl(A)]')
+    else:
+        cbar.set_label('Sound Pressure [Pa]')
+
+    # 軸設定する。
+    ax1.set_xlabel('Time [s]')
+    ax1.set_ylabel('Frequency [Hz]')
+
+    # スケールの設定をする。
+    ax1.set_xticks(np.arange(0, 50, 1))
+    ax1.set_yticks(np.arange(0, 20000, 500))
+    ax1.set_xlim(0, 5)
+    ax1.set_ylim(0, 2000)

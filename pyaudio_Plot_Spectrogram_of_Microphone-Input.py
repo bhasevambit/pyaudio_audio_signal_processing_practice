@@ -8,6 +8,7 @@ from modules.gen_freq_domain_data import gen_freq_domain_data_of_stft
 from modules.overlap import overlap
 from modules.window import hanning
 from modules.plot_matplot_graph import plot_time_and_spectrogram
+from modules.plot_matplot_graph import plot_spectrogram_by_stft
 from modules.save_audio_to_wav_file import save_audio_to_wav_file
 from modules.save_matplot_graph import save_matplot_graph
 
@@ -18,9 +19,11 @@ if __name__ == '__main__':
     # =================
 
     # --- Parameters ---
+    # スペクトログラムデータ算出モード (0:scipy.signal.spectrogram()関数を使用 / 1:自作STFT関数を使用)
+    spctrgrm_mode = 1
 
     # サンプリングレート [sampling data count/s]
-    # スペクトログラムのSTFTの周波数分解能を上げるために、サンプリング周波数を16kHzとしている
+    # (スペクトログラムのSTFTの周波数分解能を上げるために、サンプリング周波数を16kHzとしている)
     samplerate = 16000
 
     mic_mode = 1            # マイクモード (1:モノラル / 2:ステレオ)
@@ -31,10 +34,12 @@ if __name__ == '__main__':
     A = True                # 聴感補正(A特性)の有効(True)/無効(False)設定
     overlap_rate = 50       # オーバーラップ率 [%]
     plot_pause = -1         # グラフ表示のpause時間 [s] (非リアルタイムモード(指定時間録音)の場合は"-1"を設定)
-    filename_prefix = "time-waveform_and_spectrogram_"    # グラフ保存時のファイル名プレフィックス
 
-    # スペクトログラムデータ算出モード (0:scipy.signal.spectrogram()関数を使用 / 1:自作STFT関数を使用)
-    spctrgrm_mode = 0
+    # グラフ保存時のファイル名プレフィックス
+    if spctrgrm_mode == 0:
+        filename_prefix = "time-waveform_and_spectrogram_"
+    else:
+        filename_prefix = "stft-spectrogram_"
 
     # 入力音声ストリームバッファあたりのサンプリングデータ数
     frames_per_buffer = 1024
@@ -99,11 +104,16 @@ if __name__ == '__main__':
         time_array, N_ave, final_time = overlap(
             data_normalized, samplerate, frames_per_buffer, overlap_rate
         )
+        # time_array    : オーバーラップ抽出された時間領域波形配列(正規化済)
+        # N_ave         : オーバーラップ処理における切り出しフレーム数
+        # final_time    : 切り出したデータの最終時刻[s]
 
         # Hanning窓関数の適用
         time_array_after_window, acf = hanning(
             time_array, frames_per_buffer, N_ave
         )
+        # time_array_after_window   : 時間領域 波形データ(正規化/オーバーラップ処理/hanning窓関数適用済)
+        # acf                       : 振幅補正係数(Amplitude Correction Factor)
 
         # STFT(Short-Time Fourier Transform)の実行
         fft_array, fft_mean, freq = gen_freq_domain_data_of_stft(
@@ -119,15 +129,28 @@ if __name__ == '__main__':
         # fft_mean          : 全てのFFT波形の平均値
         # freq              : 周波数軸データ
 
+        # スペクトログラムで縦軸周波数、横軸時間にするためにデータを転置
+        fft_array = fft_array.T
+
     # === 時間領域波形 & スペクトログラム グラフ表示 ===
-    plot_time_and_spectrogram(
-        data_normalized,
-        t,
-        view_range,
-        freq_spctrgrm,
-        time_spctrgrm,
-        spectrogram
-    )
+    if spctrgrm_mode == 0:
+        # ================================================
+        # === scipy.signal.spectrogram()を使用する場合 ===
+        # ================================================
+        plot_time_and_spectrogram(
+            data_normalized,
+            t,
+            view_range,
+            freq_spctrgrm,
+            time_spctrgrm,
+            spectrogram
+        )
+
+    else:
+        # ==================================
+        # === 自作STFT関数を使用する場合 ===
+        # ==================================
+        plot_spectrogram_by_stft(fft_array, samplerate, final_time, dbref, A)
 
     # === 時間領域波形 & スペクトログラム グラフ保存 ===
     save_matplot_graph(filename_prefix)
