@@ -230,9 +230,16 @@ def plot_time_and_spectrogram(
             time_spctrgrm,
             freq_spctrgrm,
             spectrogram,
-            # 10 * np.log10(spectrogram),
             cmap='jet'
         )
+
+        # カラーバー設定
+        cbar = fig.colorbar(spctrgrm_im)
+
+        if dbref > 0:
+            cbar.set_label('Sound Pressure [dB spl]')
+        else:
+            cbar.set_label('Sound Pressure [Pa]')
 
     else:
         # ==================================
@@ -249,12 +256,12 @@ def plot_time_and_spectrogram(
             cmap='jet'
         )
 
-    # カラーバー設定
-    cbar = fig.colorbar(spctrgrm_im)
+        # カラーバー設定
+        cbar = fig.colorbar(spctrgrm_im)
 
-    if (dbref > 0) and not (A):
-        cbar.set_label('Sound Pressure [dB spl]')
-    elif (dbref > 0) and (A):
-        cbar.set_label('Sound Pressure [dB spl(A)]')
-    else:
-        cbar.set_label('Sound Pressure [Pa]')
+        if (dbref > 0) and not (A):
+            cbar.set_label('Sound Pressure [dB spl]')
+        elif (dbref > 0) and (A):
+            cbar.set_label('Sound Pressure [dB spl(A)]')
+        else:
+            cbar.set_label('Sound Pressure [Pa]')

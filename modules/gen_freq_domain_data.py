@@ -53,6 +53,24 @@ def gen_freq_domain_data(data_normalized, samplerate, dbref, A):
     return spectrum, amp_normalized, phase, freq
 
 
+def get_freq_domain_data_of_signal_spctrgrm(
+    data_normalized, samplerate, dbref, A
+):
+
+    freq_spctrgrm, time_spctrgrm, spectrogram = scipy.signal.spectrogram(
+        data_normalized,
+        fs=samplerate,
+        nfft=44100, nperseg=1024, mode='magnitude', window='hann'
+    )
+
+    # dbrefが0以上の時にdB変換する
+    if dbref > 0:
+        with np.errstate(divide='ignore'):
+            spectrogram = 20 * np.log10(spectrogram / dbref)
+
+    return freq_spctrgrm, time_spctrgrm, spectrogram
+
+
 def gen_freq_domain_data_of_stft(
     time_array_after_window,
     samplerate,
@@ -70,7 +88,7 @@ def gen_freq_domain_data_of_stft(
     # dbref                     : デシベル基準値
     # A                         : 聴感補正(A特性)の有効(True)/無効(False)設定
 
-    # dB(デシベル）演算する関数
+    # dB(デシベル）演算関数
     def db(x, dbref):
         y = 20 * np.log10(x / dbref)                   # 変換式
         return y                                       # dB値を返す

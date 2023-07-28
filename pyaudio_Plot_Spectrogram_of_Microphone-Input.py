@@ -1,9 +1,8 @@
-import scipy
-
 from modules.get_mic_index import get_mic_index
 from modules.audio_stream import audio_stream_start
 from modules.audio_stream import audio_stream_stop
 from modules.gen_time_domain_data import gen_time_domain_data
+from modules.gen_freq_domain_data import get_freq_domain_data_of_signal_spctrgrm
 from modules.gen_freq_domain_data import gen_freq_domain_data_of_stft
 from modules.overlap import overlap
 from modules.window import hanning
@@ -19,7 +18,7 @@ if __name__ == '__main__':
 
     # --- Parameters ---
     # スペクトログラムデータ算出モード (0:scipy.signal.spectrogram()関数を使用 / 1:自作STFT関数を使用)
-    spctrgrm_mode = 0
+    spctrgrm_mode = 1
 
     # サンプリングレート [sampling data count/s]
     # (スペクトログラムのSTFTの周波数分解能を上げるために、サンプリング周波数を16kHzとしている)
@@ -74,10 +73,8 @@ if __name__ == '__main__':
         # ================================================
         # === scipy.signal.spectrogram()を使用する場合 ===
         # ================================================
-        freq_spctrgrm, time_spctrgrm, spectrogram = scipy.signal.spectrogram(
-            data_normalized,
-            fs=samplerate
-        )
+        freq_spctrgrm, time_spctrgrm, spectrogram = get_freq_domain_data_of_signal_spctrgrm(
+            data_normalized, samplerate, dbref, A)
 
         # 未使用変数を初期化
         fft_array = []
