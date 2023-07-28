@@ -1,11 +1,11 @@
-def overlap(data_normalized, samplerate, frames_per_buffer, overlap):
+def overlap(data_normalized, samplerate, frames_per_buffer, overlap_rate):
     # ==============================
     # === オーバーラップ処理関数 ===
     # ==============================
     # data_normalized   : 時間領域 波形データ(正規化済)
     # samplerate : サンプリングレート [sampling data count/s]
     # frames_per_buffer : 入力音声ストリームバッファあたりのサンプリングデータ数
-    # overlap : オーバーラップ率 [%]
+    # overlap_rate : オーバーラップ率 [%]
 
     # 全データ時間長[s]の算出
     # (= 時間領域波形データ要素数 / (サンプリングデータ数 / 秒))
@@ -16,13 +16,13 @@ def overlap(data_normalized, samplerate, frames_per_buffer, overlap):
     Fc = frames_per_buffer / samplerate
 
     # オーバーラップ時のずらし幅 [sampling data count]
-    x_ol = frames_per_buffer * (1 - (overlap / 100))
+    x_ol = frames_per_buffer * (1 - (overlap_rate / 100))
 
     # オーバーラップ時間長[s]を算出
-    overlap_time = Fc * (overlap / 100)
+    overlap_time = Fc * (overlap_rate / 100)
 
     # 非オーバーラップ時間長[s]を算出
-    non_overlap_time = Fc * (1 - (overlap / 100))
+    non_overlap_time = Fc * (1 - (overlap_rate / 100))
 
     # 切り出しフレーム数 (平均化に使うデータ個数)
     N_ave = int((Ts - overlap_time) / non_overlap_time)

@@ -4,6 +4,7 @@ from modules.get_mic_index import get_mic_index
 from modules.audio_stream import audio_stream_start
 from modules.audio_stream import audio_stream_stop
 from modules.gen_time_domain_data import gen_time_domain_data
+from modules.overlap import overlap
 from modules.plot_matplot_graph import plot_time_and_spectrogram
 from modules.save_audio_to_wav_file import save_audio_to_wav_file
 from modules.save_matplot_graph import save_matplot_graph
@@ -26,6 +27,7 @@ if __name__ == '__main__':
     view_range = time       # 時間領域波形グラフ X軸表示レンジ [[s] or [ms]]
     dbref = 2e-5            # デシベル基準値(最小可聴値 20[μPa]を設定)
     A = True                # 聴感補正(A特性)の有効(True)/無効(False)設定
+    overlap_rate = 90    # オーバーラップ率 [%]
     plot_pause = -1         # グラフ表示のpause時間 [s] (非リアルタイムモード(指定時間録音)の場合は"-1"を設定)
     filename_prefix = "time-waveform_and_spectrogram_"    # グラフ保存時のファイル名プレフィックス
 
@@ -84,7 +86,8 @@ if __name__ == '__main__':
 
     else:
         # 自作STFT関数を使用する場合
-        pass
+        array, N_ave, final_time = overlap(
+            data_normalized, samplerate, frames_per_buffer, overlap_rate)
 
     # === 時間領域波形 & スペクトログラム グラフ表示 ===
     plot_time_and_spectrogram(
