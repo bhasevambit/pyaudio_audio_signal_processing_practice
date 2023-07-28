@@ -122,7 +122,13 @@ def plot_time_and_spectrogram(
     view_range,
     freq_spctrgrm,
     time_spctrgrm,
-    spectrogram
+    spectrogram,
+    fft_array,
+    samplerate,
+    final_time,
+    dbref,
+    A,
+    spctrgrm_mode
 ):
     # ==========================================================
     # === 時間領域波形 & スペクトログラム グラフプロット関数 ===
@@ -132,10 +138,18 @@ def plot_time_and_spectrogram(
     # view_range        : 時間領域波形グラフ X軸表示レンジ [sample count]
     # freq_spctrgrm     : Array of sample frequencies
     # time_spctrgrm     : Array of segment times
-    # spectrogram       : Spectrogram
+    # spectrogram       : Spectrogram Data
+    # fft_array         : STFT Spectrogramデータ
+    # samplerate        : サンプリングレート [sampling data count/s)]
+    # final_time        : 切り出したデータの最終時刻[s]
+    # dbref             : デシベル基準値
+    # A                 : 聴感補正(A特性)の有効(True)/無効(False)設定
+    # spctrgrm_mode     : スペクトログラムデータ算出モード
+    #                     (0:scipy.signal.spectrogram()関数を使用 / 1:自作STFT関数を使用)
 
     # グラフfigure設定
     fig = plt.figure(figsize=[8, 8])
+
     # add_axesの引数パラメータは「left，bottom，width，height」
     axes_left_common = 0.1
     axes_height_spctrgrm = 0.5
@@ -208,39 +222,35 @@ def plot_time_and_spectrogram(
     )
 
     # スペクトログラムデータプロット
-    # スペクトログラムデータはログスケール表示 (= 10 * log10(spectrogram))
-    spctrgrm_im = spctrgrm_fig.pcolormesh(
-        time_spctrgrm,
-        freq_spctrgrm,
-        spectrogram,
-        # 10 * np.log10(spectrogram),
-        cmap='jet'
-    )
+    if spctrgrm_mode == 0:
+        # ================================================
+        # === scipy.signal.spectrogram()を使用する場合 ===
+        # ================================================
+        spctrgrm_im = spctrgrm_fig.pcolormesh(
+            time_spctrgrm,
+            freq_spctrgrm,
+            spectrogram,
+            # 10 * np.log10(spectrogram),
+            cmap='jet'
+        )
+
+    else:
+        # ==================================
+        # === 自作STFT関数を使用する場合 ===
+        # ==================================
+        spctrgrm_im = spctrgrm_fig.imshow(
+            fft_array,
+            vmin=0,
+            vmax=np.max(fft_array),
+            extent=[
+                0, final_time, 0, samplerate
+            ],
+            aspect='auto',
+            cmap='jet'
+        )
 
     # カラーバー設定
     cbar = fig.colorbar(spctrgrm_im)
-    cbar.set_label("Sound Pressure [Pa]")
-
-
-def plot_spectrogram_by_stft(fft_array, samplerate, final_time, dbref, A):
-    # ===================================================
-    # === スペクトログラム(STFT版) グラフプロット関数 ===
-    # ===================================================
-
-    # ここからグラフ描画
-    # グラフをオブジェクト指向で作成する。
-    fig = plt.figure()
-    ax1 = fig.add_subplot(111)
-
-    # データをプロットする。
-    im = ax1.imshow(fft_array,
-                    vmin=0, vmax=np.max(fft_array),
-                    extent=[0, final_time, 0, samplerate],
-                    aspect='auto',
-                    cmap='jet')
-
-    # カラーバーを設定する。
-    cbar = fig.colorbar(im)
 
     if (dbref > 0) and not (A):
         cbar.set_label('Sound Pressure [dB spl]')
@@ -248,13 +258,3 @@ def plot_spectrogram_by_stft(fft_array, samplerate, final_time, dbref, A):
         cbar.set_label('Sound Pressure [dB spl(A)]')
     else:
         cbar.set_label('Sound Pressure [Pa]')
-
-    # 軸設定する。
-    ax1.set_xlabel('Time [s]')
-    ax1.set_ylabel('Frequency [Hz]')
-
-    # スケールの設定をする。
-    ax1.set_xticks(np.arange(0, 50, 1))
-    ax1.set_yticks(np.arange(0, 20000, 500))
-    ax1.set_xlim(0, 5)
-    ax1.set_ylim(0, 2000)

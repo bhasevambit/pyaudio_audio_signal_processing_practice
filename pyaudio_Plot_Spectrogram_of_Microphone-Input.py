@@ -8,7 +8,6 @@ from modules.gen_freq_domain_data import gen_freq_domain_data_of_stft
 from modules.overlap import overlap
 from modules.window import hanning
 from modules.plot_matplot_graph import plot_time_and_spectrogram
-from modules.plot_matplot_graph import plot_spectrogram_by_stft
 from modules.save_audio_to_wav_file import save_audio_to_wav_file
 from modules.save_matplot_graph import save_matplot_graph
 
@@ -20,7 +19,7 @@ if __name__ == '__main__':
 
     # --- Parameters ---
     # スペクトログラムデータ算出モード (0:scipy.signal.spectrogram()関数を使用 / 1:自作STFT関数を使用)
-    spctrgrm_mode = 1
+    spctrgrm_mode = 0
 
     # サンプリングレート [sampling data count/s]
     # (スペクトログラムのSTFTの周波数分解能を上げるために、サンプリング周波数を16kHzとしている)
@@ -36,10 +35,7 @@ if __name__ == '__main__':
     plot_pause = -1         # グラフ表示のpause時間 [s] (非リアルタイムモード(指定時間録音)の場合は"-1"を設定)
 
     # グラフ保存時のファイル名プレフィックス
-    if spctrgrm_mode == 0:
-        filename_prefix = "time-waveform_and_spectrogram_"
-    else:
-        filename_prefix = "stft-spectrogram_"
+    filename_prefix = "time-waveform_and_spectrogram_"
 
     # 入力音声ストリームバッファあたりのサンプリングデータ数
     frames_per_buffer = 1024
@@ -82,17 +78,10 @@ if __name__ == '__main__':
             data_normalized,
             fs=samplerate
         )
-        # freq_spctrgrm          : Array of sample frequencies
-        # time_spctrgrm          : Array of segment times
-        # spectrogram            : Spectrogram
 
-        # print("freq_spctrgrm = ", freq_spctrgrm)
-        # print("time_spctrgrm = ", time_spctrgrm)
-        # print("spectrogram = ", spectrogram)
-
-        print("freq_spctrgrm.shape = ", freq_spctrgrm.shape)
-        print("time_spctrgrm.shape = ", time_spctrgrm.shape)
-        print("spectrogram.shape = ", spectrogram.shape)
+        # 未使用変数を初期化
+        fft_array = []
+        final_time = 0
 
     else:
 
@@ -116,7 +105,7 @@ if __name__ == '__main__':
         # acf                       : 振幅補正係数(Amplitude Correction Factor)
 
         # STFT(Short-Time Fourier Transform)の実行
-        fft_array, fft_mean, freq = gen_freq_domain_data_of_stft(
+        fft_array, fft_mean, freq_spctrgrm = gen_freq_domain_data_of_stft(
             time_array_after_window,
             samplerate,
             frames_per_buffer,
@@ -125,32 +114,32 @@ if __name__ == '__main__':
             dbref,
             A
         )
-        # fft_array         : STFTデータ
+        # fft_array         : STFT Spectrogramデータ
         # fft_mean          : 全てのFFT波形の平均値
         # freq              : 周波数軸データ
 
         # スペクトログラムで縦軸周波数、横軸時間にするためにデータを転置
         fft_array = fft_array.T
 
-    # === 時間領域波形 & スペクトログラム グラフ表示 ===
-    if spctrgrm_mode == 0:
-        # ================================================
-        # === scipy.signal.spectrogram()を使用する場合 ===
-        # ================================================
-        plot_time_and_spectrogram(
-            data_normalized,
-            t,
-            view_range,
-            freq_spctrgrm,
-            time_spctrgrm,
-            spectrogram
-        )
+        # 未使用変数を初期化
+        time_spctrgrm = []
+        spectrogram = []
 
-    else:
-        # ==================================
-        # === 自作STFT関数を使用する場合 ===
-        # ==================================
-        plot_spectrogram_by_stft(fft_array, samplerate, final_time, dbref, A)
+    # === 時間領域波形 & スペクトログラム グラフ表示 ===
+    plot_time_and_spectrogram(
+        data_normalized,
+        t,
+        view_range,
+        freq_spctrgrm,
+        time_spctrgrm,
+        spectrogram,
+        fft_array,
+        samplerate,
+        final_time,
+        dbref,
+        A,
+        spctrgrm_mode
+    )
 
     # === 時間領域波形 & スペクトログラム グラフ保存 ===
     save_matplot_graph(filename_prefix)

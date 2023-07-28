@@ -85,10 +85,10 @@ def gen_freq_domain_data_of_stft(
     fft_array = []
 
     # 周波数軸を作成
-    freq = np.linspace(0, samplerate, frames_per_buffer)
+    freq_spctrgrm = np.linspace(0, samplerate, frames_per_buffer)
 
     # 聴感補正曲線を計算
-    a_scale = a_weighting(freq)
+    a_scale = a_weighting(freq_spctrgrm)
 
     # FFTをして配列にdBで追加、窓関数補正値をかけ、(frames_per_buffer/2)の正規化を実施
     for i in range(N_ave):
@@ -127,4 +127,4 @@ def gen_freq_domain_data_of_stft(
             fft_array ** 2),
         axis=0)
 
-    return fft_array, fft_mean, freq
+    return fft_array, fft_mean, freq_spctrgrm
