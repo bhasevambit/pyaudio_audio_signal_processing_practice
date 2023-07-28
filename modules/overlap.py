@@ -3,9 +3,9 @@ def overlap(data_normalized, samplerate, frames_per_buffer, overlap_rate):
     # === オーバーラップ処理関数 ===
     # ==============================
     # data_normalized   : 時間領域 波形データ(正規化済)
-    # samplerate : サンプリングレート [sampling data count/s]
+    # samplerate        : サンプリングレート [sampling data count/s]
     # frames_per_buffer : 入力音声ストリームバッファあたりのサンプリングデータ数
-    # overlap_rate : オーバーラップ率 [%]
+    # overlap_rate      : オーバーラップ率 [%]
 
     # 全データ時間長[s]の算出
     # (= 時間領域波形データ要素数 / (サンプリングデータ数 / 秒))
@@ -24,11 +24,11 @@ def overlap(data_normalized, samplerate, frames_per_buffer, overlap_rate):
     # 非オーバーラップ時間長[s]を算出
     non_overlap_time = Fc * (1 - (overlap_rate / 100))
 
-    # 切り出しフレーム数 (平均化に使うデータ個数)
+    # オーバーラップ処理における切り出しフレーム数
     N_ave = int((Ts - overlap_time) / non_overlap_time)
 
     # 抽出したデータを入れる空配列の定義
-    array = []
+    time_array = []
 
     # forループでデータを抽出
     for i in range(N_ave):
@@ -36,11 +36,11 @@ def overlap(data_normalized, samplerate, frames_per_buffer, overlap_rate):
         ps = int(x_ol * i)
 
         # 切り出し位置psから入力音声ストリームバッファデータ数分抽出して配列に追加
-        # (data_normalized配列に対して、開始要素: ps / 終了要素: ps+frames_per_buffer / スキップ間隔: 1 でスライスしてarray.append)
-        array.append(data_normalized[ps:ps + frames_per_buffer:1])
+        # (data_normalized配列に対して、開始要素: ps / 終了要素: ps+frames_per_buffer / スキップ間隔: 1 でスライスしてtime_array.append)
+        time_array.append(data_normalized[ps:ps + frames_per_buffer:1])
 
         # 切り出したデータの最終時刻[s]
         # (= (切り出し位置 + 入力音声ストリームバッファあたりのサンプリングデータ数) / (サンプリングデータ数 / 秒) )
         final_time = (ps + frames_per_buffer) / samplerate
 
-    return array, N_ave, final_time
+    return time_array, N_ave, final_time
