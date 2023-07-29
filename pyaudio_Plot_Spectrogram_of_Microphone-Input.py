@@ -111,7 +111,7 @@ if __name__ == '__main__':
         # === scipy.signal.spectrogram()を使用する場合 ===
         # ================================================
         freq_spctrgrm, time_spctrgrm, spectrogram = get_freq_domain_data_of_signal_spctrgrm(
-            data_normalized, samplerate, dbref, A)
+            data_normalized, samplerate, frames_per_buffer, overlap_rate, dbref, A)
 
         # 未使用変数を初期化
         fft_array = []

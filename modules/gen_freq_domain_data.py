@@ -54,13 +54,21 @@ def gen_freq_domain_data(data_normalized, samplerate, dbref, A):
 
 
 def get_freq_domain_data_of_signal_spctrgrm(
-    data_normalized, samplerate, dbref, A
+    data_normalized, samplerate, frames_per_buffer, overlap_rate, dbref, A
 ):
 
     freq_spctrgrm, time_spctrgrm, spectrogram = scipy.signal.spectrogram(
         data_normalized,
         fs=samplerate,
-        nfft=44100, nperseg=1024, mode='magnitude', window='hann'
+        window="hann",  # 窓関数はHanning窓を使用
+        nperseg=1024,
+        # noverlapはオーバラップするサンプリングデータ数
+        noverlap=(frames_per_buffer * (overlap_rate / 100)),
+        nfft=44100,
+        # scalingは"spectrum"を指定する事でスペクトログラムデータ単位が「振幅の2乗」となるパワースペクトルとなる
+        scaling="spectrum",
+        # modeを"magnitude"とすることで、スペクトログラムデータとして振幅が算出される
+        mode="magnitude"
     )
 
     # dbrefが0以上の時にdB変換する

@@ -82,8 +82,9 @@ def plot_time_and_freq(
 
     # 周波数特性 軸目盛り設定
     freq_fig.set_xlim(0, 5000)
-    freq_fig.set_ylim(-10, 90)
-    freq_fig.set_yticks(np.arange(0, 100, 20))
+    if (dbref > 0):
+        freq_fig.set_ylim(-10, 90)  # -10[dB] 〜 90[dB]
+        freq_fig.set_yticks(np.arange(0, 100, 20))  # 20[dB]刻み(範囲:0〜100[dB])
 
     # plot.figure.tight_layout()実行時の「UserWarning: The figure layout has
     # changed to tight」Warning文の抑止
@@ -234,6 +235,11 @@ def plot_time_and_spectrogram(
     )
 
     # スペクトログラムデータプロット
+    # スペクトログラムデータ範囲指定
+    if dbref > 0:
+        colorbar_min = 0    # カラーバー最小値:0[dB]
+        colorvar_max = 100  # カラーバー最大値:100[dB]
+
     if spctrgrm_mode == 0:
         # ================================================
         # === scipy.signal.spectrogram()を使用する場合 ===
@@ -242,7 +248,9 @@ def plot_time_and_spectrogram(
             time_spctrgrm,
             freq_spctrgrm,
             spectrogram,
-            cmap='jet'
+            vmin=colorbar_min,
+            vmax=colorvar_max,
+            cmap="jet"
         )
 
         # カラーバー設定
@@ -259,13 +267,13 @@ def plot_time_and_spectrogram(
         # ==================================
         spctrgrm_im = spctrgrm_fig.imshow(
             fft_array,
-            vmin=0,
-            vmax=np.max(fft_array),
+            vmin=colorbar_min,
+            vmax=colorvar_max,
             extent=[
                 0, final_time, 0, samplerate
             ],
-            aspect='auto',
-            cmap='jet'
+            aspect="auto",
+            cmap="jet"
         )
 
         # カラーバー設定
