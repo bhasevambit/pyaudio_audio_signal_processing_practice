@@ -23,11 +23,11 @@ def get_spctrgrm_mode():
         input_mode = int(input_mode)
 
     except BaseException:
-        print("\n>>> Input Value Error, please Re-Input !!! : \n")
+        print("\n!!! Input Value Error, please Re-Input !!!\n")
         return get_spctrgrm_mode()
 
     if (input_mode < 0) or (input_mode > 1):
-        print("\n>>> Only 0 and 1 are valid input value, please Re-Input !!! : \n")
+        print("\n!!! Only 0 and 1 are valid input value, please Re-Input !!!\n")
         return get_spctrgrm_mode()
 
     else:
