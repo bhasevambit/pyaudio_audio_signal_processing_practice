@@ -3,6 +3,20 @@ import numpy as np
 from modules.a_weighting import a_weighting
 
 
+def db(x, dbref):
+    # ==============================
+    # === 音圧レベル[dB]演算関数 ===
+    # ==============================
+    # x     : 観測値[pa]
+    # dbref : 基準値[pa]
+
+    # dbref[pa]を基準としたx[pa]の音圧レベル[dB]の算出
+    with np.errstate(divide='ignore'):
+        y = 20 * np.log10(x / dbref)
+
+    return y
+
+
 def gen_freq_domain_data(data_normalized, samplerate, dbref, A):
     # ================================
     # === 周波数特性データ生成関数 ===
@@ -43,8 +57,7 @@ def gen_freq_domain_data(data_normalized, samplerate, dbref, A):
 
     # dbrefが0以上の時にdB変換する
     if dbref > 0:
-        with np.errstate(divide='ignore'):
-            amp_normalized = 20 * np.log10(amp_normalized / dbref)
+        amp_normalized = db(amp_normalized, dbref)
 
         # dB変換されていてAがTrueの時に聴感補正する
         if A:
@@ -73,8 +86,11 @@ def get_freq_domain_data_of_signal_spctrgrm(
 
     # dbrefが0以上の時にdB変換する
     if dbref > 0:
-        with np.errstate(divide='ignore'):
-            spectrogram = 20 * np.log10(spectrogram / dbref)
+        spectrogram = db(spectrogram, dbref)
+
+    print("spectrogram.shape = ", spectrogram.shape)
+    print("freq_spctrgrm.shape = ", freq_spctrgrm.shape)
+    print("time_spctrgrm.shape = ", time_spctrgrm.shape)
 
     return freq_spctrgrm, time_spctrgrm, spectrogram
 
@@ -95,11 +111,6 @@ def gen_freq_domain_data_of_stft(
     # acf                       : 振幅補正係数(Amplitude Correction Factor)
     # dbref                     : デシベル基準値
     # A                         : 聴感補正(A特性)の有効(True)/無効(False)設定
-
-    # dB(デシベル）演算関数
-    def db(x, dbref):
-        y = 20 * np.log10(x / dbref)                   # 変換式
-        return y                                       # dB値を返す
 
     if dbref > 0 and A:
         # デシベル基準値設定あり、かつ、聴感補正(A特性)の有効の場合
@@ -152,5 +163,8 @@ def gen_freq_domain_data_of_stft(
         np.sqrt(
             fft_array ** 2),
         axis=0)
+
+    print("fft_array.shape = ", fft_array.shape)
+    print("freq_spctrgrm.shape = ", freq_spctrgrm.shape)
 
     return fft_array, fft_mean, freq_spctrgrm

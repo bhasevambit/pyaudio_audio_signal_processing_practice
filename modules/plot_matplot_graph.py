@@ -234,12 +234,12 @@ def plot_time_and_spectrogram(
         color="blue"
     )
 
-    # スペクトログラムデータプロット
     # スペクトログラムデータ範囲指定
     if dbref > 0:
-        colorbar_min = 0    # カラーバー最小値:0[dB]
-        colorvar_max = 100  # カラーバー最大値:100[dB]
+        colorbar_min = 0    # カラーバー最小値[dB]
+        colorvar_max = 80   # カラーバー最大値[dB]
 
+    # スペクトログラムデータプロット
     if spctrgrm_mode == 0:
         # ================================================
         # === scipy.signal.spectrogram()を使用する場合 ===
