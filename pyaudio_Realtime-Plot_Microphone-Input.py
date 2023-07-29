@@ -25,17 +25,7 @@ if __name__ == '__main__':
     plot_pause = 0.0001     # グラフ表示のpause時間 [s] (非リアルタイムモード(指定時間録音)の場合は"-1"を設定)
 
     # 入力音声ストリームバッファあたりのサンプリングデータ数
-    if platform.machine() == "armv7l":  # ARM32bit向け(Raspi等)
-        frames_per_buffer = 512
-    elif platform.machine() == "x86_64":  # Intel64bit向け
-        # 16384以下の場合、「OSError: [Errno -9981] Input
-        # overflowed」が発生したため、16384としている
-        frames_per_buffer = 32768
-    elif platform.machine() == "AMD64":  # AMD64bit向け
-        # グラフが正常表示されなかったため、16384としている
-        frames_per_buffer = 16384
-    else:
-        frames_per_buffer = 1024
+    frames_per_buffer = 16384
     print(
         "\nframes_per_buffer [sampling data count/stream buffer] = ",
         frames_per_buffer,
