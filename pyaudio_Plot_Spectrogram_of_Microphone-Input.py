@@ -93,12 +93,12 @@ if __name__ == '__main__':
         # ================================================
         # === scipy.signal.spectrogram()を使用する場合 ===
         # ================================================
+
         freq_spctrgrm, time_spctrgrm, spectrogram = get_freq_domain_data_of_signal_spctrgrm(
             data_normalized, samplerate, stft_frame_size, overlap_rate, window_func, dbref, A)
-
-        # 未使用変数を初期化
-        fft_array = []
-        final_time = 0
+        # freq_spctrgrm         : スペクトログラム y軸向けデータ[Hz]
+        # time_spctrgrm         : スペクトログラム x軸向けデータ[s]
+        # spectrogram           : スペクトログラム 振幅データ
 
     else:
 
@@ -124,12 +124,9 @@ if __name__ == '__main__':
         # STFT(Short-Time Fourier Transform)の実行
         freq_spctrgrm, time_spctrgrm, spectrogram = gen_freq_domain_data_of_stft(
             time_array_after_window, samplerate, stft_frame_size, N_ave, final_time, acf, dbref, A)
-        # fft_array         : STFT Spectrogramデータ
-        # fft_mean          : 全てのFFT波形の平均値
-        # freq              : 周波数軸データ
-
-        # スペクトログラムで縦軸周波数、横軸時間にするためにデータを転置
-        fft_array = spectrogram.T
+        # freq_spctrgrm         : スペクトログラム y軸向けデータ[Hz]
+        # time_spctrgrm         : スペクトログラム x軸向けデータ[s]
+        # spectrogram           : スペクトログラム 振幅データ
 
     # === 時間領域波形 & スペクトログラム グラフ表示 ===
     plot_time_and_spectrogram(
@@ -139,9 +136,6 @@ if __name__ == '__main__':
         freq_spctrgrm,
         time_spctrgrm,
         spectrogram,
-        fft_array,
-        samplerate,
-        final_time,
         dbref,
         A,
         spctrgrm_mode

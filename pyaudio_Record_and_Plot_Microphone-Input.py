@@ -75,7 +75,7 @@ if __name__ == '__main__':
     # spectrum          : 周波数特性データ(複素数データ)
     # amp_normalized    : 周波数特性 振幅データ(正規化済)
     # phase             : 周波数特性 位相データ
-    # freq              : 周波数特性 X軸向けデータ
+    # freq              : 周波数特性 X軸向けデータ[Hz]
 
     # === 時間領域波形 & 周波数特性 グラフ表示 ===
     plot_time_and_freq(

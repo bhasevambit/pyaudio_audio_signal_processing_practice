@@ -197,4 +197,8 @@ def gen_freq_domain_data_of_stft(
         spectrogram = spectrogram + a_scale
         print("spectrogram.shape [dB(A)] = ", spectrogram.shape)
 
+    # 縦軸周波数、横軸時間にするためにデータを転置
+    spectrogram = spectrogram.T
+    print("spectrogram.shape [dB(A) and Transposed] = ", spectrogram.shape)
+
     return freq_spctrgrm, time_spctrgrm, spectrogram

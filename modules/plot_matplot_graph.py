@@ -124,9 +124,6 @@ def plot_time_and_spectrogram(
     freq_spctrgrm,
     time_spctrgrm,
     spectrogram,
-    fft_array,
-    samplerate,
-    final_time,
     dbref,
     A,
     spctrgrm_mode
@@ -137,12 +134,9 @@ def plot_time_and_spectrogram(
     # data_normalized   : 時間領域 波形データ(正規化済)
     # t                 : 時間領域 X軸向けデータ [ms]
     # view_range        : 時間領域波形グラフ X軸表示レンジ [sample count]
-    # freq_spctrgrm     : Array of sample frequencies
-    # time_spctrgrm     : Array of segment times
-    # spectrogram       : Spectrogram Data
-    # fft_array         : STFT Spectrogramデータ
-    # samplerate        : サンプリングレート [sampling data count/s)]
-    # final_time        : 切り出したデータの最終時刻[s]
+    # freq_spctrgrm     : スペクトログラム y軸向けデータ[Hz]
+    # time_spctrgrm     : スペクトログラム x軸向けデータ[s]
+    # spectrogram       : スペクトログラム 振幅データ
     # dbref             : デシベル基準値
     # A                 : 聴感補正(A特性)の有効(True)/無効(False)設定
     # spctrgrm_mode     : スペクトログラムデータ算出モード
@@ -241,34 +235,14 @@ def plot_time_and_spectrogram(
         colorvar_max = 80   # カラーバー最大値[dB]
 
     # スペクトログラムデータプロット
-    if spctrgrm_mode == 0:
-        # ================================================
-        # === scipy.signal.spectrogram()を使用する場合 ===
-        # ================================================
-        spctrgrm_im = spctrgrm_fig.pcolormesh(
-            time_spctrgrm,
-            freq_spctrgrm,
-            spectrogram,
-            vmin=colorbar_min,
-            vmax=colorvar_max,
-            cmap="jet"
-        )
-
-    else:
-        # ==================================
-        # === 自作STFT関数を使用する場合 ===
-        # ==================================
-        spctrgrm_im = spctrgrm_fig.imshow(
-            fft_array,
-            vmin=colorbar_min,
-            vmax=colorvar_max,
-            # extentの引数は[left, right, bottom, top]
-            extent=[
-                0, final_time, 0, samplerate
-            ],
-            aspect="auto",
-            cmap="jet"
-        )
+    spctrgrm_im = spctrgrm_fig.pcolormesh(
+        time_spctrgrm,
+        freq_spctrgrm,
+        spectrogram,
+        vmin=colorbar_min,
+        vmax=colorvar_max,
+        cmap="jet"
+    )
 
     # カラーバー設定
     cbar = fig.colorbar(spctrgrm_im)
