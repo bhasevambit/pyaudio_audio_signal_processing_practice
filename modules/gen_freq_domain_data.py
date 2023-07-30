@@ -91,7 +91,7 @@ def get_freq_domain_data_of_signal_spctrgrm(
         # nfftは、短時間FFTにおける周波数軸方向のデータ数を指定する
         # ([*] (設定値+1)/2 がスペクトログラムの周波数軸要素数となる)
         # ([*] nfftは、nperseg以上である必要あり)
-        nfft=2047,
+        nfft=(stft_frame_size * 2) - 1,
         # scalingを"spectrum"を指定する事でスペクトログラムデータ単位が「2乗値」となるパワースペクトルとなる
         scaling="spectrum",
         # modeを"magnitude"とすることで、スペクトログラムデータとして振幅が算出される
@@ -127,6 +127,7 @@ def gen_freq_domain_data_of_stft(
     samplerate,
     stft_frame_size,
     N_ave,
+    final_time,
     acf,
     dbref,
     A
@@ -138,19 +139,27 @@ def gen_freq_domain_data_of_stft(
     # samplerate                : サンプリングレート [sampling data count/s)]
     # stft_frame_size           : STFT(短時間フーリエ変換)を行う時系列データ数(=STFTフレーム長)
     # N_ave                     : オーバーラップ処理における切り出しフレーム数
+    # final_time                : オーバーラップ処理で切り出したデータの最終時刻[s]
     # acf                       : 振幅補正係数(Amplitude Correction Factor)
     # dbref                     : デシベル基準値
     # A                         : 聴感補正(A特性)の有効(True)/無効(False)設定
 
     print("N_ave = ", N_ave)
+    print("final_time = ", final_time)
 
-    # 平均化FFTする関数
-    fft_array = []
+    # スペクトログラムデータ格納配列の初期化
+    spectrogram = []
 
     # 周波数軸を作成
     # (開始:0 , 終了:サンプリング周波数, 要素数:STFTフレーム長)
     freq_spctrgrm = np.linspace(0, samplerate, stft_frame_size)
     print("freq_spctrgrm.shape = ", freq_spctrgrm.shape)
+
+    # 時間軸を作成
+    # (開始:0 , 終了:オーバーラップ処理で切り出したデータの最終時刻[s],
+    #  要素数:オーバーラップ処理における切り出しフレーム数)
+    time_spctrgrm = np.linspace(0, final_time, N_ave)
+    print("time_spctrgrm.shape = ", time_spctrgrm.shape)
 
     # 聴感補正曲線を計算
     a_scale = a_weighting(freq_spctrgrm)
@@ -162,7 +171,7 @@ def gen_freq_domain_data_of_stft(
         # dbrefが0以上の場合は、dB変換し、配列に追加する
         if dbref > 0:
             # (stft_frame_size/2)の正規化、および窓関数補正値(acf)を乗算を実施
-            fft_array.append(
+            spectrogram.append(
                 db(
                     acf *
                     np.abs(scipy.fft.fft(time_array_after_window[i]) /
@@ -173,25 +182,19 @@ def gen_freq_domain_data_of_stft(
 
         else:
             # (stft_frame_size/2)の正規化、および窓関数補正値(acf)を乗算を実施
-            fft_array.append(
+            spectrogram.append(
                 acf *
                 np.abs(scipy.fft.fft(time_array_after_window[i]) /
                        (stft_frame_size / 2))
             )
 
     # numpy.ndarray変換を行う
-    fft_array = np.array(fft_array)
-    print("fft_array.shape = ", fft_array.shape)
+    spectrogram = np.array(spectrogram)
+    print("spectrogram.shape = ", spectrogram.shape)
 
     # dbrefが0以上、かつ、A=Trueの場合に、A特性補正を行う
     if (dbref > 0) and A:
-        fft_array = fft_array + a_scale
-        print("fft_array.shape [dB(A)] = ", fft_array.shape)
+        spectrogram = spectrogram + a_scale
+        print("spectrogram.shape [dB(A)] = ", spectrogram.shape)
 
-    # 全てのFFT波形の平均を計算
-    fft_mean = np.mean(
-        np.sqrt(
-            fft_array ** 2),
-        axis=0)
-
-    return fft_array, fft_mean, freq_spctrgrm
+    return freq_spctrgrm, time_spctrgrm, spectrogram

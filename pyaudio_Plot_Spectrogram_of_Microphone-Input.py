@@ -112,7 +112,7 @@ if __name__ == '__main__':
         )
         # time_array    : オーバーラップ抽出された時間領域波形配列(正規化済)
         # N_ave         : オーバーラップ処理における切り出しフレーム数
-        # final_time    : 切り出したデータの最終時刻[s]
+        # final_time    : オーバーラップ処理で切り出したデータの最終時刻[s]
 
         # Hanning窓関数の適用
         time_array_after_window, acf = hanning(
@@ -122,25 +122,14 @@ if __name__ == '__main__':
         # acf                       : 振幅補正係数(Amplitude Correction Factor)
 
         # STFT(Short-Time Fourier Transform)の実行
-        fft_array, fft_mean, freq_spctrgrm = gen_freq_domain_data_of_stft(
-            time_array_after_window,
-            samplerate,
-            stft_frame_size,
-            N_ave,
-            acf,
-            dbref,
-            A
-        )
+        freq_spctrgrm, time_spctrgrm, spectrogram = gen_freq_domain_data_of_stft(
+            time_array_after_window, samplerate, stft_frame_size, N_ave, final_time, acf, dbref, A)
         # fft_array         : STFT Spectrogramデータ
         # fft_mean          : 全てのFFT波形の平均値
         # freq              : 周波数軸データ
 
         # スペクトログラムで縦軸周波数、横軸時間にするためにデータを転置
-        fft_array = fft_array.T
-
-        # 未使用変数を初期化
-        time_spctrgrm = []
-        spectrogram = []
+        fft_array = spectrogram.T
 
     # === 時間領域波形 & スペクトログラム グラフ表示 ===
     plot_time_and_spectrogram(

@@ -15,7 +15,7 @@ def overlap(data_normalized, samplerate, stft_frame_size, overlap_rate):
     Ts = len(data_normalized) / samplerate
 
     # 入力音声ストリームバッファ周期[s]の算出
-    # (= 入力音声ストリームバッファあたりのサンプリングデータ数 / (サンプリングデータ数 / 秒) )
+    # (= STFTフレーム長 / (サンプリングデータ数 / 秒) )
     Fc = stft_frame_size / samplerate
 
     # オーバーラップ時のずらし幅 [sampling data count]
@@ -43,7 +43,7 @@ def overlap(data_normalized, samplerate, stft_frame_size, overlap_rate):
         time_array.append(data_normalized[ps:ps + stft_frame_size:1])
 
         # 切り出したデータの最終時刻[s]
-        # (= (切り出し位置 + 入力音声ストリームバッファあたりのサンプリングデータ数) / (サンプリングデータ数 / 秒) )
+        # (= (切り出し位置 + STFTフレーム長) / (サンプリングデータ数 / 秒) )
         final_time = (ps + stft_frame_size) / samplerate
 
     return time_array, N_ave, final_time
