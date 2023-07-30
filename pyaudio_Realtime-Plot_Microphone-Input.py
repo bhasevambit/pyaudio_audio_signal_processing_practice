@@ -1,5 +1,3 @@
-import platform
-
 from modules.get_mic_index import get_mic_index
 from modules.audio_stream import audio_stream_start
 from modules.audio_stream import audio_stream_stop
@@ -16,7 +14,7 @@ if __name__ == '__main__':
 
     # --- Parameters ---
     mic_mode = 1            # マイクモード (1:モノラル / 2:ステレオ)
-    samplerate = 44100      # サンプリングレート [sampling data count/s)]
+    samplerate = 44100      # サンプリング周波数 [sampling data count/s)]
     time_unit = "ms"        # 時間軸単位設定 ("s" or "ms")
     time = 0                # 計測時間 [[s] or [ms]] (リアルタイムモードの場合は"0"を設定)
     view_range = 50         # 時間領域波形グラフ X軸表示レンジ [[s] or [ms]]
