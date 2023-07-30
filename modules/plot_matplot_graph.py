@@ -214,7 +214,7 @@ def plot_time_and_spectrogram(
         text_word = "scipy.signal.spectrogram Function Mode"
     else:
         text_xpos = 0.32
-        text_word = "Full Scrach STFT Function Mode"
+        text_word = "Full Scratch STFT Function Mode"
 
     fig.text(text_xpos, text_ypos, text_word)
 

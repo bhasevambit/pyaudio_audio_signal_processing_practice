@@ -1,3 +1,4 @@
+from modules.get_std_input import get_selected_mode_by_std_input
 from modules.get_mic_index import get_mic_index
 from modules.audio_stream import audio_stream_start
 from modules.audio_stream import audio_stream_stop
@@ -9,34 +10,6 @@ from modules.window import hanning
 from modules.plot_matplot_graph import plot_time_and_spectrogram
 from modules.save_audio_to_wav_file import save_audio_to_wav_file
 from modules.save_matplot_graph import save_matplot_graph
-
-
-def get_spctrgrm_mode():
-    # ==================================================
-    # === スペクトログラム算出モード標準入力取得関数 ===
-    # ==================================================
-
-    # input関数で入力された値を変数figureに代入
-    input_mode = input(">>> Please INPUT Spectrogram Mode : ")
-
-    try:
-        input_mode = int(input_mode)
-
-    except BaseException:
-        print("\n!!! Input Value Error, please Re-Input !!!\n")
-        return get_spctrgrm_mode()
-
-    if (input_mode < 0) or (input_mode > 1):
-        print("\n!!! Only 0 and 1 are valid input value, please Re-Input !!!\n")
-        return get_spctrgrm_mode()
-
-    else:
-        if input_mode == 0:
-            selected_mode = "'scipy.signal.spectrogram Function Mode'"
-        else:
-            selected_mode = "'Full Scrach STFT Function Mode'"
-        print("\n - Selected Spectrogram Mode = ", selected_mode, " - \n")
-        return input_mode
 
 
 if __name__ == '__main__':
@@ -52,10 +25,16 @@ if __name__ == '__main__':
     print("  [ Please INPUT Spectrogram Mode ]")
     print("")
     print("  0 : Use scipy.signal.spectrogram Function")
-    print("  1 : Use Full Scrach STFT Function")
+    print("  1 : Use Full Scratch STFT Function")
     print("=================================================================")
     print("")
-    spctrgrm_mode = get_spctrgrm_mode()
+    spctrgrm_mode = get_selected_mode_by_std_input(mode_count=2)
+
+    if spctrgrm_mode == 0:
+        selected_mode = "'scipy.signal.spectrogram Function Mode'"
+    else:
+        selected_mode = "'Full Scratch STFT Function Mode'"
+    print("\n - Selected Spectrogram Mode = ", selected_mode, " - \n")
 
     # サンプリングレート [sampling data count/s]
     # (スペクトログラムのSTFTの周波数分解能を上げるために、サンプリング周波数を16kHzとしている)
