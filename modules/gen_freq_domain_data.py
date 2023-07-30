@@ -13,7 +13,7 @@ def gen_freq_domain_data(data_normalized, samplerate, dbref, A):
     # dbref             : デシベル基準値
     # A                 : 聴感補正(A特性)の有効(True)/無効(False)設定
 
-    # 信号のフーリエ変換
+    # 時間領域 波形データ(正規化済)のフーリエ変換を実施
     # (scipy.fft.fft()の出力結果spectrumは複素数)
     spectrum = scipy.fft.fft(data_normalized)
 
@@ -168,25 +168,34 @@ def gen_freq_domain_data_of_stft(
     # 時間軸方向データ数分のループ処理
     for i in range(N_ave):
 
-        # dbrefが0以上の場合は、dB変換し、配列に追加する
+        # 時間領域 波形データのSTFTフレーム[i] に対して、フーリエ変換を実施
+        # (scipy.fft.fft()の出力結果spectrumは複素数)
+        spectrum = scipy.fft.fft(time_array_after_window[i])
+        # print("len(spectrum) = ", len(spectrum))
+
+        # 振幅成分算出
+        amp = np.abs(spectrum)
+        # print("len(amp) = ", len(amp))
+
+        # 振幅成分の正規化
+        # 離散フーリエ変換の定義から、求まる振幅ampを入力データの振幅に合わせるため 1/N 倍して振幅を計算する。
+        # 加えて、フーリエ変換された N 個のスペクトル（振幅やパワー） は、サンプリング周波数の 1/2
+        # の周波数（ナイキスト周波数）を堺に左右対称となる事から、スペクトルの値は対になる対称成分を足し合わせたものが、
+        # 入力データの実データと一致するため、スペクトル値をさらに2倍する正規化を施す
+        amp_normalized = (amp / len(time_array_after_window[i])) * 2
+        # print("len(amp_normalized) = ", len(amp_normalized))
+
+        # 窓関数補正値(acf)を乗算
+        amp_normaliazed_acf = amp_normalized * acf
+
+        # dbrefが0以上の場合は、dB変換する
         if dbref > 0:
-            # (stft_frame_size/2)の正規化、および窓関数補正値(acf)を乗算を実施
-            spectrogram.append(
-                db(
-                    acf *
-                    np.abs(scipy.fft.fft(time_array_after_window[i]) /
-                           (stft_frame_size / 2)),
-                    dbref
-                )
+            amp_normaliazed_acf = db(
+                amp_normaliazed_acf, dbref
             )
 
-        else:
-            # (stft_frame_size/2)の正規化、および窓関数補正値(acf)を乗算を実施
-            spectrogram.append(
-                acf *
-                np.abs(scipy.fft.fft(time_array_after_window[i]) /
-                       (stft_frame_size / 2))
-            )
+        # spectrogram配列に追加
+        spectrogram.append(amp_normaliazed_acf)
 
     # numpy.ndarray変換を行う
     spectrogram = np.array(spectrogram)
