@@ -151,9 +151,16 @@ def gen_freq_domain_data_of_stft(
     spectrogram = []
 
     # 周波数軸を作成
-    # (開始:0 , 終了:サンプリング周波数, 要素数:STFTフレーム長)
-    freq_spctrgrm = np.linspace(0, samplerate, stft_frame_size)
+    dt = 1 / samplerate  # サンプリング周期[s]
+    # nを、stft_frame_sizeの2倍とする事で、周波数分解能をscipy.signal.spectrogramと同じとする
+    # dをサンプリング周期の2倍とする(scipy.signal.spectrogramと合わせる)
+    freq_bipolar = scipy.fft.fftfreq(n=(stft_frame_size * 2), d=dt)
+
+    # freq_bipolarは、負の周波数領域軸データも含むため、
+    # 「要素数(len(freq_bipolar) / 2」までの要素をスライス抽出
+    freq_spctrgrm = freq_bipolar[:int(len(freq_bipolar) / 2)]
     print("freq_spctrgrm.shape = ", freq_spctrgrm.shape)
+    print("np.max(freq_spctrgrm) = ", np.max(freq_spctrgrm))
 
     # 時間軸を作成
     # (開始:0 , 終了:オーバーラップ処理で切り出したデータの最終時刻[s],
@@ -170,7 +177,13 @@ def gen_freq_domain_data_of_stft(
 
         # 時間領域 波形データのSTFTフレーム[i] に対して、フーリエ変換を実施
         # (scipy.fft.fft()の出力結果spectrumは複素数)
-        spectrum = scipy.fft.fft(time_array_after_window[i])
+        spectrum = scipy.fft.fft(
+            # xは「Input array, can be complex」
+            x=time_array_after_window[i],
+            # nは「Length of the transformed axis of the output」
+            # nを、stft_frame_sizeの2倍とする事で、周波数分解能をscipy.signal.spectrogramと同じとする
+            n=stft_frame_size * 2
+        )
         # print("len(spectrum) = ", len(spectrum))
 
         # 振幅成分算出
@@ -182,8 +195,12 @@ def gen_freq_domain_data_of_stft(
         # 加えて、フーリエ変換された N 個のスペクトル（振幅やパワー） は、サンプリング周波数の 1/2
         # の周波数（ナイキスト周波数）を堺に左右対称となる事から、スペクトルの値は対になる対称成分を足し合わせたものが、
         # 入力データの実データと一致するため、スペクトル値をさらに2倍する正規化を施す
-        amp_normalized = (amp / len(time_array_after_window[i])) * 2
-        # print("len(amp_normalized) = ", len(amp_normalized))
+        amp_normalized_pre = (amp / len(time_array_after_window[i])) * 2
+        # print("len(amp_normalized_pre) = ", len(amp_normalized_pre))
+
+        # amp_normalized_preは、負の周波数領域データも含むため、
+        # 「要素数(len(amp_normalized_pre) / 2」までの要素をスライス抽出
+        amp_normalized = amp_normalized_pre[:int(len(amp_normalized_pre) / 2)]
 
         # 窓関数補正値(acf)を乗算
         amp_normaliazed_acf = amp_normalized * acf
