@@ -1,20 +1,7 @@
 import scipy
 import numpy as np
-from modules.a_weighting import a_weighting
-
-
-def db(x, dbref):
-    # ==============================
-    # === 音圧レベル[dB]演算関数 ===
-    # ==============================
-    # x     : 観測値[pa]
-    # dbref : 基準値[pa]
-
-    # dbref[pa]を基準としたx[pa]の音圧レベル[dB]の算出
-    with np.errstate(divide='ignore'):
-        y = 20 * np.log10(x / dbref)
-
-    return y
+from modules.audio_signal_processing_basic import db
+from modules.audio_signal_processing_basic import a_weighting
 
 
 def gen_freq_domain_data(data_normalized, samplerate, dbref, A):
@@ -69,6 +56,15 @@ def gen_freq_domain_data(data_normalized, samplerate, dbref, A):
 def get_freq_domain_data_of_signal_spctrgrm(
     data_normalized, samplerate, frames_per_buffer, overlap_rate, dbref, A
 ):
+    # =============================================================
+    # === 周波数特性データ生成関数 (scipy.signal.spectrogram版) ===
+    # =============================================================
+    # data_normalized       : 時間領域 波形データ(正規化済)
+    # samplerate            : サンプリングレート [sampling data count/s)]
+    # frames_per_buffer     : 入力音声ストリームバッファあたりのサンプリングデータ数
+    # overlap_rate          : オーバーラップ率 [%]
+    # dbref                 : デシベル基準値
+    # A                     : 聴感補正(A特性)の有効(True)/無効(False)設定
 
     freq_spctrgrm, time_spctrgrm, spectrogram = scipy.signal.spectrogram(
         data_normalized,
@@ -77,20 +73,33 @@ def get_freq_domain_data_of_signal_spctrgrm(
         nperseg=1024,
         # noverlapはオーバラップするサンプリングデータ数
         noverlap=(frames_per_buffer * (overlap_rate / 100)),
-        nfft=44100,
+        nfft=2047,
         # scalingは"spectrum"を指定する事でスペクトログラムデータ単位が「振幅の2乗」となるパワースペクトルとなる
         scaling="spectrum",
         # modeを"magnitude"とすることで、スペクトログラムデータとして振幅が算出される
         mode="magnitude"
     )
 
+    print("freq_spctrgrm.shape = ", freq_spctrgrm.shape)
+    print("time_spctrgrm.shape = ", time_spctrgrm.shape)
+    print("spectrogram.shape [scipy org] = ", spectrogram.shape)
+
+    # 聴感補正曲線を計算
+    a_scale = a_weighting(freq_spctrgrm)
+    print("a_scale.shape = ", a_scale.shape)
+
     # dbrefが0以上の時にdB変換する
     if dbref > 0:
         spectrogram = db(spectrogram, dbref)
+        print("spectrogram.shape [dB] = ", spectrogram.shape)
 
-    print("spectrogram.shape = ", spectrogram.shape)
-    print("freq_spctrgrm.shape = ", freq_spctrgrm.shape)
-    print("time_spctrgrm.shape = ", time_spctrgrm.shape)
+        # A=Trueの場合に、A特性補正を行う
+        if A:
+            for i in range(len(time_spctrgrm)):
+                # 各時間軸データ(freq_spctrgrmと同じ次元サイズ)に対して、A特性補正を実施
+                spectrogram[:, i] += a_scale
+
+            print("spectrogram.shape [dB(A)]= ", spectrogram.shape)
 
     return freq_spctrgrm, time_spctrgrm, spectrogram
 
@@ -104,6 +113,9 @@ def gen_freq_domain_data_of_stft(
     dbref,
     A
 ):
+    # ===============================================================
+    # === 周波数特性データ生成関数 (Full Scratch STFT Function版) ===
+    # ===============================================================
     # time_array_after_window   : 時間領域 波形データ(正規化/オーバーラップ処理/hanning窓関数適用済)
     # samplerate                : サンプリングレート [sampling data count/s)]
     # frames_per_buffer         : 入力音声ストリームバッファあたりのサンプリングデータ数
@@ -112,34 +124,25 @@ def gen_freq_domain_data_of_stft(
     # dbref                     : デシベル基準値
     # A                         : 聴感補正(A特性)の有効(True)/無効(False)設定
 
-    if dbref > 0 and A:
-        # デシベル基準値設定あり、かつ、聴感補正(A特性)の有効の場合
-        no_db_a = False
-    else:
-        no_db_a = True
+    print("N_ave = ", N_ave)
 
     # 平均化FFTする関数
     fft_array = []
 
     # 周波数軸を作成
     freq_spctrgrm = np.linspace(0, samplerate, frames_per_buffer)
+    print("freq_spctrgrm.shape = ", freq_spctrgrm.shape)
 
     # 聴感補正曲線を計算
     a_scale = a_weighting(freq_spctrgrm)
+    print("a_scale.shape = ", a_scale.shape)
 
-    # FFTをして配列にdBで追加、窓関数補正値をかけ、(frames_per_buffer/2)の正規化を実施
+    # FFT実施後に、配列にdBで追加し、窓関数補正値をかけ、(frames_per_buffer/2)の正規化を実施
     for i in range(N_ave):
 
-        if no_db_a:
-            # 非dB(A)モード
-            fft_array.append(
-                acf *
-                np.abs(scipy.fft.fft(time_array_after_window[i]) /
-                       (frames_per_buffer / 2))
-            )
-
-        else:
-            # dB(A)モード
+        # dbrefが0以上の場合は、dB変換し、配列に追加する
+        if dbref > 0:
+            # (frames_per_buffer/2)の正規化、および窓関数補正値(acf)を乗算を実施
             fft_array.append(
                 db(
                     acf *
@@ -149,22 +152,27 @@ def gen_freq_domain_data_of_stft(
                 )
             )
 
-    # 型をndarrayに変換し、A特性をかける
-    # (A特性はdB表示しない場合はかけない）
-    if no_db_a:
-        # 非dB(A)モード
-        fft_array = np.array(fft_array)
-    else:
-        # dB(A)モード
-        fft_array = np.array(fft_array) + a_scale
+        else:
+            # (frames_per_buffer/2)の正規化、および窓関数補正値(acf)を乗算を実施
+            fft_array.append(
+                acf *
+                np.abs(scipy.fft.fft(time_array_after_window[i]) /
+                       (frames_per_buffer / 2))
+            )
+
+    # numpy.ndarray変換を行う
+    fft_array = np.array(fft_array)
+    print("fft_array.shape = ", fft_array.shape)
+
+    # dbrefが0以上、かつ、A=Trueの場合に、A特性補正を行う
+    if (dbref > 0) and A:
+        fft_array = fft_array + a_scale
+        print("fft_array.shape [dB(A)] = ", fft_array.shape)
 
     # 全てのFFT波形の平均を計算
     fft_mean = np.mean(
         np.sqrt(
             fft_array ** 2),
         axis=0)
-
-    print("fft_array.shape = ", fft_array.shape)
-    print("freq_spctrgrm.shape = ", freq_spctrgrm.shape)
 
     return fft_array, fft_mean, freq_spctrgrm

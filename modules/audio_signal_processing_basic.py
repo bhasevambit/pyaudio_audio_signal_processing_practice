@@ -1,6 +1,20 @@
 import numpy as np
 
 
+def db(x, dbref):
+    # ==============================
+    # === 音圧レベル[dB]演算関数 ===
+    # ==============================
+    # x     : 観測値[pa]
+    # dbref : 基準値[pa]
+
+    # dbref[pa]を基準としたx[pa]の音圧レベル[dB]の算出
+    with np.errstate(divide='ignore'):
+        y = 20 * np.log10(x / dbref)
+
+    return y
+
+
 def a_weighting(f):
     # ==================================
     # === 聴感補正関数 (A特性カーブ) ===

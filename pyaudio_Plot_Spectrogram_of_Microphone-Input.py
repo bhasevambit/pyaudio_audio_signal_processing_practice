@@ -5,8 +5,8 @@ from modules.audio_stream import audio_stream_stop
 from modules.gen_time_domain_data import gen_time_domain_data
 from modules.gen_freq_domain_data import get_freq_domain_data_of_signal_spctrgrm
 from modules.gen_freq_domain_data import gen_freq_domain_data_of_stft
-from modules.overlap import overlap
-from modules.window import hanning
+from modules.audio_signal_processing_advanced import overlap
+from modules.audio_signal_processing_advanced import hanning
 from modules.plot_matplot_graph import plot_time_and_spectrogram
 from modules.save_audio_to_wav_file import save_audio_to_wav_file
 from modules.save_matplot_graph import save_matplot_graph
