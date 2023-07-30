@@ -36,29 +36,33 @@ if __name__ == '__main__':
         selected_mode = "'Full Scratch STFT Function Mode'"
     print("\n - Selected Spectrogram Mode = ", selected_mode, " - \n")
 
-    # サンプリングレート [sampling data count/s]
-    # (スペクトログラムのSTFTの周波数分解能を上げるために、サンプリング周波数を16kHzとしている)
-    samplerate = 16000
-
-    mic_mode = 1            # マイクモード (1:モノラル / 2:ステレオ)
-    time_unit = "s"         # 時間軸単位設定 ("s" or "ms")
-    time = 5                # 計測時間 [[s] or [ms]] (リアルタイムモードの場合は"0"を設定)
-    view_range = time       # 時間領域波形グラフ X軸表示レンジ [[s] or [ms]]
-    dbref = 2e-5            # デシベル基準値(最小可聴値 20[μPa]を設定)
-    A = True                # 聴感補正(A特性)の有効(True)/無効(False)設定
-    overlap_rate = 50       # オーバーラップ率 [%]
-    plot_pause = -1         # グラフ表示のpause時間 [s] (非リアルタイムモード(指定時間録音)の場合は"-1"を設定)
-
-    # グラフ保存時のファイル名プレフィックス
-    filename_prefix = "time-waveform_and_spectrogram_"
+    # サンプリング周波数 [sampling data count/s]
+    samplerate = 44100
 
     # 入力音声ストリームバッファあたりのサンプリングデータ数
-    frames_per_buffer = 1024
+    frames_per_buffer = 512
     print(
         "\nframes_per_buffer [sampling data count/stream buffer] = ",
         frames_per_buffer,
         "\n"
     )
+
+    mic_mode = 1            # マイクモード (1:モノラル / 2:ステレオ)
+    time_unit = "s"         # 時間軸単位設定 ("s" or "ms")
+    time = 5                # 計測時間 [[s] or [ms]] (リアルタイムモードの場合は"0"を設定)
+    view_range = time       # 時間領域波形グラフ X軸表示レンジ [[s] or [ms]]
+
+    dbref = 2e-5            # デシベル基準値(最小可聴値 20[μPa]を設定)
+    A = True                # 聴感補正(A特性)の有効(True)/無効(False)設定
+
+    stft_frame_size = 1536  # STFT(短時間フーリエ変換)を行う時系列データ数(=STFTフレーム長)
+    overlap_rate = 20       # オーバーラップ率 [%]
+    window_func = "hann"    # 使用する窓関数 ("hann" : Hanning窓)
+
+    # グラフ保存時のファイル名プレフィックス
+    filename_prefix = "time-waveform_and_spectrogram_"
+    # グラフ表示のpause時間 [s] (非リアルタイムモード(指定時間録音)の場合は"-1"を設定)
+    plot_pause = -1
     # ------------------------
 
     # === マイクチャンネルを自動取得 ===
@@ -90,7 +94,7 @@ if __name__ == '__main__':
         # === scipy.signal.spectrogram()を使用する場合 ===
         # ================================================
         freq_spctrgrm, time_spctrgrm, spectrogram = get_freq_domain_data_of_signal_spctrgrm(
-            data_normalized, samplerate, frames_per_buffer, overlap_rate, dbref, A)
+            data_normalized, samplerate, stft_frame_size, overlap_rate, window_func, dbref, A)
 
         # 未使用変数を初期化
         fft_array = []
@@ -104,7 +108,7 @@ if __name__ == '__main__':
 
         # オーバーラップ処理の実行
         time_array, N_ave, final_time = overlap(
-            data_normalized, samplerate, frames_per_buffer, overlap_rate
+            data_normalized, samplerate, stft_frame_size, overlap_rate
         )
         # time_array    : オーバーラップ抽出された時間領域波形配列(正規化済)
         # N_ave         : オーバーラップ処理における切り出しフレーム数
@@ -112,7 +116,7 @@ if __name__ == '__main__':
 
         # Hanning窓関数の適用
         time_array_after_window, acf = hanning(
-            time_array, frames_per_buffer, N_ave
+            time_array, stft_frame_size, N_ave
         )
         # time_array_after_window   : 時間領域 波形データ(正規化/オーバーラップ処理/hanning窓関数適用済)
         # acf                       : 振幅補正係数(Amplitude Correction Factor)
@@ -121,7 +125,7 @@ if __name__ == '__main__':
         fft_array, fft_mean, freq_spctrgrm = gen_freq_domain_data_of_stft(
             time_array_after_window,
             samplerate,
-            frames_per_buffer,
+            stft_frame_size,
             N_ave,
             acf,
             dbref,

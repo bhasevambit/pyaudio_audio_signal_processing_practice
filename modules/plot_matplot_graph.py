@@ -235,6 +235,7 @@ def plot_time_and_spectrogram(
     )
 
     # スペクトログラムデータ範囲指定
+    # スペクトログラムデータがdB単位の場合
     if dbref > 0:
         colorbar_min = 0    # カラーバー最小値[dB]
         colorvar_max = 80   # カラーバー最大値[dB]
@@ -253,14 +254,6 @@ def plot_time_and_spectrogram(
             cmap="jet"
         )
 
-        # カラーバー設定
-        cbar = fig.colorbar(spctrgrm_im)
-
-        if dbref > 0:
-            cbar.set_label('Sound Pressure [dB spl]')
-        else:
-            cbar.set_label('Sound Pressure [Pa]')
-
     else:
         # ==================================
         # === 自作STFT関数を使用する場合 ===
@@ -269,6 +262,7 @@ def plot_time_and_spectrogram(
             fft_array,
             vmin=colorbar_min,
             vmax=colorvar_max,
+            # extentの引数は[left, right, bottom, top]
             extent=[
                 0, final_time, 0, samplerate
             ],
@@ -276,12 +270,12 @@ def plot_time_and_spectrogram(
             cmap="jet"
         )
 
-        # カラーバー設定
-        cbar = fig.colorbar(spctrgrm_im)
+    # カラーバー設定
+    cbar = fig.colorbar(spctrgrm_im)
 
-        if (dbref > 0) and not (A):
-            cbar.set_label('Sound Pressure [dB spl]')
-        elif (dbref > 0) and (A):
-            cbar.set_label('Sound Pressure [dB spl(A)]')
-        else:
-            cbar.set_label('Sound Pressure [Pa]')
+    if (dbref > 0) and not (A):
+        cbar.set_label('Sound Pressure [dB spl]')
+    elif (dbref > 0) and (A):
+        cbar.set_label('Sound Pressure [dB spl(A)]')
+    else:
+        cbar.set_label('Sound Pressure [Pa]')

@@ -14,6 +14,7 @@ def gen_freq_domain_data(data_normalized, samplerate, dbref, A):
     # A                 : 聴感補正(A特性)の有効(True)/無効(False)設定
 
     # 信号のフーリエ変換
+    # (scipy.fft.fft()の出力結果spectrumは複素数)
     spectrum = scipy.fft.fft(data_normalized)
 
     # 振幅成分算出
@@ -54,27 +55,44 @@ def gen_freq_domain_data(data_normalized, samplerate, dbref, A):
 
 
 def get_freq_domain_data_of_signal_spctrgrm(
-    data_normalized, samplerate, frames_per_buffer, overlap_rate, dbref, A
-):
+        data_normalized,
+        samplerate,
+        stft_frame_size,
+        overlap_rate,
+        window_func,
+        dbref,
+        A):
     # =============================================================
     # === 周波数特性データ生成関数 (scipy.signal.spectrogram版) ===
     # =============================================================
     # data_normalized       : 時間領域 波形データ(正規化済)
     # samplerate            : サンプリングレート [sampling data count/s)]
-    # frames_per_buffer     : 入力音声ストリームバッファあたりのサンプリングデータ数
+    # stft_frame_size       : STFT(短時間フーリエ変換)を行う時系列データ数(=STFTフレーム長)
     # overlap_rate          : オーバーラップ率 [%]
+    # window_func           : 使用する窓関数
     # dbref                 : デシベル基準値
     # A                     : 聴感補正(A特性)の有効(True)/無効(False)設定
 
     freq_spctrgrm, time_spctrgrm, spectrogram = scipy.signal.spectrogram(
-        data_normalized,
+        # xは、「Time series of measurement values」
+        # (= スペクトログラムデータの元となる時系列データ配列)
+        x=data_normalized,
+        # fsは、「Sampling frequency of the x time series」
+        # (= サンプリング周波数)
         fs=samplerate,
-        window="hann",  # 窓関数はHanning窓を使用
-        nperseg=1024,
-        # noverlapはオーバラップするサンプリングデータ数
-        noverlap=(frames_per_buffer * (overlap_rate / 100)),
+        # windowは、使用する窓関数
+        window=window_func,
+        # npersegは、「Length of each segment」
+        # (= STFT(短時間フーリエ変換)を行う時系列データ数(=STFTフレーム長))
+        nperseg=stft_frame_size,
+        # noverlapは、オーバラップするサンプリングデータ数を指定する
+        # ([*] noverlapは、nperseg以下である必要あり)
+        noverlap=(stft_frame_size * (overlap_rate / 100)),
+        # nfftは、短時間FFTにおける周波数軸方向のデータ数を指定する
+        # ([*] (設定値+1)/2 がスペクトログラムの周波数軸要素数となる)
+        # ([*] nfftは、nperseg以上である必要あり)
         nfft=2047,
-        # scalingは"spectrum"を指定する事でスペクトログラムデータ単位が「振幅の2乗」となるパワースペクトルとなる
+        # scalingを"spectrum"を指定する事でスペクトログラムデータ単位が「2乗値」となるパワースペクトルとなる
         scaling="spectrum",
         # modeを"magnitude"とすることで、スペクトログラムデータとして振幅が算出される
         mode="magnitude"
@@ -107,7 +125,7 @@ def get_freq_domain_data_of_signal_spctrgrm(
 def gen_freq_domain_data_of_stft(
     time_array_after_window,
     samplerate,
-    frames_per_buffer,
+    stft_frame_size,
     N_ave,
     acf,
     dbref,
@@ -118,7 +136,7 @@ def gen_freq_domain_data_of_stft(
     # ===============================================================
     # time_array_after_window   : 時間領域 波形データ(正規化/オーバーラップ処理/hanning窓関数適用済)
     # samplerate                : サンプリングレート [sampling data count/s)]
-    # frames_per_buffer         : 入力音声ストリームバッファあたりのサンプリングデータ数
+    # stft_frame_size           : STFT(短時間フーリエ変換)を行う時系列データ数(=STFTフレーム長)
     # N_ave                     : オーバーラップ処理における切り出しフレーム数
     # acf                       : 振幅補正係数(Amplitude Correction Factor)
     # dbref                     : デシベル基準値
@@ -130,34 +148,35 @@ def gen_freq_domain_data_of_stft(
     fft_array = []
 
     # 周波数軸を作成
-    freq_spctrgrm = np.linspace(0, samplerate, frames_per_buffer)
+    # (開始:0 , 終了:サンプリング周波数, 要素数:STFTフレーム長)
+    freq_spctrgrm = np.linspace(0, samplerate, stft_frame_size)
     print("freq_spctrgrm.shape = ", freq_spctrgrm.shape)
 
     # 聴感補正曲線を計算
     a_scale = a_weighting(freq_spctrgrm)
     print("a_scale.shape = ", a_scale.shape)
 
-    # FFT実施後に、配列にdBで追加し、窓関数補正値をかけ、(frames_per_buffer/2)の正規化を実施
+    # 時間軸方向データ数分のループ処理
     for i in range(N_ave):
 
         # dbrefが0以上の場合は、dB変換し、配列に追加する
         if dbref > 0:
-            # (frames_per_buffer/2)の正規化、および窓関数補正値(acf)を乗算を実施
+            # (stft_frame_size/2)の正規化、および窓関数補正値(acf)を乗算を実施
             fft_array.append(
                 db(
                     acf *
                     np.abs(scipy.fft.fft(time_array_after_window[i]) /
-                           (frames_per_buffer / 2)),
+                           (stft_frame_size / 2)),
                     dbref
                 )
             )
 
         else:
-            # (frames_per_buffer/2)の正規化、および窓関数補正値(acf)を乗算を実施
+            # (stft_frame_size/2)の正規化、および窓関数補正値(acf)を乗算を実施
             fft_array.append(
                 acf *
                 np.abs(scipy.fft.fft(time_array_after_window[i]) /
-                       (frames_per_buffer / 2))
+                       (stft_frame_size / 2))
             )
 
     # numpy.ndarray変換を行う
