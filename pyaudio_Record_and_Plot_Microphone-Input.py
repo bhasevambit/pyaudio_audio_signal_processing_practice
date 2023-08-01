@@ -19,7 +19,6 @@ if __name__ == '__main__':
     # --- Parameters ---
     mic_mode = 1            # マイクモード (1:モノラル / 2:ステレオ)
     samplerate = 44100      # サンプリングレート [sampling data count/s)]
-    time_unit = "s"         # 時間軸単位設定 ("s" or "ms")
     time = 5                # 計測時間 [[s] or [ms]] (リアルタイムモードの場合は"0"を設定)
     view_range = time       # 時間領域波形グラフ X軸表示レンジ [[s] or [ms]]
     dbref = 2e-5            # デシベル基準値(最小可聴値 20[μPa]を設定)
@@ -47,21 +46,23 @@ if __name__ == '__main__':
 
     # === 時間領域波形と周波数特性向けの2つのグラフ領域を作成
     fig, wave_fig, freq_fig = gen_graph_figure()
-    # fig       : matplotlib グラフfigure
-    # wave_fig  : matplotlib 時間領域波形グラフfigure
-    # freq_fig  : matplotlib 周波数特性グラフfigure
+    # fig       : 生成したmatplotlib figureインスタンス
+    # wave_fig  : 時間領域波形向けmatplotlib Axesインスタンス
+    # freq_fig  : 周波数特性向けmatplotlib Axesインスタンス
 
     # === Microphone入力音声ストリーム生成 ===
     pa, stream = audio_stream_start(
         index, mic_mode, samplerate, frames_per_buffer)
-    # pa : pyaudioクラスオブジェクト
-    # stream : マイク入力音声ストリーム
+    # pa        : 生成したpyaudio.PyAudioクラスオブジェクト
+    #             (pyaudio.PyAudio object)
+    # stream    : 生成したpyaudio.PyAudio.Streamオブジェクト
+    #             (pyaudio.PyAudio.Stream object)
 
     # === 時間領域波形データ生成 ===
-    data_normalized, t = gen_time_domain_data(
-        stream, frames_per_buffer, samplerate, time_unit, time)
-    # data_normalized   : 時間領域 波形データ(正規化済)
-    # t                 : 時間領域 X軸向けデータ[s]
+    data_normalized, time_normalized = gen_time_domain_data(
+        stream, frames_per_buffer, samplerate, time)
+    # data_normalized : 時間領域波形データ(正規化済)
+    # time_normalized : 時間領域波形データ(正規化済)に対応した時間軸データ
 
     # === Microphone入力音声ストリーム停止 ===
     audio_stream_stop(pa, stream)
@@ -83,7 +84,7 @@ if __name__ == '__main__':
         wave_fig,
         freq_fig,
         data_normalized,
-        t,
+        time_normalized,
         amp_normalized,
         freq,
         view_range,

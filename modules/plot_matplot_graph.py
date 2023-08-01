@@ -19,9 +19,9 @@ def gen_graph_figure():
     sub_fig2.yaxis.set_ticks_position('both')
     sub_fig2.xaxis.set_ticks_position('both')
 
-    # fig : 生成したmatplotlib figureインスタンス
-    # sub_fig1 : 生成したmatplotlib 第1 Axesインスタンス
-    # sub_fig2 : 生成したmatplotlib 第2 Axesインスタンス
+    # fig       : 生成したmatplotlib figureインスタンス
+    # sub_fig1  : 生成したmatplotlib 第1のAxesインスタンス
+    # sub_fig2  : 生成したmatplotlib 第2のAxesインスタンス
     return fig, sub_fig1, sub_fig2
 
 
@@ -30,7 +30,7 @@ def plot_time_and_freq(
     wave_fig,
     freq_fig,
     data_normalized,
-    t,
+    time_normalized,
     amp_normalized,
     freq,
     view_range,
@@ -45,9 +45,9 @@ def plot_time_and_freq(
     # wave_fig          : matplotlib 時間領域波形グラフfigure
     # freq_fig          : matplotlib 周波数特性グラフfigure
     # data_normalized   : 時間領域 波形データ(正規化済)
-    # t                 : 時間領域 X軸向けデータ [ms]
+    # time_normalized   : 時間領域 X軸向けデータ [s]
     # amp_normalized    : 周波数特性 振幅データ(正規化済)
-    # freq              : 周波数特性 X軸向けデータ
+    # freq              : 周波数特性 X軸向けデータ [Hz]
     # view_range        : 時間領域波形グラフ X軸表示レンジ [sample count]
     # dbref             : デシベル基準値
     # A                 : 聴感補正(A特性)の有効(True)/無効(False)設定
@@ -61,12 +61,7 @@ def plot_time_and_freq(
     plt.rcParams['ytick.direction'] = 'in'
 
     # 時間領域波形 軸ラベル設定
-    if plot_pause == -1:
-        # 録音時間指定モードの場合
-        wave_fig.set_xlabel('Time [s]')
-    else:
-        # リアルタイムモードの場合
-        wave_fig.set_xlabel('Time [ms]')
+    wave_fig.set_xlabel('Time [s]')
     wave_fig.set_ylabel('Amplitude')
 
     # 周波数特性 軸ラベル設定
@@ -79,8 +74,11 @@ def plot_time_and_freq(
         freq_fig.set_ylabel('Amplitude')
 
     # 時間領域波形 軸目盛り設定
-    wave_fig.set_xlim(0, view_range)
-    wave_fig.set_ylim(-1, 1)
+    if plot_pause == -1:
+        wave_fig.set_xlim(0, view_range)
+    else:
+        wave_fig.set_xlim(0, (view_range / 1000))
+    wave_fig.set_ylim(-1.1, 1.1)
     wave_fig.set_yticks([-1, -0.5, 0, 0.5, 1])
 
     # 周波数特性 軸目盛り設定
@@ -98,7 +96,7 @@ def plot_time_and_freq(
 
     # 時間領域波形データプロット
     wave_fig.plot(
-        t,
+        time_normalized,
         data_normalized,
         label='Time Waveform',
         lw=1,
@@ -122,7 +120,7 @@ def plot_time_and_freq(
 
 def plot_time_and_spectrogram(
     data_normalized,
-    t,
+    time_normalized,
     view_range,
     freq_spctrgrm,
     time_spctrgrm,
@@ -135,7 +133,7 @@ def plot_time_and_spectrogram(
     # === 時間領域波形 & スペクトログラム グラフプロット関数 ===
     # ==========================================================
     # data_normalized   : 時間領域 波形データ(正規化済)
-    # t                 : 時間領域 X軸向けデータ [ms]
+    # time_normalized   : 時間領域 X軸向けデータ [ms]
     # view_range        : 時間領域波形グラフ X軸表示レンジ [sample count]
     # freq_spctrgrm     : スペクトログラム y軸向けデータ[Hz]
     # time_spctrgrm     : スペクトログラム x軸向けデータ[s]
@@ -224,7 +222,7 @@ def plot_time_and_spectrogram(
 
     # 時間領域波形データプロット
     wave_fig.plot(
-        t,
+        time_normalized,
         data_normalized,
         label='Time Waveform',
         lw=1,

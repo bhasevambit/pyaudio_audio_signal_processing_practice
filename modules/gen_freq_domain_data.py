@@ -42,7 +42,7 @@ def gen_freq_domain_data(data_normalized, samplerate, dbref, A):
     return spectrum_normalized, amp_normalized, phase_normalized, freq_normalized
 
 
-def get_freq_domain_data_of_signal_spctrgrm(
+def gen_freq_domain_data_of_signal_spctrgrm(
         data_normalized,
         samplerate,
         stft_frame_size,
@@ -152,7 +152,7 @@ def gen_freq_domain_data_of_stft(
     freq_spctrgrm = dft_freq_normalize(freq_data)
     print("freq_spctrgrm.shape = ", freq_spctrgrm.shape)
 
-    # 時間軸を作成
+    # DFT(離散フーリエ変換)データに対応した時間軸データを作成
     # (開始:0 , 終了:オーバーラップ処理で切り出したデータの最終時刻[s],
     #  要素数:オーバーラップ処理における切り出しフレーム数)
     time_spctrgrm = np.linspace(0, final_time, N_ave)

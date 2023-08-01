@@ -3,7 +3,7 @@ from modules.get_mic_index import get_mic_index
 from modules.audio_stream import audio_stream_start
 from modules.audio_stream import audio_stream_stop
 from modules.gen_time_domain_data import gen_time_domain_data
-from modules.gen_freq_domain_data import get_freq_domain_data_of_signal_spctrgrm
+from modules.gen_freq_domain_data import gen_freq_domain_data_of_signal_spctrgrm
 from modules.gen_freq_domain_data import gen_freq_domain_data_of_stft
 from modules.audio_signal_processing_advanced import overlap
 from modules.audio_signal_processing_advanced import window
@@ -72,14 +72,16 @@ if __name__ == '__main__':
     # === Microphone入力音声ストリーム生成 ===
     pa, stream = audio_stream_start(
         index, mic_mode, samplerate, frames_per_buffer)
-    # pa : pyaudioクラスオブジェクト
-    # stream : マイク入力音声ストリーム
+    # pa        : 生成したpyaudio.PyAudioクラスオブジェクト
+    #             (pyaudio.PyAudio object)
+    # stream    : 生成したpyaudio.PyAudio.Streamオブジェクト
+    #             (pyaudio.PyAudio.Stream object)
 
     # === 時間領域波形データ生成 ===
-    data_normalized, t = gen_time_domain_data(
-        stream, frames_per_buffer, samplerate, time_unit, time)
-    # data_normalized   : 時間領域 波形データ(正規化済)
-    # t                 : 時間領域 X軸向けデータ[s]
+    data_normalized, time_normalized = gen_time_domain_data(
+        stream, frames_per_buffer, samplerate, time)
+    # data_normalized : 時間領域波形データ(正規化済)
+    # time_normalized : 時間領域波形データ(正規化済)に対応した時間軸データ
 
     # === Microphone入力音声ストリーム停止 ===
     audio_stream_stop(pa, stream)
@@ -94,7 +96,7 @@ if __name__ == '__main__':
         # === scipy.signal.spectrogram()を使用する場合 ===
         # ================================================
 
-        freq_spctrgrm, time_spctrgrm, spectrogram = get_freq_domain_data_of_signal_spctrgrm(
+        freq_spctrgrm, time_spctrgrm, spectrogram = gen_freq_domain_data_of_signal_spctrgrm(
             data_normalized, samplerate, stft_frame_size, overlap_rate, window_func, dbref, A)
         # freq_spctrgrm         : スペクトログラム y軸向けデータ[Hz]
         # time_spctrgrm         : スペクトログラム x軸向けデータ[s]
@@ -131,7 +133,7 @@ if __name__ == '__main__':
     # === 時間領域波形 & スペクトログラム グラフ表示 ===
     plot_time_and_spectrogram(
         data_normalized,
-        t,
+        time_normalized,
         view_range,
         freq_spctrgrm,
         time_spctrgrm,

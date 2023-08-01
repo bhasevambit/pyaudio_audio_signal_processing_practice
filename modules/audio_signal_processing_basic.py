@@ -36,6 +36,23 @@ def discrete_data_normalize(discrete_data, dtype):
     return data_normalized
 
 
+def gen_time_axis_data(discrete_data, samplerate):
+    # ========================================================
+    # === 時間領域波形データに対応した時間軸データ生成関数 ===
+    # ========================================================
+    # discrete_data     : 時間領域波形 離散データ 1次元配列
+    # samplerate        : サンプリング周波数[sampling data count/s)]
+
+    # サンプリング周期[s]を算出
+    dt = 1 / samplerate
+
+    # 時間領域波形データに対応した時間軸データ 1次元配列の生成
+    time_axis_data = np.arange(0, len(discrete_data) * dt, dt)
+
+    # time_axis_data : 時間領域波形データに対応した時間軸データ 1次元配列
+    return time_axis_data
+
+
 def dft_normalize(discrete_data, spectrum_data):
     # ===============================================
     # === DFT(離散フーリエ変換)データの正規化関数 ===

@@ -49,3 +49,19 @@ def audio_stream_stop(pa, stream):
 
     # 生成したpyaudio.PyAudioクラスオブジェクトを削除
     pa.terminate()
+
+
+def gen_discrete_data_from_audio_stream(stream, frames_per_buffer):
+    # ==================================================
+    # === 時間領域波形 離散データ 1次元配列 生成関数 ===
+    # ==================================================
+
+    # 時間領域波形 離散データ 1次元配列の生成
+    # (「OSError: [Errno -9981] Input overflowed」エラー対策のために「exception_on_overflow = False」を設定)
+    discrete_data = stream.read(
+        frames_per_buffer,
+        exception_on_overflow=False
+    )
+
+    # discrete_data     : 時間領域波形 離散データ 1次元配列
+    return discrete_data
