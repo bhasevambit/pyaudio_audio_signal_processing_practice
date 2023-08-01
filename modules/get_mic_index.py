@@ -49,4 +49,5 @@ def get_mic_index():
 
         print("")
 
+    # mic_list : microphone index list
     return mic_list
