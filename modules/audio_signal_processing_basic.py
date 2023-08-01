@@ -1,4 +1,3 @@
-import scipy
 import numpy as np
 
 
@@ -13,6 +12,7 @@ def db(x, dbref):
     with np.errstate(divide='ignore'):
         y = 20 * np.log10(x / dbref)
 
+    # y : 音圧レベル変換値[dB]
     return y
 
 
@@ -51,6 +51,9 @@ def dft_normalize(discrete_data, spectrum_data):
     # 正の周波数領域データをスライス抽出 (開始要素から「要素数(len(phase) / 2」までの要素)
     phase_normalized = phase[:int(len(phase) / 2)]
 
+    # spectrum_normalized   : 正規化後 DFTデータ 1次元配列
+    # amp_normalized        : 正規化後 DFTデータ振幅成分 1次元配列
+    # phase_normalized      : 正規化後 DFTデータ位相成分 1次元配列
     return spectrum_normalized, amp_normalized, phase_normalized
 
 
@@ -65,6 +68,7 @@ def dft_freq_normalize(freq_data):
     # 「要素数(len(freq_data) / 2」までの要素をスライス抽出
     freq_normalized = freq_data[:int(len(freq_data) / 2)]
 
+    # freq_normalized   : 正規化後 周波数軸データ 1次元配列
     return freq_normalized
 
 
@@ -87,4 +91,5 @@ def a_weighting(f):
 
     a = 20 * np.log10(ra) + 2.00
 
+    # a : 聴感補正 振幅データ[dB] 1次元配列
     return a

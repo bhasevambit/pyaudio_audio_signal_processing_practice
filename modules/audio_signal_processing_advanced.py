@@ -1,37 +1,37 @@
 import scipy
 
 
-def overlap(data_normalized, samplerate, stft_frame_size, overlap_rate):
+def overlap(discrete_data, samplerate, stft_frame_size, overlap_rate):
     # ==============================
     # === オーバーラップ処理関数 ===
     # ==============================
-    # data_normalized   : 時間領域 波形データ(正規化済)
-    # samplerate        : サンプリングレート [sampling data count/s]
-    # stft_frame_size   : STFT(短時間フーリエ変換)を行う時系列データ数(=STFTフレーム長)
+    # discrete_data     : 離散データ 1次元配列
+    # samplerate        : サンプリング周波数 [sampling data count/s]
+    # stft_frame_size   : STFT(短時間フーリエ変換)を行う離散データ数(=STFTフレーム長)
     # overlap_rate      : オーバーラップ率 [%]
 
-    # 全データ時間長[s]の算出
-    # (= 時間領域波形データ要素数 / (サンプリングデータ数 / 秒))
-    Ts = len(data_normalized) / samplerate
+    # 全離散データ時間長 Ts[s]の算出
+    # (= 離散データ要素数 / (サンプリングデータ数 / 秒))
+    Ts = len(discrete_data) / samplerate
 
-    # 入力音声ストリームバッファ周期[s]の算出
+    # STFTフレーム周期 Tf[s]の算出
     # (= STFTフレーム長 / (サンプリングデータ数 / 秒) )
-    Fc = stft_frame_size / samplerate
+    Tf = stft_frame_size / samplerate
 
-    # オーバーラップ時のずらし幅 [sampling data count]
+    # オーバーラップ時のずらし幅 x_ol[sampling data count]
     x_ol = stft_frame_size * (1 - (overlap_rate / 100))
 
-    # オーバーラップ時間長[s]を算出
-    overlap_time = Fc * (overlap_rate / 100)
+    # オーバーラップ時間長 overlap_time[s]を算出
+    overlap_time = Tf * (overlap_rate / 100)
 
-    # 非オーバーラップ時間長[s]を算出
-    non_overlap_time = Fc * (1 - (overlap_rate / 100))
+    # 非オーバーラップ時間長 non_overlap_time[s]を算出
+    non_overlap_time = Tf - overlap_time
 
     # オーバーラップ処理における切り出しフレーム数
     N_ave = int((Ts - overlap_time) / non_overlap_time)
 
-    # 抽出したデータを入れる空配列の定義
-    time_array = []
+    # オーバーラップ処理後 離散データ 1次元配列の初期化
+    data_overlaped = []
 
     # forループでデータを抽出
     for i in range(N_ave):
@@ -39,35 +39,47 @@ def overlap(data_normalized, samplerate, stft_frame_size, overlap_rate):
         ps = int(x_ol * i)
 
         # 切り出し位置psから入力音声ストリームバッファデータ数分抽出して配列に追加
-        # (data_normalized配列に対して、開始要素: ps / 終了要素: ps+stft_frame_size / スキップ間隔: 1 でスライスしてtime_array.append)
-        time_array.append(data_normalized[ps:ps + stft_frame_size:1])
+        # (discrete_data配列に対して、開始要素: ps / 終了要素: ps+stft_frame_size / スキップ間隔: 1 でスライスしてdata_overlaped.append)
+        data_overlaped.append(discrete_data[ps:ps + stft_frame_size:1])
 
         # 切り出したデータの最終時刻[s]
         # (= (切り出し位置 + STFTフレーム長) / (サンプリングデータ数 / 秒) )
         final_time = (ps + stft_frame_size) / samplerate
 
-    return time_array, N_ave, final_time
+    # data_overlaped    : オーバーラップ処理後 離散データ 1次元配列
+    # N_ave             : オーバーラップ処理における切り出しフレーム数
+    # final_time        : オーバーラップ処理後 離散データの最終時刻[s]
+    return data_overlaped, N_ave, final_time
 
 
-def hanning(time_array, stft_frame_size, N_ave):
+def window(data_overlaped, stft_frame_size, N_ave, window_func):
     # =============================================
     # === Hanning窓関数 (振幅補正係数計算付き) ===
     # =============================================
-    # time_array        : オーバーラップ抽出された時間領域波形配列(正規化済)
-    # stft_frame_size   : STFT(短時間フーリエ変換)を行う時系列データ数(=STFTフレーム長)
+    # data_overlaped    : オーバーラップ処理後 離散データ 1次元配列
+    # stft_frame_size   : STFT(短時間フーリエ変換)を行う離散データ数(=STFTフレーム長)
     # N_ave             : オーバーラップ処理における切り出しフレーム数
 
-    # Hanning窓 作成
-    han = scipy.signal.hann(stft_frame_size)
+    # 窓関数 1次元配列の作成
+    if window_func == "hann":
+        # Hanning窓
+        window = scipy.signal.hann(stft_frame_size)
+    else:
+        # 矩形窓
+        window = scipy.signal.boxcar(stft_frame_size)
 
     # 振幅補正係数(Amplitude Correction Factor)
-    acf = 1 / (sum(han) / stft_frame_size)
+    acf = 1 / (sum(window) / stft_frame_size)
 
-    # 時間領域 波形データ(正規化/オーバーラップ処理/hanning窓関数適用済)の初期化
-    time_array_after_window = [0 for _ in range(len(time_array))]
+    # 窓関数適用後 離散データ 1次元配列の初期化
+    data_applied_window = [0 for _ in range(len(data_overlaped))]
 
-    # オーバーラップされた複数時間波形全てに窓関数をかける
+    # オーバーラップ処理における切り出しフレームの個々に窓関数を適用
     for i in range(N_ave):
-        time_array_after_window[i] = time_array[i] * han         # 窓関数をかける
 
-    return time_array_after_window, acf
+        # 切り出しフレーム(numpy.ndarray)と窓関数(numpy.ndarray)を要素毎に乗算
+        data_applied_window[i] = data_overlaped[i] * window
+
+    # data_applied_window   : 窓関数適用後 離散データ 1次元配列
+    # acf                   : 振幅補正係数(Amplitude Correction Factor)
+    return data_applied_window, acf

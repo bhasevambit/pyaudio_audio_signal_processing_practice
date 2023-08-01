@@ -6,7 +6,7 @@ from modules.gen_time_domain_data import gen_time_domain_data
 from modules.gen_freq_domain_data import get_freq_domain_data_of_signal_spctrgrm
 from modules.gen_freq_domain_data import gen_freq_domain_data_of_stft
 from modules.audio_signal_processing_advanced import overlap
-from modules.audio_signal_processing_advanced import hanning
+from modules.audio_signal_processing_advanced import window
 from modules.plot_matplot_graph import plot_time_and_spectrogram
 from modules.save_audio_to_wav_file import save_audio_to_wav_file
 from modules.save_matplot_graph import save_matplot_graph
@@ -114,9 +114,9 @@ if __name__ == '__main__':
         # N_ave         : オーバーラップ処理における切り出しフレーム数
         # final_time    : オーバーラップ処理で切り出したデータの最終時刻[s]
 
-        # Hanning窓関数の適用
-        time_array_after_window, acf = hanning(
-            time_array, stft_frame_size, N_ave
+        # 窓関数の適用
+        time_array_after_window, acf = window(
+            time_array, stft_frame_size, N_ave, window_func
         )
         # time_array_after_window   : 時間領域 波形データ(正規化/オーバーラップ処理/hanning窓関数適用済)
         # acf                       : 振幅補正係数(Amplitude Correction Factor)
