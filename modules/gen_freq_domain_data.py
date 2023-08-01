@@ -2,6 +2,7 @@ import scipy
 import numpy as np
 from modules.audio_signal_processing_basic import db
 from modules.audio_signal_processing_basic import dft_normalize
+from modules.audio_signal_processing_basic import dft_freq_normalize
 from modules.audio_signal_processing_basic import a_weighting
 
 
@@ -14,14 +15,21 @@ def gen_freq_domain_data(data_normalized, samplerate, dbref, A):
     # dbref             : デシベル基準値
     # A                 : 聴感補正(A特性)の有効(True)/無効(False)設定
 
-    # 時間領域 波形データ(正規化済)のフーリエ変換を実施
+    # 時間領域 波形データ(正規化済)のDFT(離散フーリエ変換)を実施
     # (scipy.fft.fft()の出力結果spectrumは複素数)
-    spectrum = scipy.fft.fft(data_normalized)
+    spectrum_data = scipy.fft.fft(data_normalized)
 
-    # DFT(離散フーリエ変換)データから、正規化済振幅成分/位相成分、および周波数軸データを生成
-    amp_normalized, phase_normalized, freq_data = dft_normalize(
-        data_normalized, spectrum, samplerate
+    # DFT(離散フーリエ変換)データに対応した周波数軸データを作成
+    dt = 1 / samplerate  # サンプリング周期[s]
+    freq_data = scipy.fft.fftfreq(len(data_normalized), d=dt)
+
+    # DFT(離散フーリエ変換)データの正規化を実施
+    spectrum_normalized, amp_normalized, phase_normalized = dft_normalize(
+        data_normalized, spectrum_data
     )
+
+    # 周波数軸データの正規化を実施
+    freq_normalized = dft_freq_normalize(freq_data)
 
     # dbrefが0以上の時にdB変換する
     if dbref > 0:
@@ -29,9 +37,9 @@ def gen_freq_domain_data(data_normalized, samplerate, dbref, A):
 
         # dB変換されていてAがTrueの時に聴感補正する
         if A:
-            amp_normalized += a_weighting(freq_data)
+            amp_normalized += a_weighting(freq_normalized)
 
-    return spectrum, amp_normalized, phase_normalized, freq_data
+    return spectrum_normalized, amp_normalized, phase_normalized, freq_normalized
 
 
 def get_freq_domain_data_of_signal_spctrgrm(
@@ -130,17 +138,19 @@ def gen_freq_domain_data_of_stft(
     # スペクトログラムデータ格納配列の初期化
     spectrogram = []
 
-    # 周波数軸を作成
+    # DFT(離散フーリエ変換)データに対応した周波数軸データを作成
     dt = 1 / samplerate  # サンプリング周期[s]
-    # nを、stft_frame_sizeの2倍とする事で、周波数分解能をscipy.signal.spectrogramと同じとする
-    # dをサンプリング周期の2倍とする(scipy.signal.spectrogramと合わせる)
-    freq_bipolar = scipy.fft.fftfreq(n=(stft_frame_size * 2), d=dt)
 
-    # freq_bipolarは、負の周波数領域軸データも含むため、
-    # 「要素数(len(freq_bipolar) / 2」までの要素をスライス抽出
-    freq_spctrgrm = freq_bipolar[:int(len(freq_bipolar) / 2)]
+    freq_data = scipy.fft.fftfreq(
+        # nを、stft_frame_sizeの2倍とする事で、周波数分解能をscipy.signal.spectrogramと同じとする
+        n=(stft_frame_size * 2),
+        # dをサンプリング周期の2倍とする(scipy.signal.spectrogramと合わせる)
+        d=dt
+    )
+
+    # 周波数軸データの正規化を実施
+    freq_spctrgrm = dft_freq_normalize(freq_data)
     print("freq_spctrgrm.shape = ", freq_spctrgrm.shape)
-    print("np.max(freq_spctrgrm) = ", np.max(freq_spctrgrm))
 
     # 時間軸を作成
     # (開始:0 , 終了:オーバーラップ処理で切り出したデータの最終時刻[s],
@@ -157,30 +167,34 @@ def gen_freq_domain_data_of_stft(
 
         # 時間領域 波形データのSTFTフレーム[i] に対して、フーリエ変換を実施
         # (scipy.fft.fft()の出力結果spectrumは複素数)
-        spectrum = scipy.fft.fft(
+        spectrum_data = scipy.fft.fft(
             # xは「Input array, can be complex」
             x=time_array_after_window[i],
             # nは「Length of the transformed axis of the output」
-            # nを、stft_frame_sizeの2倍とする事で、周波数分解能をscipy.signal.spectrogramと同じとする
+            # (nを、stft_frame_sizeの2倍とする事で、周波数分解能をscipy.signal.spectrogramと同じとする)
             n=stft_frame_size * 2
         )
-        # print("len(spectrum) = ", len(spectrum))
 
-        # 振幅成分算出
-        amp = np.abs(spectrum)
-        # print("len(amp) = ", len(amp))
+        # # 振幅成分算出
+        # amp = np.abs(spectrum)
+        # # print("len(amp) = ", len(amp))
 
-        # 振幅成分の正規化
-        # 離散フーリエ変換の定義から、求まる振幅ampを入力データの振幅に合わせるため 1/N 倍して振幅を計算する。
-        # 加えて、フーリエ変換された N 個のスペクトル（振幅やパワー） は、サンプリング周波数の 1/2
-        # の周波数（ナイキスト周波数）を堺に左右対称となる事から、スペクトルの値は対になる対称成分を足し合わせたものが、
-        # 入力データの実データと一致するため、スペクトル値をさらに2倍する正規化を施す
-        amp_normalized_pre = (amp / len(time_array_after_window[i])) * 2
-        # print("len(amp_normalized_pre) = ", len(amp_normalized_pre))
+        # # 振幅成分の正規化
+        # # 離散フーリエ変換の定義から、求まる振幅ampを入力データの振幅に合わせるため 1/N 倍して振幅を計算する。
+        # # 加えて、フーリエ変換された N 個のスペクトル（振幅やパワー） は、サンプリング周波数の 1/2
+        # # の周波数（ナイキスト周波数）を堺に左右対称となる事から、スペクトルの値は対になる対称成分を足し合わせたものが、
+        # # 入力データの実データと一致するため、スペクトル値をさらに2倍する正規化を施す
+        # amp_normalized_pre = (amp / len(time_array_after_window[i])) * 2
+        # # print("len(amp_normalized_pre) = ", len(amp_normalized_pre))
 
-        # amp_normalized_preは、負の周波数領域データも含むため、
-        # 「要素数(len(amp_normalized_pre) / 2」までの要素をスライス抽出
-        amp_normalized = amp_normalized_pre[:int(len(amp_normalized_pre) / 2)]
+        # # amp_normalized_preは、負の周波数領域データも含むため、
+        # # 「要素数(len(amp_normalized_pre) / 2」までの要素をスライス抽出
+        # amp_normalized = amp_normalized_pre[:int(len(amp_normalized_pre) / 2)]
+
+        # DFT(離散フーリエ変換)データの正規化を実施
+        spectrum_normalized, amp_normalized, phase_normalized = dft_normalize(
+            time_array_after_window[i], spectrum_data
+        )
 
         # 窓関数補正値(acf)を乗算
         amp_normaliazed_acf = amp_normalized * acf
