@@ -19,6 +19,9 @@ def gen_graph_figure():
     sub_fig2.yaxis.set_ticks_position('both')
     sub_fig2.xaxis.set_ticks_position('both')
 
+    # fig : 生成したmatplotlib figureインスタンス
+    # sub_fig1 : 生成したmatplotlib 第1 Axesインスタンス
+    # sub_fig2 : 生成したmatplotlib 第2 Axesインスタンス
     return fig, sub_fig1, sub_fig2
 
 

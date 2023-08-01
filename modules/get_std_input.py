@@ -19,4 +19,5 @@ def get_selected_mode_by_std_input(mode_count):
         return get_selected_mode_by_std_input(mode_count)
 
     else:
+        # input_mode : 標準入力されたモード
         return input_mode
