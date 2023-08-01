@@ -1,6 +1,7 @@
 import scipy
 import numpy as np
 from modules.audio_signal_processing_basic import db
+from modules.audio_signal_processing_basic import dft_normalize
 from modules.audio_signal_processing_basic import a_weighting
 
 
@@ -17,31 +18,10 @@ def gen_freq_domain_data(data_normalized, samplerate, dbref, A):
     # (scipy.fft.fft()の出力結果spectrumは複素数)
     spectrum = scipy.fft.fft(data_normalized)
 
-    # 振幅成分算出
-    amp = np.abs(spectrum)
-
-    # 位相成分算出 & 位相をラジアンから度に変換
-    phase_rad = np.angle(spectrum)
-    phase = np.degrees(phase_rad)
-
-    # 振幅成分の正規化
-    # 離散フーリエ変換の定義から、求まる振幅ampを入力データの振幅に合わせるため 1/N 倍して振幅を計算する。
-    # 加えて、フーリエ変換された N 個のスペクトル（振幅やパワー） は、サンプリング周波数の 1/2
-    # の周波数（ナイキスト周波数）を堺に左右対称となる事から、スペクトルの値は対になる対称成分を足し合わせたものが、
-    # 入力データの実データと一致するため、スペクトル値をさらに2倍する正規化を施す
-    amp_normalized_pre = (amp / len(data_normalized)) * 2
-
-    # amp_normalized_preは、負の周波数領域データも含むため、
-    # 「要素数(len(amp_normalized_pre) / 2」までの要素をスライス抽出
-    amp_normalized = amp_normalized_pre[1:int(len(amp_normalized_pre) / 2)]
-
-    # 周波数軸を作成
-    dt = 1 / samplerate  # サンプリング周期[s]
-    freq_bipolar = scipy.fft.fftfreq(len(spectrum), d=dt)
-
-    # freq_bipolarは、負の周波数領域軸データも含むため、
-    # 「要素数(len(freq_bipolar) / 2」までの要素をスライス抽出
-    freq = freq_bipolar[1:int(len(freq_bipolar) / 2)]
+    # DFT(離散フーリエ変換)データから、正規化済振幅成分/位相成分、および周波数軸データを生成
+    amp_normalized, phase_normalized, freq_data = dft_normalize(
+        data_normalized, spectrum, samplerate
+    )
 
     # dbrefが0以上の時にdB変換する
     if dbref > 0:
@@ -49,9 +29,9 @@ def gen_freq_domain_data(data_normalized, samplerate, dbref, A):
 
         # dB変換されていてAがTrueの時に聴感補正する
         if A:
-            amp_normalized += a_weighting(freq)
+            amp_normalized += a_weighting(freq_data)
 
-    return spectrum, amp_normalized, phase, freq
+    return spectrum, amp_normalized, phase_normalized, freq_data
 
 
 def get_freq_domain_data_of_signal_spctrgrm(
