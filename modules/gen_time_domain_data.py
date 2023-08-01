@@ -1,23 +1,7 @@
 import numpy as np
 import math
 
-
-def normalize_time_domain_data(audio_data, dtype):
-    # ====================================
-    # === 時間領域波形データ正規化関数 ===
-    # ====================================
-    # audio_data    : 時間領域波形データ
-    # dtype         : 変換する1次元配列の型
-
-    # 時間領域波形データを dtype引数で指定された整数型 1次元配列に変換
-    data = np.frombuffer(audio_data, dtype)
-
-    # 時間領域波形データの正規化
-    # dataについては、16bit量子化であり、かつ正負符号を持つ事から、
-    # ±32767(=±((2^16 / 2) - 1))の範囲にデータが入る事から、dataを((2^16 / 2) - 1)で割る事で、正規化している
-    data_normalized = data / float((np.power(2, 16) / 2) - 1)
-
-    return data_normalized
+from modules.audio_signal_processing_basic import discrete_data_normalize
 
 
 def gen_time_domain_x_axis_data(samplerate, data_normalized, time_unit):
@@ -97,7 +81,7 @@ def gen_time_domain_data(
         )
 
     # 時間領域波形データの正規化
-    data_normalized = normalize_time_domain_data(audio_data, "int16")
+    data_normalized = discrete_data_normalize(audio_data, "int16")
 
     # 時間領域 X軸データの生成
     t = gen_time_domain_x_axis_data(samplerate, data_normalized, time_unit)

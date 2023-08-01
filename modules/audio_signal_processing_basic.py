@@ -16,6 +16,26 @@ def db(x, dbref):
     return y
 
 
+def discrete_data_normalize(discrete_data, dtype):
+    # ====================================================
+    # === 量子化により生成された離散データの正規化関数 ===
+    # ====================================================
+    # discrete_data     : 量子化により生成された離散データ 1次元配列
+    # dtype             : 変換する1次元配列の型 (例："int16")
+
+    # 離散データ 1次元配列を、dtype引数で指定された整数型のnumpy.ndarrayに変換
+    discrete_data_ndarray = np.frombuffer(discrete_data, dtype)
+
+    # === 離散データの正規化 ===
+    # discrete_data_ndarrayは、振幅成分が16bit量子化されたデータであり、かつ正負符号を持ち、
+    # ±32767(=±((2^16 / 2) - 1))の範囲にデータが入る事から、
+    # dataを((2^16 / 2) - 1)で除算する事で、振幅成分を"-1.0～+1.0"の範囲に正規化する
+    data_normalized = discrete_data_ndarray / float((np.power(2, 16) / 2) - 1)
+
+    # data_normalized : 正規化済 離散データ 1次元配列
+    return data_normalized
+
+
 def dft_normalize(discrete_data, spectrum_data):
     # ===============================================
     # === DFT(離散フーリエ変換)データの正規化関数 ===
