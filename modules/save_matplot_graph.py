@@ -8,7 +8,7 @@ def save_matplot_graph(filename_prefix):
     # ======================
     # === グラフ保存関数 ===
     # ======================
-    # filename_prefix : # グラフ保存時のファイル名プレフィックス
+    # filename_prefix : グラフ保存時のファイル名プレフィックス
 
     print("Graph File Save START")
 

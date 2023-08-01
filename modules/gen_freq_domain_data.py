@@ -11,7 +11,7 @@ def gen_freq_domain_data(data_normalized, samplerate, dbref, A):
     # === 周波数特性データ生成関数 ===
     # ================================
     # data_normalized   : 時間領域 波形データ(正規化済)
-    # samplerate        : サンプリングレート [sampling data count/s)]
+    # samplerate        : サンプリング周波数 [sampling data count/s)]
     # dbref             : デシベル基準値
     # A                 : 聴感補正(A特性)の有効(True)/無効(False)設定
 
