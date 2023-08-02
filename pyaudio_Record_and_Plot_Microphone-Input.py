@@ -1,5 +1,3 @@
-import platform
-
 from modules.get_mic_index import get_mic_index
 from modules.audio_stream import audio_stream_start
 from modules.audio_stream import audio_stream_stop
@@ -27,12 +25,7 @@ if __name__ == '__main__':
     filename_prefix = "time-waveform_and_freq-response_"    # グラフ保存時のファイル名プレフィックス
 
     # 入力音声ストリームバッファあたりのサンプリングデータ数
-    if platform.machine() == "armv7l":  # ARM32bit向け(Raspi等)
-        frames_per_buffer = 512
-    elif platform.machine() == "x86_64":  # Intel/AMD64bit向け
-        frames_per_buffer = 1024
-    else:
-        frames_per_buffer = 1024
+    frames_per_buffer = 1024
     print(
         "\nframes_per_buffer [sampling data count/stream buffer] = ",
         frames_per_buffer,

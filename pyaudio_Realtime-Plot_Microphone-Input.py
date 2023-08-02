@@ -15,7 +15,6 @@ if __name__ == '__main__':
     # --- Parameters ---
     mic_mode = 1            # マイクモード (1:モノラル / 2:ステレオ)
     samplerate = 44100      # サンプリング周波数 [sampling data count/s)]
-    time_unit = "ms"        # 時間軸単位設定 ("s" or "ms"
     time = 0                # 計測時間 [[s] or [ms]] (リアルタイムモードの場合は"0"を設定)
     view_range = 50         # 時間領域波形グラフ X軸表示レンジ [[s] or [ms]]
     dbref = 2e-5            # デシベル基準値(最小可聴値 20[μPa]を設定)
