@@ -1,3 +1,4 @@
+from modules.get_std_input import get_selected_mode_by_std_input
 from modules.get_mic_index import get_mic_index
 from modules.audio_stream import audio_stream_start
 from modules.audio_stream import audio_stream_stop
@@ -15,22 +16,46 @@ if __name__ == '__main__':
     # =================
 
     # --- Parameters ---
-    mic_mode = 1            # マイクモード (1:モノラル / 2:ステレオ)
-    samplerate = 44100      # サンプリングレート [sampling data count/s)]
-    time = 5                # 計測時間 [[s] or [ms]] (リアルタイムモードの場合は"0"を設定)
-    view_range = time       # 時間領域波形グラフ X軸表示レンジ [[s] or [ms]]
-    dbref = 2e-5            # デシベル基準値(最小可聴値 20[μPa]を設定)
-    A = True                # 聴感補正(A特性)の有効(True)/無効(False)設定
-    plot_pause = -1         # グラフ表示のpause時間 [s] (非リアルタイムモード(指定時間録音)の場合は"-1"を設定)
-    filename_prefix = "time-waveform_and_freq-response_"    # グラフ保存時のファイル名プレフィックス
+    # スペクトログラムデータ算出モード (0:scipy.signal.spectrogram()関数を使用 / 1:自作STFT関数を使用)
+    # (標準入力にて変更可能とする)
+    print("")
+    print("=================================================================")
+    print("  [ Please INPUT Spectrogram Mode ]")
+    print("")
+    print("  0 : Use scipy.signal.spectrogram Function")
+    print("  1 : Use Full Scratch STFT Function")
+    print("=================================================================")
+    print("")
+    spctrgrm_mode = get_selected_mode_by_std_input(mode_count=2)
+
+    if spctrgrm_mode == 0:
+        selected_mode = "'scipy.signal.spectrogram Function Mode'"
+    else:
+        selected_mode = "'Full Scratch STFT Function Mode'"
+    print("\n - Selected Spectrogram Mode = ", selected_mode, " - \n")
+
+    # サンプリング周波数 [sampling data count/s]
+    samplerate = 44100
 
     # 入力音声ストリームバッファあたりのサンプリングデータ数
-    frames_per_buffer = 1024
+    frames_per_buffer = 512
     print(
         "\nframes_per_buffer [sampling data count/stream buffer] = ",
         frames_per_buffer,
         "\n"
     )
+
+    mic_mode = 1            # マイクモード (1:モノラル / 2:ステレオ)
+    time = 5                # 計測時間 [[s] or [ms]] (リアルタイムモードの場合は"0"を設定)
+    view_range = time       # 時間領域波形グラフ X軸表示レンジ [[s] or [ms]]
+
+    dbref = 2e-5            # デシベル基準値(最小可聴値 20[μPa]を設定)
+    A = True                # 聴感補正(A特性)の有効(True)/無効(False)設定
+
+    # グラフ保存時のファイル名プレフィックス
+    filename_prefix = "time-waveform_and_freq-response_"
+    # グラフ表示のpause時間 [s] (非リアルタイムモード(指定時間録音)の場合は"-1"を設定)
+    plot_pause = -1
     # ------------------------
 
     # === マイクチャンネルを自動取得 ===
