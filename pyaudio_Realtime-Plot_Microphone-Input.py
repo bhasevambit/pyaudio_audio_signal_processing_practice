@@ -61,13 +61,12 @@ if __name__ == '__main__':
             # time_normalized : 時間領域波形データ(正規化済)に対応した時間軸データ
 
             # === 周波数特性データ生成 ===
-            spectrum, amp_normalized, phase, freq = gen_freq_domain_data(
-                data_normalized, samplerate, dbref, A
-            )
-            # spectrum          : 周波数特性データ(複素数データ)
-            # amp_normalized    : 周波数特性 振幅データ(正規化済)
-            # phase             : 周波数特性 位相データ
-            # freq              : 周波数特性 X軸向けデータ
+            spectrum_normalized, amp_normalized, phase_normalized, freq_normalized = gen_freq_domain_data(
+                data_normalized, samplerate, dbref, A)
+            # spectrum_normalized   : 正規化後 DFTデータ 1次元配列
+            # amp_normalized        : 正規化後 DFTデータ振幅成分 1次元配列
+            # phase_normalized      : 正規化後 DFTデータ位相成分 1次元配列
+            # freq_normalized       : 正規化後 周波数軸データ 1次元配列
 
             # === 時間領域波形 & 周波数特性 グラフ表示 ===
             plot_time_and_freq(
@@ -77,7 +76,7 @@ if __name__ == '__main__':
                 data_normalized,
                 time_normalized,
                 amp_normalized,
-                freq,
+                freq_normalized,
                 view_range,
                 dbref,
                 A,

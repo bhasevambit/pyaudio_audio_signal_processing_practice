@@ -6,26 +6,26 @@ from modules.audio_signal_processing_basic import dft_freq_normalize
 from modules.audio_signal_processing_basic import a_weighting
 
 
-def gen_freq_domain_data(data_normalized, samplerate, dbref, A):
+def gen_freq_domain_data(discrete_data, samplerate, dbref, A):
     # ================================
     # === 周波数特性データ生成関数 ===
     # ================================
-    # data_normalized   : 時間領域 波形データ(正規化済)
+    # discrete_data     : 時間領域波形 離散データ 1次元配列
     # samplerate        : サンプリング周波数 [sampling data count/s)]
     # dbref             : デシベル基準値
     # A                 : 聴感補正(A特性)の有効(True)/無効(False)設定
 
-    # 時間領域 波形データ(正規化済)のDFT(離散フーリエ変換)を実施
+    # 時間領域波形 離散データ 1次元配列のDFT(離散フーリエ変換)を実施
     # (scipy.fft.fft()の出力結果spectrumは複素数)
-    spectrum_data = scipy.fft.fft(data_normalized)
+    spectrum_data = scipy.fft.fft(discrete_data)
 
     # DFT(離散フーリエ変換)データに対応した周波数軸データを作成
     dt = 1 / samplerate  # サンプリング周期[s]
-    freq_data = scipy.fft.fftfreq(len(data_normalized), d=dt)
+    freq_data = scipy.fft.fftfreq(len(discrete_data), d=dt)
 
     # DFT(離散フーリエ変換)データの正規化を実施
     spectrum_normalized, amp_normalized, phase_normalized = dft_normalize(
-        data_normalized, spectrum_data
+        discrete_data, spectrum_data
     )
 
     # 周波数軸データの正規化を実施
@@ -39,6 +39,10 @@ def gen_freq_domain_data(data_normalized, samplerate, dbref, A):
         if A:
             amp_normalized += a_weighting(freq_normalized)
 
+    # spectrum_normalized   : 正規化後 DFTデータ 1次元配列
+    # amp_normalized        : 正規化後 DFTデータ振幅成分 1次元配列
+    # phase_normalized      : 正規化後 DFTデータ位相成分 1次元配列
+    # freq_normalized       : 正規化後 周波数軸データ 1次元配列
     return spectrum_normalized, amp_normalized, phase_normalized, freq_normalized
 
 
