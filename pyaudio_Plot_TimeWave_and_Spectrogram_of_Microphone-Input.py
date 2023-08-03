@@ -73,16 +73,14 @@ if __name__ == '__main__':
         "\n"
     )
 
-    # 計測時間[s] / 時間領域波形グラフ X軸表示レンジ[s] / グラフ表示のpause時間[s]
+    # 計測時間[s] / 時間領域波形グラフ X軸表示レンジ[s]
     if selected_mode == 0:
         time = 5
         view_range = time
-        plot_pause = -1  # レコーディングモードの場合は"-1"を設定
     else:
         # リアルタイムモードの場合は"0"を設定する
         time = 0
         view_range = 0.050  # リアルタイムモードの場合は"50[ms]"を設定
-        plot_pause = 0.0001
 
     # デシベル基準値(最小可聴値 20[μPa]を設定)
     dbref = 2e-5

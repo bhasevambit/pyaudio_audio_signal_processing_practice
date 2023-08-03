@@ -35,14 +35,14 @@ def plot_time_and_freq(
     view_range,
     dbref,
     A,
-    plot_pause
+    selected_mode
 ):
     # ====================================================
     # === 時間領域波形 & 周波数特性 グラフプロット関数 ===
     # ====================================================
-    # fig               : matplotlib グラフfigure
-    # wave_fig          : matplotlib 時間領域波形グラフfigure
-    # freq_fig          : matplotlib 周波数特性グラフfigure
+    # fig               : 生成したmatplotlib figureインスタンス
+    # wave_fig          : 時間領域波形向けmatplotlib Axesインスタンス
+    # freq_fig          : 周波数特性向けmatplotlib Axesインスタンス
     # data_normalized   : 時間領域 波形データ(正規化済)
     # time_normalized   : 時間領域 X軸向けデータ [s]
     # amp_normalized    : 周波数特性 振幅データ(正規化済)
@@ -50,7 +50,7 @@ def plot_time_and_freq(
     # view_range        : 時間領域波形グラフ X軸表示レンジ [sample count]
     # dbref             : デシベル基準値
     # A                 : 聴感補正(A特性)の有効(True)/無効(False)設定
-    # plot_pause        : グラフ表示のpause時間 [s] (非リアルタイムモード(指定時間録音)の場合は"-1"を設定)
+    # selected_mode     : 動作モード (0:レコーディングモード / 1:リアルタイムモード)
 
     # フォントサイズ設定
     plt.rcParams['font.size'] = 10
@@ -106,9 +106,9 @@ def plot_time_and_freq(
         lw=1,
         color="dodgerblue")
 
-    if plot_pause != -1:
+    if selected_mode == 1:
         # リアルタイムモードの場合、matplotlibグラフを更新
-        plt.pause(plot_pause)
+        plt.pause(0.0001)
 
         freq_fig.cla()
         wave_fig.cla()

@@ -52,16 +52,14 @@ if __name__ == '__main__':
         "\n"
     )
 
-    # 計測時間[s] / 時間領域波形グラフ X軸表示レンジ[s] / グラフ表示のpause時間[s]
+    # 計測時間[s] / 時間領域波形グラフ X軸表示レンジ[s]
     if selected_mode == 0:
         time = 5
         view_range = time
-        plot_pause = -1  # レコーディングモードの場合は"-1"を設定
     else:
         # リアルタイムモードの場合は"0"を設定する
         time = 0
         view_range = 0.050  # リアルタイムモードの場合は"50[ms]"を設定
-        plot_pause = 0.0001
 
     # デシベル基準値(最小可聴値 20[μPa]を設定)
     dbref = 2e-5
@@ -78,6 +76,7 @@ if __name__ == '__main__':
     print("Use Microphone Index :", index, "\n")
 
     # === 時間領域波形と周波数特性向けの2つのグラフ領域を作成
+    # (リアルタイムモード向けグラフ描画のために必須)
     fig, wave_fig, freq_fig = gen_graph_figure()
     # fig       : 生成したmatplotlib figureインスタンス
     # wave_fig  : 時間領域波形向けmatplotlib Axesインスタンス
@@ -122,7 +121,7 @@ if __name__ == '__main__':
                 view_range,
                 dbref,
                 A,
-                plot_pause
+                selected_mode
             )
 
             if selected_mode == 0:
