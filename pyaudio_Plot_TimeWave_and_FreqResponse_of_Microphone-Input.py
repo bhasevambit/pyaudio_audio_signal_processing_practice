@@ -110,7 +110,7 @@ if __name__ == '__main__':
             # phase_normalized      : 正規化後 DFTデータ位相成分 1次元配列
             # freq_normalized       : 正規化後 周波数軸データ 1次元配列
 
-            # === 時間領域波形 & 周波数特性 グラフ表示 ===
+            # === グラフ表示 ===
             plot_time_and_freq(
                 fig,
                 wave_fig,
@@ -139,7 +139,7 @@ if __name__ == '__main__':
         # === レコーディング音声のwavファイル保存 ===
         save_audio_to_wav_file(samplerate, data_normalized)
 
-        # === 時間領域波形 & 周波数特性 グラフ保存 ===
+        # === グラフ保存 ===
         save_matplot_graph(filename_prefix)
 
     # === Microphone入力音声ストリーム停止 ===
