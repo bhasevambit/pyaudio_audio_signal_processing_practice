@@ -7,6 +7,7 @@ from modules.gen_freq_domain_data import gen_freq_domain_data_of_signal_spctrgrm
 from modules.gen_freq_domain_data import gen_freq_domain_data_of_stft
 from modules.audio_signal_processing_advanced import overlap
 from modules.audio_signal_processing_advanced import window
+from modules.plot_matplot_graph import gen_graph_figure
 from modules.plot_matplot_graph import plot_time_and_spectrogram
 from modules.save_audio_to_wav_file import save_audio_to_wav_file
 from modules.save_matplot_graph import save_matplot_graph
@@ -73,6 +74,9 @@ if __name__ == '__main__':
         "\n"
     )
 
+    # グラフタイプ (0:時間領域波形&周波数特性 / 1:時間領域波形&スペクトログラム)
+    graph_type = 1
+
     # 計測時間[s] / 時間領域波形グラフ X軸表示レンジ[s]
     if selected_mode == 0:
         time = 5
@@ -102,6 +106,13 @@ if __name__ == '__main__':
     # === マイクチャンネルを自動取得 ===
     index = get_mic_index()[0]
     print("Use Microphone Index :", index, "\n")
+
+    # === グラフ領域作成 ===
+    # (リアルタイムモード向けグラフ描画のために必須)
+    fig, wave_fig, spctrgrm_fig = gen_graph_figure(graph_type)
+    # fig           : 生成したmatplotlib figureインスタンス
+    # wave_fig      : 時間領域波形向けmatplotlib Axesインスタンス
+    # spctrgrm_fig  : スペクトログラム向けmatplotlib Axesインスタンス
 
     # === Microphone入力音声ストリーム生成 ===
     pa, stream = audio_stream_start(
@@ -166,6 +177,9 @@ if __name__ == '__main__':
 
             # === グラフ表示 ===
             plot_time_and_spectrogram(
+                fig,
+                wave_fig,
+                spctrgrm_fig,
                 data_normalized,
                 time_normalized,
                 view_range,

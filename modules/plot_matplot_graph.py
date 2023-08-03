@@ -3,14 +3,56 @@ from matplotlib import pyplot as plt
 import warnings
 
 
-def gen_graph_figure():
+def gen_graph_figure(graph_type):
     # ==========================
     # === グラフ領域作成関数 ===
     # ==========================
+    # graph_type : グラフタイプ (0:時間領域波形&周波数特性 / 1:時間領域波形&スペクトログラム)
 
-    fig = plt.figure()
-    sub_fig1 = fig.add_subplot(2, 1, 1)
-    sub_fig2 = fig.add_subplot(2, 1, 2)
+    if graph_type == 0:
+        # =========================================
+        # === 時間領域波形&周波数特性グラフ向け ===
+        # =========================================
+        # figureインスタンスの作成
+        fig = plt.figure()
+
+        # Axesインスタンスの作成
+        sub_fig1 = fig.add_subplot(2, 1, 1)
+        sub_fig2 = fig.add_subplot(2, 1, 2)
+
+    else:
+        # ===============================================
+        # === 時間領域波形&スペクトログラムグラフ向け ===
+        # ===============================================
+        # figureインスタンスの作成
+        fig = plt.figure(figsize=[8, 8])
+
+        # Axesインスタンスの作成
+        # add_axesの引数パラメータは「left，bottom，width，height」
+        axes_left_common = 0.1
+        axes_height_spctrgrm = 0.5
+        axes_height_wave = 0.25
+        axes_bottom_spctrgrm = 0.1
+        axes_bottom_wave = axes_bottom_spctrgrm + axes_height_spctrgrm + 0.1
+        axes_width_spctrgrm = 0.89  # 時間領域波形とスペクトログラムの横軸メモリが合うように微調整
+        axes_width_wave = 0.71  # 時間領域波形とスペクトログラムの横軸メモリが合うように微調整
+
+        sub_fig1 = fig.add_axes(
+            (
+                axes_left_common,
+                axes_bottom_wave,
+                axes_width_wave,
+                axes_height_wave
+            )
+        )
+        sub_fig2 = fig.add_axes(
+            (
+                axes_left_common,
+                axes_bottom_spctrgrm,
+                axes_width_spctrgrm,
+                axes_height_spctrgrm
+            )
+        )
 
     # 上下左右にグラフ目盛線を付与
     sub_fig1.yaxis.set_ticks_position('both')
@@ -115,6 +157,9 @@ def plot_time_and_freq(
 
 
 def plot_time_and_spectrogram(
+    fig,
+    wave_fig,
+    spctrgrm_fig,
     data_normalized,
     time_normalized,
     view_range,
@@ -128,6 +173,9 @@ def plot_time_and_spectrogram(
     # ==========================================================
     # === 時間領域波形 & スペクトログラム グラフプロット関数 ===
     # ==========================================================
+    # fig               : 生成したmatplotlib figureインスタンス
+    # wave_fig          : 時間領域波形向けmatplotlib Axesインスタンス
+    # spctrgrm_fig      : スペクトログラム向けmatplotlib Axesインスタンス
     # data_normalized   : 時間領域 波形データ(正規化済)
     # time_normalized   : 時間領域 X軸向けデータ [ms]
     # view_range        : 時間領域波形グラフ X軸表示レンジ [sample count]
@@ -138,41 +186,6 @@ def plot_time_and_spectrogram(
     # A                 : 聴感補正(A特性)の有効(True)/無効(False)設定
     # spctrgrm_mode     : スペクトログラムデータ算出モード
     #                     (0:scipy.signal.spectrogram()関数を使用 / 1:自作STFT関数を使用)
-
-    # グラフfigure設定
-    fig = plt.figure(figsize=[8, 8])
-
-    # add_axesの引数パラメータは「left，bottom，width，height」
-    axes_left_common = 0.1
-    axes_height_spctrgrm = 0.5
-    axes_height_wave = 0.25
-    axes_bottom_spctrgrm = 0.1
-    axes_bottom_wave = axes_bottom_spctrgrm + axes_height_spctrgrm + 0.1
-    axes_width_spctrgrm = 0.89  # 時間領域波形とスペクトログラムの横軸メモリが合うように微調整
-    axes_width_wave = 0.71  # 時間領域波形とスペクトログラムの横軸メモリが合うように微調整
-
-    wave_fig = fig.add_axes(
-        (
-            axes_left_common,
-            axes_bottom_wave,
-            axes_width_wave,
-            axes_height_wave
-        )
-    )
-    spctrgrm_fig = fig.add_axes(
-        (
-            axes_left_common,
-            axes_bottom_spctrgrm,
-            axes_width_spctrgrm,
-            axes_height_spctrgrm
-        )
-    )
-
-    # 上下左右にグラフ目盛線を付与
-    wave_fig.yaxis.set_ticks_position('both')
-    wave_fig.xaxis.set_ticks_position('both')
-    spctrgrm_fig.yaxis.set_ticks_position('both')
-    spctrgrm_fig.xaxis.set_ticks_position('both')
 
     # フォントサイズ設定
     plt.rcParams['font.size'] = 10

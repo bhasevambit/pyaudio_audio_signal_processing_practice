@@ -52,6 +52,9 @@ if __name__ == '__main__':
         "\n"
     )
 
+    # グラフタイプ (0:時間領域波形&周波数特性 / 1:時間領域波形&スペクトログラム)
+    graph_type = 0
+
     # 計測時間[s] / 時間領域波形グラフ X軸表示レンジ[s]
     if selected_mode == 0:
         time = 5
@@ -75,9 +78,9 @@ if __name__ == '__main__':
     index = get_mic_index()[0]
     print("Use Microphone Index :", index, "\n")
 
-    # === 時間領域波形と周波数特性向けの2つのグラフ領域を作成
+    # === グラフ領域作成 ===
     # (リアルタイムモード向けグラフ描画のために必須)
-    fig, wave_fig, freq_fig = gen_graph_figure()
+    fig, wave_fig, freq_fig = gen_graph_figure(graph_type)
     # fig       : 生成したmatplotlib figureインスタンス
     # wave_fig  : 時間領域波形向けmatplotlib Axesインスタンス
     # freq_fig  : 周波数特性向けmatplotlib Axesインスタンス
