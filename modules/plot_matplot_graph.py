@@ -73,10 +73,7 @@ def plot_time_and_freq(
         freq_fig.set_ylabel('Amplitude')
 
     # 時間領域波形 軸目盛り設定
-    if plot_pause == -1:
-        wave_fig.set_xlim(0, view_range)
-    else:
-        wave_fig.set_xlim(0, (view_range / 1000))
+    wave_fig.set_xlim(0, view_range)
     wave_fig.set_ylim(-1.1, 1.1)
     wave_fig.set_yticks([-1, -0.5, 0, 0.5, 1])
 
