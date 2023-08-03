@@ -153,24 +153,23 @@ if __name__ == '__main__':
                 # ==================================
 
                 # オーバーラップ処理の実行
-                time_array, N_ave, final_time = overlap(
+                data_overlaped, N_ave, final_time = overlap(
                     data_normalized, samplerate, stft_frame_size, overlap_rate
                 )
-                # time_array    : オーバーラップ抽出された時間領域波形配列(正規化済)
-                # N_ave         : オーバーラップ処理における切り出しフレーム数
-                # final_time    : オーバーラップ処理で切り出したデータの最終時刻[s]
+                # data_overlaped    : オーバーラップ抽出された時間領域波形配列(正規化済)
+                # N_ave             : オーバーラップ処理における切り出しフレーム数
+                # final_time        : オーバーラップ処理で切り出したデータの最終時刻[s]
 
                 # 窓関数の適用
-                time_array_after_window, acf = window(
-                    time_array, stft_frame_size, N_ave, window_func
+                data_applied_window, acf = window(
+                    data_overlaped, stft_frame_size, N_ave, window_func
                 )
-                # time_array_after_window   : 時間領域 波形データ(正規化/オーバーラップ処理/hanning窓関数適用済)
-                # acf                       : 振幅補正係数(Amplitude Correction
-                # Factor)
+                # data_applied_window   : 時間領域 波形データ(正規化/オーバーラップ処理/hanning窓関数適用済)
+                # acf                   : 振幅補正係数(Amplitude Correction Factor)
 
                 # STFT(Short-Time Fourier Transform)の実行
                 freq_spctrgrm, time_spctrgrm, spectrogram = gen_freq_domain_data_of_stft(
-                    time_array_after_window, samplerate, stft_frame_size, N_ave, final_time, acf, dbref, A)
+                    data_applied_window, samplerate, stft_frame_size, N_ave, final_time, acf, dbref, A)
                 # freq_spctrgrm         : スペクトログラム y軸向けデータ[Hz]
                 # time_spctrgrm         : スペクトログラム x軸向けデータ[s]
                 # spectrogram           : スペクトログラム 振幅データ
@@ -188,6 +187,7 @@ if __name__ == '__main__':
                 spectrogram,
                 dbref,
                 A,
+                selected_mode,
                 spctrgrm_mode
             )
 

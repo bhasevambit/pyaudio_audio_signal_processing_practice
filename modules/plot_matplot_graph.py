@@ -168,6 +168,7 @@ def plot_time_and_spectrogram(
     spectrogram,
     dbref,
     A,
+    selected_mode,
     spctrgrm_mode
 ):
     # ==========================================================
@@ -184,6 +185,7 @@ def plot_time_and_spectrogram(
     # spectrogram       : スペクトログラム 振幅データ
     # dbref             : デシベル基準値
     # A                 : 聴感補正(A特性)の有効(True)/無効(False)設定
+    # selected_mode     : 動作モード (0:レコーディングモード / 1:リアルタイムモード)
     # spctrgrm_mode     : スペクトログラムデータ算出モード
     #                     (0:scipy.signal.spectrogram()関数を使用 / 1:自作STFT関数を使用)
 
@@ -263,3 +265,10 @@ def plot_time_and_spectrogram(
         cbar.set_label('Sound Pressure [dB spl(A)]')
     else:
         cbar.set_label('Sound Pressure [Pa]')
+
+    # if selected_mode == 1:
+    #     # リアルタイムモードの場合、matplotlibグラフを更新
+    #     plt.pause(0.001)
+
+    #     spctrgrm_fig.cla()
+    #     wave_fig.cla()
