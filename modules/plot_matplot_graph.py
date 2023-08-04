@@ -299,18 +299,6 @@ def plot_time_and_spectrogram(
         spctrgrm_fig.set_xlim(0, view_range)
         spctrgrm_fig.set_ylim(0, 2000)  # 0 ～ 2000[Hz]の範囲
 
-        # スペクトログラム算出モードテキスト表示設定
-        text_ypos = 0.01
-
-        if spctrgrm_mode == 0:
-            text_xpos = 0.3
-            text_word = "scipy.signal.spectrogram Function Mode"
-        else:
-            text_xpos = 0.32
-            text_word = "Full Scratch STFT Function Mode"
-
-        fig.text(text_xpos, text_ypos, text_word)
-
         # plot.figure.tight_layout()実行時の「UserWarning: The figure layout has
         # changed to tight」Warning文の抑止
         warnings.simplefilter('ignore', UserWarning)
@@ -335,17 +323,15 @@ def plot_time_and_spectrogram(
         )
 
         # カラーバー設定
-        cbar = fig.colorbar(spctrgrm_im)
+        # cbar = fig.colorbar(spctrgrm_im)
 
-        if (dbref > 0) and not (A):
-            cbar.set_label('Sound Pressure [dB spl]')
-        elif (dbref > 0) and (A):
-            cbar.set_label('Sound Pressure [dB spl(A)]')
-        else:
-            cbar.set_label('Sound Pressure [Pa]')
+        # if (dbref > 0) and not (A):
+        #     cbar.set_label('Sound Pressure [dB spl]')
+        # elif (dbref > 0) and (A):
+        #     cbar.set_label('Sound Pressure [dB spl(A)]')
+        # else:
+        #     cbar.set_label('Sound Pressure [Pa]')
 
     if selected_mode == 1:
         # リアルタイムモードの場合、matplotlibグラフを更新
-        plt.pause(0.0001)
-
-        spctrgrm_fig.cla()
+        plt.pause(0.1)

@@ -111,6 +111,10 @@ def gen_freq_domain_data_of_signal_spctrgrm(
 
             print("spectrogram.shape [dB(A)]= ", spectrogram.shape)
 
+    print("")
+    # freq_spctrgrm         : スペクトログラム y軸向けデータ[Hz]
+    # time_spctrgrm         : スペクトログラム x軸向けデータ[s]
+    # spectrogram           : スペクトログラム 振幅データ
     return freq_spctrgrm, time_spctrgrm, spectrogram
 
 
@@ -179,22 +183,6 @@ def gen_freq_domain_data_of_stft(
             n=stft_frame_size * 2
         )
 
-        # # 振幅成分算出
-        # amp = np.abs(spectrum)
-        # # print("len(amp) = ", len(amp))
-
-        # # 振幅成分の正規化
-        # # 離散フーリエ変換の定義から、求まる振幅ampを入力データの振幅に合わせるため 1/N 倍して振幅を計算する。
-        # # 加えて、フーリエ変換された N 個のスペクトル（振幅やパワー） は、サンプリング周波数の 1/2
-        # # の周波数（ナイキスト周波数）を堺に左右対称となる事から、スペクトルの値は対になる対称成分を足し合わせたものが、
-        # # 入力データの実データと一致するため、スペクトル値をさらに2倍する正規化を施す
-        # amp_normalized_pre = (amp / len(time_array_after_window[i])) * 2
-        # # print("len(amp_normalized_pre) = ", len(amp_normalized_pre))
-
-        # # amp_normalized_preは、負の周波数領域データも含むため、
-        # # 「要素数(len(amp_normalized_pre) / 2」までの要素をスライス抽出
-        # amp_normalized = amp_normalized_pre[:int(len(amp_normalized_pre) / 2)]
-
         # DFT(離散フーリエ変換)データの正規化を実施
         spectrum_normalized, amp_normalized, phase_normalized = dft_normalize(
             time_array_after_window[i], spectrum_data
@@ -225,4 +213,8 @@ def gen_freq_domain_data_of_stft(
     spectrogram = spectrogram.T
     print("spectrogram.shape [dB(A) and Transposed] = ", spectrogram.shape)
 
+    print("")
+    # freq_spctrgrm         : スペクトログラム y軸向けデータ[Hz]
+    # time_spctrgrm         : スペクトログラム x軸向けデータ[s]
+    # spectrogram           : スペクトログラム 振幅データ
     return freq_spctrgrm, time_spctrgrm, spectrogram
