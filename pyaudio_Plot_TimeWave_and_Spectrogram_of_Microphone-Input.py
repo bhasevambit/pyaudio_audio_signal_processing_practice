@@ -30,7 +30,6 @@ if __name__ == '__main__':
     print("=================================================================")
     print("")
     selected_mode = get_selected_mode_by_std_input(mode_count=2)
-    selected_mode = 0   # レコーディングモードで固定
 
     if selected_mode == 0:
         selected_mode_name = "'Recording MODE'"
