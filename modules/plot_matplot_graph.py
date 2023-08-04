@@ -66,6 +66,21 @@ def gen_graph_figure(graph_type):
     return fig, sub_fig1, sub_fig2
 
 
+def gen_graph_figure_for_realtime_spctrgrm():
+    # ==========================
+    # === グラフ領域作成関数 ===
+    # ==========================
+    # figureインスタンスの作成
+    fig = plt.figure()
+
+    # Axesインスタンスの作成
+    sub_fig = fig.add_subplot(1, 1, 1)
+
+    # fig       : 生成したmatplotlib figureインスタンス
+    # sub_fig   : 生成したmatplotlib Axesインスタンス
+    return fig, sub_fig
+
+
 def plot_time_and_freq(
     fig,
     wave_fig,
@@ -275,4 +290,62 @@ def plot_time_and_spectrogram(
         # ================================
         # === リアルタイムモードの場合 ===
         # ================================
-        pass
+
+        # スペクトログラム 軸ラベル設定
+        spctrgrm_fig.set_xlabel('Time [s]')
+        spctrgrm_fig.set_ylabel('Frequency [Hz]')
+
+        # スペクトログラム 軸目盛り設定
+        spctrgrm_fig.set_xlim(0, view_range)
+        spctrgrm_fig.set_ylim(0, 2000)  # 0 ～ 2000[Hz]の範囲
+
+        # スペクトログラム算出モードテキスト表示設定
+        text_ypos = 0.01
+
+        if spctrgrm_mode == 0:
+            text_xpos = 0.3
+            text_word = "scipy.signal.spectrogram Function Mode"
+        else:
+            text_xpos = 0.32
+            text_word = "Full Scratch STFT Function Mode"
+
+        fig.text(text_xpos, text_ypos, text_word)
+
+        # plot.figure.tight_layout()実行時の「UserWarning: The figure layout has
+        # changed to tight」Warning文の抑止
+        warnings.simplefilter('ignore', UserWarning)
+
+        # レイアウト設定
+        fig.tight_layout()
+
+        # スペクトログラムデータ範囲指定
+        # スペクトログラムデータがdB単位の場合
+        if dbref > 0:
+            colorbar_min = 0    # カラーバー最小値[dB]
+            colorvar_max = 80   # カラーバー最大値[dB]
+
+        # スペクトログラムデータプロット
+        spctrgrm_im = spctrgrm_fig.pcolormesh(
+            time_spctrgrm,
+            freq_spctrgrm,
+            spectrogram,
+            vmin=colorbar_min,
+            vmax=colorvar_max,
+            cmap="jet"
+        )
+
+        # カラーバー設定
+        cbar = fig.colorbar(spctrgrm_im)
+
+        if (dbref > 0) and not (A):
+            cbar.set_label('Sound Pressure [dB spl]')
+        elif (dbref > 0) and (A):
+            cbar.set_label('Sound Pressure [dB spl(A)]')
+        else:
+            cbar.set_label('Sound Pressure [Pa]')
+
+    if selected_mode == 1:
+        # リアルタイムモードの場合、matplotlibグラフを更新
+        plt.pause(0.0001)
+
+        spctrgrm_fig.cla()

@@ -79,7 +79,7 @@ if __name__ == '__main__':
     print("Use Microphone Index :", index, "\n")
 
     # === グラフ領域作成 ===
-    # (リアルタイムモード向けグラフ描画のために必須)
+    # (リアルタイムモード向けグラフ描画のためにMain Codeでの生成が必須)
     fig, wave_fig, freq_fig = gen_graph_figure(graph_type)
     # fig       : 生成したmatplotlib figureインスタンス
     # wave_fig  : 時間領域波形向けmatplotlib Axesインスタンス
