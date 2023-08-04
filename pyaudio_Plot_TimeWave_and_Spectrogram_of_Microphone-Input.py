@@ -63,14 +63,14 @@ if __name__ == '__main__':
     if selected_mode == 0:
         samplerate = 44100
     else:
-        samplerate = int(44100 / 6)
+        samplerate = int(44100 / 8)
     print("\nSampling Frequency[Hz] = ", samplerate)
 
     # 入力音声ストリームバッファあたりのサンプリングデータ数
     if selected_mode == 0:
         frames_per_buffer = 512
     else:
-        frames_per_buffer = 8192
+        frames_per_buffer = 1024 * 8
     print(
         "frames_per_buffer [sampling data count/stream buffer] = ",
         frames_per_buffer,
@@ -83,10 +83,12 @@ if __name__ == '__main__':
     # 計測時間[s] / 時間領域波形グラフ X軸表示レンジ[s]
     if selected_mode == 0:
         time = 5
-        view_range = time
+        time_range = time
+        freq_range = 2000
     else:
         time = 0  # リアルタイムモードの場合は"0"を設定する
-        view_range = 0.7
+        time_range = (1 / samplerate) * frames_per_buffer
+        freq_range = samplerate / 2
 
     # デシベル基準値(最小可聴値 20[μPa]を設定)
     dbref = 2e-5
@@ -98,7 +100,7 @@ if __name__ == '__main__':
     if selected_mode == 0:
         stft_frame_size = 1536
     else:
-        stft_frame_size = 128
+        stft_frame_size = int(frames_per_buffer / 35)
     # オーバーラップ率 [%]
     overlap_rate = 20
     # 使用する窓関数 ("hann" : Hanning窓)
@@ -194,10 +196,11 @@ if __name__ == '__main__':
                 spctrgrm_fig,
                 data_normalized,
                 time_normalized,
-                view_range,
+                time_range,
                 freq_spctrgrm,
                 time_spctrgrm,
                 spectrogram,
+                freq_range,
                 dbref,
                 A,
                 selected_mode,
