@@ -192,83 +192,87 @@ def plot_time_and_spectrogram(
     # フォントサイズ設定
     plt.rcParams['font.size'] = 10
 
-    # 目盛内側化
-    wave_fig.tick_params(axis="both", direction="in")
+    if selected_mode == 0:
+        # ==================================
+        # === レコーディングモードの場合 ===
+        # ==================================
 
-    # 時間領域波形 軸ラベル設定
-    wave_fig.set_xlabel('Time [s]')
-    wave_fig.set_ylabel('Amplitude')
+        # 目盛内側化
+        wave_fig.tick_params(axis="both", direction="in")
 
-    # スペクトログラム 軸ラベル設定
-    spctrgrm_fig.set_xlabel('Time [s]')
-    spctrgrm_fig.set_ylabel('Frequency [Hz]')
+        # 時間領域波形 軸ラベル設定
+        wave_fig.set_xlabel('Time [s]')
+        wave_fig.set_ylabel('Amplitude')
 
-    # 時間領域波形 軸目盛り設定
-    wave_fig.set_xlim(0, view_range)
-    wave_fig.set_ylim(-1, 1)
-    wave_fig.set_yticks([-1, -0.5, 0, 0.5, 1])
+        # スペクトログラム 軸ラベル設定
+        spctrgrm_fig.set_xlabel('Time [s]')
+        spctrgrm_fig.set_ylabel('Frequency [Hz]')
 
-    # スペクトログラム 軸目盛り設定
-    spctrgrm_fig.set_xlim(0, view_range)
-    spctrgrm_fig.set_ylim(0, 2000)  # 0 ～ 2000[Hz]の範囲
+        # 時間領域波形 軸目盛り設定
+        wave_fig.set_xlim(0, view_range)
+        wave_fig.set_ylim(-1, 1)
+        wave_fig.set_yticks([-1, -0.5, 0, 0.5, 1])
 
-    # スペクトログラム算出モードテキスト表示設定
-    text_ypos = 0.01
+        # スペクトログラム 軸目盛り設定
+        spctrgrm_fig.set_xlim(0, view_range)
+        spctrgrm_fig.set_ylim(0, 2000)  # 0 ～ 2000[Hz]の範囲
 
-    if spctrgrm_mode == 0:
-        text_xpos = 0.3
-        text_word = "scipy.signal.spectrogram Function Mode"
+        # スペクトログラム算出モードテキスト表示設定
+        text_ypos = 0.01
+
+        if spctrgrm_mode == 0:
+            text_xpos = 0.3
+            text_word = "scipy.signal.spectrogram Function Mode"
+        else:
+            text_xpos = 0.32
+            text_word = "Full Scratch STFT Function Mode"
+
+        fig.text(text_xpos, text_ypos, text_word)
+
+        # plot.figure.tight_layout()実行時の「UserWarning: The figure layout has
+        # changed to tight」Warning文の抑止
+        warnings.simplefilter('ignore', UserWarning)
+
+        # レイアウト設定
+        fig.tight_layout()
+
+        # 時間領域波形データプロット
+        wave_fig.plot(
+            time_normalized,
+            data_normalized,
+            label='Time Waveform',
+            lw=1,
+            color="blue"
+        )
+
+        # スペクトログラムデータ範囲指定
+        # スペクトログラムデータがdB単位の場合
+        if dbref > 0:
+            colorbar_min = 0    # カラーバー最小値[dB]
+            colorvar_max = 80   # カラーバー最大値[dB]
+
+        # スペクトログラムデータプロット
+        spctrgrm_im = spctrgrm_fig.pcolormesh(
+            time_spctrgrm,
+            freq_spctrgrm,
+            spectrogram,
+            vmin=colorbar_min,
+            vmax=colorvar_max,
+            cmap="jet"
+        )
+
+        # カラーバー設定
+        cbar = fig.colorbar(spctrgrm_im)
+
+        if (dbref > 0) and not (A):
+            cbar.set_label('Sound Pressure [dB spl]')
+        elif (dbref > 0) and (A):
+            cbar.set_label('Sound Pressure [dB spl(A)]')
+        else:
+            cbar.set_label('Sound Pressure [Pa]')
+
     else:
-        text_xpos = 0.32
-        text_word = "Full Scratch STFT Function Mode"
-
-    fig.text(text_xpos, text_ypos, text_word)
-
-    # plot.figure.tight_layout()実行時の「UserWarning: The figure layout has
-    # changed to tight」Warning文の抑止
-    warnings.simplefilter('ignore', UserWarning)
-
-    # レイアウト設定
-    fig.tight_layout()
-
-    # 時間領域波形データプロット
-    wave_fig.plot(
-        time_normalized,
-        data_normalized,
-        label='Time Waveform',
-        lw=1,
-        color="blue"
-    )
-
-    # スペクトログラムデータ範囲指定
-    # スペクトログラムデータがdB単位の場合
-    if dbref > 0:
-        colorbar_min = 0    # カラーバー最小値[dB]
-        colorvar_max = 80   # カラーバー最大値[dB]
-
-    # スペクトログラムデータプロット
-    spctrgrm_im = spctrgrm_fig.pcolormesh(
-        time_spctrgrm,
-        freq_spctrgrm,
-        spectrogram,
-        vmin=colorbar_min,
-        vmax=colorvar_max,
-        cmap="jet"
-    )
-
-    # カラーバー設定
-    cbar = fig.colorbar(spctrgrm_im)
-
-    if (dbref > 0) and not (A):
-        cbar.set_label('Sound Pressure [dB spl]')
-    elif (dbref > 0) and (A):
-        cbar.set_label('Sound Pressure [dB spl(A)]')
-    else:
-        cbar.set_label('Sound Pressure [Pa]')
-
-    # if selected_mode == 1:
-    #     # リアルタイムモードの場合、matplotlibグラフを更新
-    #     plt.pause(0.001)
-
-    #     spctrgrm_fig.cla()
-    #     wave_fig.cla()
+        # ================================
+        # === リアルタイムモードの場合 ===
+        # ================================
+        pass
