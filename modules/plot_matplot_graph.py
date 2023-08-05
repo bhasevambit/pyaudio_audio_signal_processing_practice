@@ -67,18 +67,45 @@ def gen_graph_figure(graph_type):
 
 
 def gen_graph_figure_for_realtime_spctrgrm():
-    # ==========================
-    # === グラフ領域作成関数 ===
-    # ==========================
+    # ==========================================================
+    # === グラフ領域作成関数(リアルタイムスペクトログラム用) ===
+    # ==========================================================
     # figureインスタンスの作成
-    fig = plt.figure()
+    fig = plt.figure(figsize=[7, 4])
 
     # Axesインスタンスの作成
-    sub_fig = fig.add_subplot(1, 1, 1)
+    # add_axesの引数パラメータは「left，bottom，width，height」
+    axes_left = 0.12
+    axes_width = 0.70
+    axes_bottom = 0.15
+    axes_height = 0.80
+
+    sub_fig = fig.add_axes(
+        (
+            axes_left,
+            axes_bottom,
+            axes_width,
+            axes_height
+        )
+    )
+
+    # 上下左右にグラフ目盛線を付与
+    sub_fig.yaxis.set_ticks_position('both')
+    sub_fig.xaxis.set_ticks_position('both')
+
+    # カラーバー用Axesインスタンスの作成
+    # add_axesの引数パラメータは「left，bottom，width，height」
+    cbar_fig = fig.add_axes(
+        (axes_left + axes_width + 0.03,
+         axes_bottom,
+         0.03,
+         axes_height)
+    )
 
     # fig       : 生成したmatplotlib figureインスタンス
     # sub_fig   : 生成したmatplotlib Axesインスタンス
-    return fig, sub_fig
+    # cbar_fig  : 生成したmatplotlib カラーバー用Axesインスタンス
+    return fig, sub_fig, cbar_fig
 
 
 def plot_time_and_freq(
@@ -175,6 +202,7 @@ def plot_time_and_spectrogram(
     fig,
     wave_fig,
     spctrgrm_fig,
+    cbar_fig,
     data_normalized,
     time_normalized,
     time_range,
@@ -193,6 +221,7 @@ def plot_time_and_spectrogram(
     # fig               : 生成したmatplotlib figureインスタンス
     # wave_fig          : 時間領域波形向けmatplotlib Axesインスタンス
     # spctrgrm_fig      : スペクトログラム向けmatplotlib Axesインスタンス
+    # cbar_fig          : スペクトログラム向けmatplotlib カラーバー用Axesインスタンス
     # data_normalized   : 時間領域 波形データ(正規化済)
     # time_normalized   : 時間領域 X軸向けデータ [ms]
     # time_range        : 時間領域波形グラフ X軸表示レンジ [sample count]
@@ -325,14 +354,14 @@ def plot_time_and_spectrogram(
         )
 
         # カラーバー設定
-        # cbar = fig.colorbar(spctrgrm_im)
+        cbar = plt.colorbar(spctrgrm_im, orientation='vertical', cax=cbar_fig)
 
-        # if (dbref > 0) and not (A):
-        #     cbar.set_label('Sound Pressure [dB spl]')
-        # elif (dbref > 0) and (A):
-        #     cbar.set_label('Sound Pressure [dB spl(A)]')
-        # else:
-        #     cbar.set_label('Sound Pressure [Pa]')
+        if (dbref > 0) and not (A):
+            cbar.set_label('Sound Pressure [dB spl]')
+        elif (dbref > 0) and (A):
+            cbar.set_label('Sound Pressure [dB spl(A)]')
+        else:
+            cbar.set_label('Sound Pressure [Pa]')
 
     if selected_mode == 1:
         # リアルタイムモードの場合、matplotlibグラフを更新

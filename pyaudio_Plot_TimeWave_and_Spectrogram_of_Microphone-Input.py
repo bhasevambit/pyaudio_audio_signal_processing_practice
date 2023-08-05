@@ -119,12 +119,13 @@ if __name__ == '__main__':
     if selected_mode == 0:
         # === レコーディングモードの場合 ===
         fig, wave_fig, spctrgrm_fig = gen_graph_figure(graph_type)
+        cbar_fig = 0    # 未使用変数の初期化
         # fig           : 生成したmatplotlib figureインスタンス
         # wave_fig      : 時間領域波形向けmatplotlib Axesインスタンス
         # spctrgrm_fig  : スペクトログラム向けmatplotlib Axesインスタンス
     else:
         # === リアルタイムモードの場合 ===
-        fig, spctrgrm_fig = gen_graph_figure_for_realtime_spctrgrm()
+        fig, spctrgrm_fig, cbar_fig = gen_graph_figure_for_realtime_spctrgrm()
         wave_fig = 0    # 未使用変数の初期化
         # fig           : 生成したmatplotlib figureインスタンス
         # spctrgrm_fig  : スペクトログラム向けmatplotlib Axesインスタンス
@@ -194,6 +195,7 @@ if __name__ == '__main__':
                 fig,
                 wave_fig,
                 spctrgrm_fig,
+                cbar_fig,
                 data_normalized,
                 time_normalized,
                 time_range,
