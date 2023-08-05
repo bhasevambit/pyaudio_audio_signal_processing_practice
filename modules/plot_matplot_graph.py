@@ -66,10 +66,12 @@ def gen_graph_figure(graph_type):
     return fig, sub_fig1, sub_fig2
 
 
-def gen_graph_figure_for_realtime_spctrgrm():
+def gen_graph_figure_for_realtime_spctrgrm(spctrgrm_mode):
     # ==========================================================
     # === グラフ領域作成関数(リアルタイムスペクトログラム用) ===
     # ==========================================================
+    # spctrgrm_mode : スペクトログラムデータ算出モード
+
     # figureインスタンスの作成
     fig = plt.figure(figsize=[7, 4])
 
@@ -77,7 +79,7 @@ def gen_graph_figure_for_realtime_spctrgrm():
     # add_axesの引数パラメータは「left，bottom，width，height」
     axes_left = 0.12
     axes_width = 0.70
-    axes_bottom = 0.15
+    axes_bottom = 0.17
     axes_height = 0.80
 
     sub_fig = fig.add_axes(
@@ -101,6 +103,18 @@ def gen_graph_figure_for_realtime_spctrgrm():
          0.03,
          axes_height)
     )
+
+    # スペクトログラム算出モードテキスト表示設定
+    text_ypos = 0.01
+
+    if spctrgrm_mode == 0:
+        text_xpos = 0.3
+        text_word = "scipy.signal.spectrogram Function Mode"
+    else:
+        text_xpos = 0.32
+        text_word = "Full Scratch STFT Function Mode"
+
+    fig.text(text_xpos, text_ypos, text_word)
 
     # fig       : 生成したmatplotlib figureインスタンス
     # sub_fig   : 生成したmatplotlib Axesインスタンス
@@ -295,7 +309,7 @@ def plot_time_and_spectrogram(
         # スペクトログラムデータがdB単位の場合
         if dbref > 0:
             colorbar_min = 0    # カラーバー最小値[dB]
-            colorvar_max = 80   # カラーバー最大値[dB]
+            colorvar_max = 90   # カラーバー最大値[dB]
 
         # スペクトログラムデータプロット
         spctrgrm_im = spctrgrm_fig.pcolormesh(
@@ -341,7 +355,7 @@ def plot_time_and_spectrogram(
         # スペクトログラムデータがdB単位の場合
         if dbref > 0:
             colorbar_min = 0    # カラーバー最小値[dB]
-            colorvar_max = 80   # カラーバー最大値[dB]
+            colorvar_max = 90   # カラーバー最大値[dB]
 
         # スペクトログラムデータプロット
         spctrgrm_im = spctrgrm_fig.pcolormesh(
@@ -363,6 +377,5 @@ def plot_time_and_spectrogram(
         else:
             cbar.set_label('Sound Pressure [Pa]')
 
-    if selected_mode == 1:
         # リアルタイムモードの場合、matplotlibグラフを更新
         plt.pause(0.0001)

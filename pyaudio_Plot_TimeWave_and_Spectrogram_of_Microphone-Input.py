@@ -125,7 +125,7 @@ if __name__ == '__main__':
         # spctrgrm_fig  : スペクトログラム向けmatplotlib Axesインスタンス
     else:
         # === リアルタイムモードの場合 ===
-        fig, spctrgrm_fig, cbar_fig = gen_graph_figure_for_realtime_spctrgrm()
+        fig, spctrgrm_fig, cbar_fig = gen_graph_figure_for_realtime_spctrgrm(spctrgrm_mode)
         wave_fig = 0    # 未使用変数の初期化
         # fig           : 生成したmatplotlib figureインスタンス
         # spctrgrm_fig  : スペクトログラム向けmatplotlib Axesインスタンス
