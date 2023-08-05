@@ -60,16 +60,16 @@ if __name__ == '__main__':
     mic_mode = 1
 
     # サンプリング周波数[Hz]
-    if selected_mode == 0:
+    if selected_mode == 0:  # レコーディングモード向け
         samplerate = 44100
-    else:
+    else:                   # リアルタイムモード向け
         samplerate = int(44100 / 8)
     print("\nSampling Frequency[Hz] = ", samplerate)
 
     # 入力音声ストリームバッファあたりのサンプリングデータ数
-    if selected_mode == 0:
+    if selected_mode == 0:  # レコーディングモード向け
         frames_per_buffer = 512
-    else:
+    else:                   # リアルタイムモード向け
         frames_per_buffer = 1024 * 8
     print(
         "frames_per_buffer [sampling data count/stream buffer] = ",
@@ -81,11 +81,11 @@ if __name__ == '__main__':
     graph_type = 1
 
     # 計測時間[s] / 時間領域波形グラフ X軸表示レンジ[s]
-    if selected_mode == 0:
+    if selected_mode == 0:  # レコーディングモード向け
         time = 5
         time_range = time
-        freq_range = 2000
-    else:
+        freq_range = int(44100 / 8) / 2
+    else:                   # リアルタイムモード向け
         time = 0  # リアルタイムモードの場合は"0"を設定する
         time_range = (1 / samplerate) * frames_per_buffer
         freq_range = samplerate / 2
@@ -102,7 +102,7 @@ if __name__ == '__main__':
     else:
         stft_frame_size = int(frames_per_buffer / 35)
     # オーバーラップ率 [%]
-    overlap_rate = 20
+    overlap_rate = 50
     # 使用する窓関数 ("hann" : Hanning窓)
     window_func = "hann"
 
@@ -125,7 +125,9 @@ if __name__ == '__main__':
         # spctrgrm_fig  : スペクトログラム向けmatplotlib Axesインスタンス
     else:
         # === リアルタイムモードの場合 ===
-        fig, spctrgrm_fig, cbar_fig = gen_graph_figure_for_realtime_spctrgrm(spctrgrm_mode)
+        fig, spctrgrm_fig, cbar_fig = gen_graph_figure_for_realtime_spctrgrm(
+            spctrgrm_mode
+        )
         wave_fig = 0    # 未使用変数の初期化
         # fig           : 生成したmatplotlib figureインスタンス
         # spctrgrm_fig  : スペクトログラム向けmatplotlib Axesインスタンス

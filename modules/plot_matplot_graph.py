@@ -128,9 +128,10 @@ def plot_time_and_freq(
     freq_fig,
     data_normalized,
     time_normalized,
-    amp_normalized,
-    freq,
     time_range,
+    amp_normalized,
+    freq_normalized,
+    freq_range,
     dbref,
     A,
     selected_mode
@@ -143,9 +144,10 @@ def plot_time_and_freq(
     # freq_fig          : 周波数特性向けmatplotlib Axesインスタンス
     # data_normalized   : 時間領域 波形データ(正規化済)
     # time_normalized   : 時間領域 X軸向けデータ [s]
-    # amp_normalized    : 周波数特性 振幅データ(正規化済)
-    # freq              : 周波数特性 X軸向けデータ [Hz]
     # time_range        : 時間領域波形グラフ X軸表示レンジ [sample count]
+    # amp_normalized    : 周波数特性 振幅データ(正規化済)
+    # freq_normalized   : 周波数特性 X軸向けデータ [Hz]
+    # freq_range        : 周波数特性グラフ X軸表示レンジ [Hz]
     # dbref             : デシベル基準値
     # A                 : 聴感補正(A特性)の有効(True)/無効(False)設定
     # selected_mode     : 動作モード (0:レコーディングモード / 1:リアルタイムモード)
@@ -176,7 +178,7 @@ def plot_time_and_freq(
     wave_fig.set_yticks([-1, -0.5, 0, 0.5, 1])
 
     # 周波数特性 軸目盛り設定
-    freq_fig.set_xlim(0, 5000)
+    freq_fig.set_xlim(0, freq_range)
     if (dbref > 0):
         freq_fig.set_ylim(-10, 90)  # -10[dB] 〜 90[dB]
         freq_fig.set_yticks(np.arange(0, 100, 20))  # 20[dB]刻み(範囲:0〜100[dB])
@@ -198,7 +200,7 @@ def plot_time_and_freq(
 
     # 周波数特性データプロット
     freq_fig.plot(
-        freq,
+        freq_normalized,
         amp_normalized,
         label='Frequency Response',
         lw=1,

@@ -37,17 +37,20 @@ if __name__ == '__main__':
     # マイクモード (1:モノラル / 2:ステレオ)
     mic_mode = 1
 
-    # サンプリング周波数 [sampling data count/s]
-    samplerate = 44100
+    # サンプリング周波数[Hz]
+    if selected_mode == 0:  # レコーディングモード向け
+        samplerate = 44100
+    else:                   # リアルタイムモード向け
+        samplerate = int(44100 / 4)
+    print("\nSampling Frequency[Hz] = ", samplerate)
 
     # 入力音声ストリームバッファあたりのサンプリングデータ数
-    if selected_mode == 0:
+    if selected_mode == 0:  # レコーディングモード向け
         frames_per_buffer = 512
-    else:
-        # 8192以下ではリアルタイムでのグラフ描画が不可であったため"16384"とした
-        frames_per_buffer = 16384
+    else:                   # リアルタイムモード向け
+        frames_per_buffer = 1024 * 8
     print(
-        "\nframes_per_buffer [sampling data count/stream buffer] = ",
+        "frames_per_buffer [sampling data count/stream buffer] = ",
         frames_per_buffer,
         "\n"
     )
@@ -56,13 +59,14 @@ if __name__ == '__main__':
     graph_type = 0
 
     # 計測時間[s] / 時間領域波形グラフ X軸表示レンジ[s]
-    if selected_mode == 0:
-        time = 5
-        view_range = time
-    else:
-        # リアルタイムモードの場合は"0"を設定する
-        time = 0
-        view_range = 0.050  # リアルタイムモードの場合は"50[ms]"を設定
+    if selected_mode == 0:  # レコーディングモード向け
+        time = 3
+        time_range = time
+        freq_range = int(44100 / 4) / 2
+    else:                   # リアルタイムモード向け
+        time = 0  # リアルタイムモードの場合は"0"を設定する
+        time_range = ((1 / samplerate) * frames_per_buffer) / 10
+        freq_range = samplerate / 2
 
     # デシベル基準値(最小可聴値 20[μPa]を設定)
     dbref = 2e-5
@@ -119,9 +123,11 @@ if __name__ == '__main__':
                 freq_fig,
                 data_normalized,
                 time_normalized,
+                time_range,
                 amp_normalized,
                 freq_normalized,
-                view_range,
+
+                freq_range,
                 dbref,
                 A,
                 selected_mode
