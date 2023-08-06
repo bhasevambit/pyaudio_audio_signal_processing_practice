@@ -431,6 +431,7 @@ def plot_time_and_quef(
     freq_normalized,
     freq_range,
     cepstrum_db,
+    cepstrum_data_lpl,
     dbref,
     A,
     selected_mode
@@ -449,7 +450,8 @@ def plot_time_and_quef(
     # amp_envelope_normalized   : スペクトル包絡データ(正規化済)
     # freq_normalized           : 周波数特性 X軸向けデータ [Hz]
     # freq_range                : 周波数特性グラフ X軸表示レンジ [Hz]
-    # cepstrum_db               : ケプストラムデータ[dB]
+    # cepstrum_data             : ケプストラムデータ(対数値)[dB] 1次元配列
+    # cepstrum_data_lpl         : LPL(=Low-Pass-Lifter)適用後 ケプストラムデータ(対数値)[dB] 1次元配列
     # dbref                     : デシベル基準値
     # A                         : 聴感補正(A特性)の有効(True)/無効(False)設定
     # selected_mode             : 動作モード (0:レコーディングモード / 1:リアルタイムモード)
@@ -495,10 +497,10 @@ def plot_time_and_quef(
         freq_fig.set_yticks(np.arange(0, 100, 20))  # 20[dB]刻み(範囲:0〜100[dB])
 
     # ケプストラム 軸目盛り設定
-    ceps_fig.set_xlim(0, 0.500)  # 0 ～ 250[ms] (低ケフレンシ/高ケフレンシの境界を表示)
+    ceps_fig.set_xlim(0, 0.03)  # 0 ～ 30[ms] (低ケフレンシ/高ケフレンシの境界を表示)
     if (dbref > 0):
-        ceps_fig.set_ylim(-2, 8)  # -10[dB] 〜50[dB]
-        ceps_fig.set_yticks(np.arange(0, 10, 2))  # 5[dB]刻み(範囲:0〜50[dB])
+        ceps_fig.set_ylim(-1, 4)  # -1[dB] 〜5[dB]
+        ceps_fig.set_yticks(np.arange(-2, 5, 1))  # 1[dB]刻み(範囲:-2〜6[dB])
 
     # plot.figure.tight_layout()実行時の「UserWarning: The figure layout has
     # changed to tight」Warning文の抑止
@@ -535,8 +537,16 @@ def plot_time_and_quef(
         time_normalized,
         cepstrum_db,
         label="Cepstrum",
-        lw=2,
+        lw=1,
         color="red")
+
+    ceps_fig.plot(
+        time_normalized,
+        cepstrum_data_lpl,
+        label="Cepstrum(Low-Pass-Lifter)",
+        lw=1,
+        color="royalblue"
+    )
 
     # グラフの凡例表示
     wave_fig.legend(loc="upper right", borderaxespad=1, fontsize=8)

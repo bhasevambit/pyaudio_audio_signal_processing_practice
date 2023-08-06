@@ -118,11 +118,12 @@ if __name__ == '__main__':
             # freq_normalized       : 正規化後 周波数軸データ 1次元配列
 
             # === ケプストラムデータ生成 ===
-            amp_envelope_normalized, cepstrum_data, quef = gen_quef_domain_data(
+            amp_envelope_normalized, cepstrum_data, cepstrum_data_lpl = gen_quef_domain_data(
                 data_normalized, samplerate, dbref)
             # amp_envelope_normalized   : 正規化後 スペクトル包絡データ振幅成分 1次元配列
             # cepstrum_data             : ケプストラムデータ(対数値)[dB] 1次元配列
-            # quef_data                 : ケプストラムデータに対応したケフレンシー軸データ 1次元配列
+            # cepstrum_data_lpl         : LPL(=Low-Pass-Lifter)適用後
+            # ケプストラムデータ(対数値)[dB] 1次元配列
 
             # === グラフ表示 ===
             plot_time_and_quef(
@@ -138,6 +139,7 @@ if __name__ == '__main__':
                 freq_normalized,
                 freq_range,
                 cepstrum_data,
+                cepstrum_data_lpl,
                 dbref,
                 A,
                 selected_mode

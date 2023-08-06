@@ -28,14 +28,14 @@ def gen_quef_domain_data(discrete_data, samplerate, dbref):
 
     # ケプストラム波形データに対応したケフレンシー軸データを作成
     # (時間領域波形 離散データ 1次元配列の要素数を最大値とした１次元配列の各要素にサンプリング周期[s]を乗算)
-    dt = 1 / samplerate  # サンプリング周期[s]
-    quef_data = np.arange(0, len(discrete_data)) * dt
+    # dt = 1 / samplerate  # サンプリング周期[s]
+    # quef_data = np.arange(0, len(discrete_data)) * dt
 
     # LPL(=Low-Pass-Lifter)のカットオフタイム(ケプストラム離散データindex)を設定
     cut_off_index = 50
 
     # ケプストラム波形へのLPL(=Low-Pass-Lifter)の適用 (高次ケフレンシー成分の0化)
-    cepstrum_data_lpl = cepstrum_data
+    cepstrum_data_lpl = cepstrum_data.copy()    # 独立したリストとして複製
     cepstrum_data_lpl[cut_off_index:len(cepstrum_data_lpl) - cut_off_index] = 0
 
     # ケプストラム波形データ 1次元配列のDFT(離散フーリエ変換)を実施し、
@@ -56,5 +56,5 @@ def gen_quef_domain_data(discrete_data, samplerate, dbref):
 
     # amp_envelope_normalized   : 正規化後 スペクトル包絡データ振幅成分 1次元配列
     # cepstrum_data             : ケプストラムデータ(対数値)[dB] 1次元配列
-    # quef_data                 : ケプストラムデータに対応したケフレンシー軸データ 1次元配列
-    return amp_envelope_normalized, cepstrum_data, quef_data
+    # cepstrum_data_lpl         : LPL(=Low-Pass-Lifter)適用後 ケプストラムデータ(対数値)[dB] 1次元配列
+    return amp_envelope_normalized, cepstrum_data, cepstrum_data_lpl
