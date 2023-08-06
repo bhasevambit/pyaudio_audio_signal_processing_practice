@@ -2,6 +2,7 @@ import scipy
 import numpy as np
 from modules.audio_signal_processing_basic import db
 from modules.audio_signal_processing_basic import liner
+from modules.audio_signal_processing_basic import dft_negative_freq_domain_exlusion
 
 
 def norm(spectrum, dBref):
@@ -42,18 +43,18 @@ def gen_quef_domain_data(discrete_data, samplerate, dbref):
     # ケプストラム波形を再度フーリエ変換してスペクトル包絡を得る
     cepstrum_db_low = scipy.fft.fft(cepstrum_db)
 
-    # quefrency軸を作成
-    quef = np.arange(0, len(discrete_data)) / samplerate
+    # ケプストラムデータに対応したケフレンシー軸データを作成
+    # (時間領域波形 離散データ 1次元配列の要素数を最大値とした１次元配列の各要素にサンプリング周期[s]を乗算)
+    dt = 1 / samplerate  # サンプリング周期[s]
+    quef_data = np.arange(0, len(discrete_data)) * dt
 
-    # ローパスリフター適用後のスペクトル包絡の振幅成分を算出(正規化)
+    # ローパスリフター適用後のスペクトル包絡データの振幅成分を算出(振幅成分の正規化)
     amp_envelope = norm(cepstrum_db_low, 2e-5)
 
-    # amp_envelopeは、負の周波数領域データも含むため、
-    # 正の周波数領域データをスライス抽出 (開始要素から「要素数(len(amp_envelope) / 2」までの要素)
-    amp_envelope_normalized = amp_envelope[:int(len(amp_envelope) / 2)]
+    # スペクトル包絡データ振幅成分の正規化(負の周波数領域の除外)を実施
+    amp_envelope_normalized = dft_negative_freq_domain_exlusion(amp_envelope)
 
-    # amp_envelope_normalized   : 正規化後 スペクトル包絡データ 1次元配列
-    # cepstrum_db                       : ケプストラムデータ[dB]
-    # spectrum_db_amp                   :
-    # quef                      : ケプストラムデータに対応したケフレンシー軸データ
-    return amp_envelope_normalized, cepstrum_db, quef
+    # amp_envelope_normalized   : 正規化後 スペクトル包絡データ振幅成分 1次元配列
+    # cepstrum_db               : ケプストラムデータ[dB]
+    # quef_data                 :  ケプストラムデータに対応したケフレンシー軸データ 1次元配列
+    return amp_envelope_normalized, cepstrum_db, quef_data

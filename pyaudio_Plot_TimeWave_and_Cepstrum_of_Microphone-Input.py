@@ -120,7 +120,7 @@ if __name__ == '__main__':
             # === ケプストラムデータ生成 ===
             amp_envelope_normalized, cepstrum_db, quef = gen_quef_domain_data(
                 data_normalized, samplerate, dbref)
-            # amp_envelope_normalized   : 正規化後 スペクトル包絡データ 1次元配列
+            # amp_envelope_normalized   : 正規化後 スペクトル包絡データ振幅成分 1次元配列
 
             # === グラフ表示 ===
             plot_time_and_quef(

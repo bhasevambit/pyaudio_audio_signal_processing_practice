@@ -2,7 +2,7 @@ import scipy
 import numpy as np
 from modules.audio_signal_processing_basic import db
 from modules.audio_signal_processing_basic import dft_normalize
-from modules.audio_signal_processing_basic import dft_freq_normalize
+from modules.audio_signal_processing_basic import dft_negative_freq_domain_exlusion
 from modules.audio_signal_processing_basic import a_weighting
 
 
@@ -28,8 +28,8 @@ def gen_freq_domain_data(discrete_data, samplerate, dbref, A):
         discrete_data, spectrum_data
     )
 
-    # 周波数軸データの正規化を実施
-    freq_normalized = dft_freq_normalize(freq_data)
+    # 周波数軸データの正規化(負の周波数領域の除外)を実施
+    freq_normalized = dft_negative_freq_domain_exlusion(freq_data)
 
     # dbrefが0以上の時にdB変換する
     if dbref > 0:
@@ -156,8 +156,8 @@ def gen_freq_domain_data_of_stft(
         d=dt
     )
 
-    # 周波数軸データの正規化を実施
-    freq_spctrgrm = dft_freq_normalize(freq_data)
+    # 周波数軸データの正規化(負の周波数領域の除外)を実施
+    freq_spctrgrm = dft_negative_freq_domain_exlusion(freq_data)
     print("freq_spctrgrm.shape = ", freq_spctrgrm.shape)
 
     # DFT(離散フーリエ変換)データに対応した時間軸データを作成

@@ -109,19 +109,19 @@ def dft_normalize(discrete_data, spectrum_data):
     return spectrum_normalized, amp_normalized, phase_normalized
 
 
-def dft_freq_normalize(freq_data):
-    # ========================================================
-    # === DFT(離散フーリエ変換) 周波数軸データの正規化関数 ===
-    # ========================================================
-    # freq_data     : DFTデータに対応した周波数軸データ 1次元配列
+def dft_negative_freq_domain_exlusion(freq_domain_data):
+    # ======================================
+    # === 負の周波数領域データの除外関数 ===
+    # ======================================
+    # freq_domain_data     : 負の周波数領域を含む離散データ 1次元配列
 
-    # === 正規化済データと連動した周波数軸の作成 ===
-    # freq_dataは、負の周波数領域軸データも含むため、
-    # 「要素数(len(freq_data) / 2」までの要素をスライス抽出
-    freq_normalized = freq_data[:int(len(freq_data) / 2)]
+    # freq_domain_dataは、負の周波数領域軸データも含むため、
+    # 「要素数(len(freq_domain_data) / 2」までの要素をスライス抽出
+    freq_domain_data_normalized = freq_domain_data[:int(
+        len(freq_domain_data) / 2)]
 
-    # freq_normalized   : 正規化後 周波数軸データ 1次元配列
-    return freq_normalized
+    # freq_domain_data_normalized   : 正の周波数領域のみの離散データ 1次元配列
+    return freq_domain_data_normalized
 
 
 def a_weighting(f):
