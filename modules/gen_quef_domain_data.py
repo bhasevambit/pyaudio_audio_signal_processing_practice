@@ -25,31 +25,32 @@ def gen_quef_domain_data(discrete_data, samplerate, dbref):
     # (scipy.fft.fft()の出力結果spectrumは複素数)
     spectrum_data = scipy.fft.fft(discrete_data)
 
-    # スペクトルを対数(dB)に変換
-    log_spectrum = db(spectrum_data, dbref)
+    # DFTデータ(複素数)を対数[dB](dbref基準)に変換
+    spectrum_data_log = db(spectrum_data, dbref)
 
-    # 対数スペクトルをIDFT(逆離散フーリエ変換)を実施
-    spectrum_idft = scipy.ifft(log_spectrum)
+    # 対数DFTデータ(複素数対数)に対して、IDFT(逆離散フーリエ変換)を実施
+    spectrum_idft = scipy.ifft(spectrum_data_log)
 
-    # IFFT結果の実数値のみを抽出し、ケプストラム波形を作成
-    cepstrum_db = np.real(spectrum_idft)
+    # IDFTデータの実数値を抽出し、ケプストラム波形データを作成
+    cepstrum_data = np.real(spectrum_idft)
 
-    # ローパスリフターのカットオフ指標
-    index = 50
-
-    # ケプストラム波形の高次ケフレンシー成分を0にする（ローパスリフター）
-    cepstrum_db[index:len(cepstrum_db) - index] = 0
-
-    # ケプストラム波形を再度フーリエ変換してスペクトル包絡を得る
-    cepstrum_db_low = scipy.fft.fft(cepstrum_db)
-
-    # ケプストラムデータに対応したケフレンシー軸データを作成
+    # ケプストラム波形データに対応したケフレンシー軸データを作成
     # (時間領域波形 離散データ 1次元配列の要素数を最大値とした１次元配列の各要素にサンプリング周期[s]を乗算)
     dt = 1 / samplerate  # サンプリング周期[s]
     quef_data = np.arange(0, len(discrete_data)) * dt
 
-    # ローパスリフター適用後のスペクトル包絡データの振幅成分を算出(振幅成分の正規化)
-    amp_envelope = norm(cepstrum_db_low, 2e-5)
+    # LPL(=Low-Pass-Lifter)のカットオフタイム(ケプストラム離散データindex)を設定
+    cut_off_index = 50
+
+    # ケプストラム波形へのLPL(=Low-Pass-Lifter)の適用 (高次ケフレンシー成分の0化)
+    cepstrum_data_lpl = cepstrum_data
+    cepstrum_data_lpl[cut_off_index:len(cepstrum_data_lpl) - cut_off_index] = 0
+
+    # ケプストラム波形データ 1次元配列のDFT(離散フーリエ変換)を実施し、スペクトル包絡データを生成
+    spectrum_envelope = scipy.fft.fft(cepstrum_data_lpl)
+
+    # LPL(=Low-Pass-Lifter)の適用後のスペクトル包絡データの振幅成分を算出(振幅成分の正規化)
+    amp_envelope = norm(spectrum_envelope, 2e-5)
 
     # スペクトル包絡データ振幅成分の正規化(負の周波数領域の除外)を実施
     amp_envelope_normalized = dft_negative_freq_domain_exlusion(amp_envelope)
@@ -57,4 +58,4 @@ def gen_quef_domain_data(discrete_data, samplerate, dbref):
     # amp_envelope_normalized   : 正規化後 スペクトル包絡データ振幅成分 1次元配列
     # cepstrum_db               : ケプストラムデータ[dB]
     # quef_data                 :  ケプストラムデータに対応したケフレンシー軸データ 1次元配列
-    return amp_envelope_normalized, cepstrum_db, quef_data
+    return amp_envelope_normalized, cepstrum_data, quef_data
