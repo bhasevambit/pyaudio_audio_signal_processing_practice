@@ -120,17 +120,10 @@ if __name__ == '__main__':
             print("len(freq_normalized) = ", len(freq_normalized))
 
             # === ケプストラムデータ生成 ===
-            cepstrum_db, spectrum_db_amp, cepstrum_db_low_amp, freq, quef = gen_quef_domain_data(
+            cepstrum_db, spectrum_db_amp, cepstrum_db_low_amp_normalized, quef = gen_quef_domain_data(
                 data_normalized, samplerate, dbref)
-            print("len(cepstrum_db_low_amp) = ", len(cepstrum_db_low_amp))
-            print("len(freq) = ", len(freq))
-
-            # cepstrum_db_low_ampは、負の周波数領域データも含むため、
-            # 正の周波数領域データをスライス抽出 (開始要素から「要素数(len(cepstrum_db_low_amp) / 2」までの要素)
-            cepstrum_db_low_amp_normalized = cepstrum_db_low_amp[:int(
-                len(cepstrum_db_low_amp) / 2)]
             print(
-                "len(cepstrum_db_low_amp_normalized) = ",
+                "len(cepstrum_dbcepstrum_db_low_amp_normalized_low_amp) = ",
                 len(cepstrum_db_low_amp_normalized))
 
             # === グラフ表示 ===
