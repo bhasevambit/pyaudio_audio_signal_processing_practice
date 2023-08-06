@@ -31,11 +31,24 @@ def gen_quef_domain_data(discrete_data, samplerate, dbref):
     # dt = 1 / samplerate  # サンプリング周期[s]
     # quef_data = np.arange(0, len(discrete_data)) * dt
 
-    # LPL(=Low-Pass-Lifter)のカットオフタイム(ケプストラム離散データindex)を設定
-    cut_off_index = 50
+    # LPL(=Low-Pass-Lifter)適用前後を把握するために独立したリストとして複製
+    cepstrum_data_lpl = cepstrum_data.copy()
+
+    # LPL(=Low-Pass-Lifter)のカットオフタイム(ケプストラム離散データindex)の推定
+    index_range_low = int(samplerate / 800)  # 基本周波数の推定範囲の上限を800Hzとする
+    index_range_high = int(samplerate / 40)  # 基本周波数の推定範囲の下限を40Hzとする
+
+    # 基本周期の点数を求める
+    voice_fundamental_freq = np.argmax(
+        cepstrum_data_lpl[index_range_low:index_range_high]) + index_range_low
+
+    # カットオフタイム(ケプストラム離散データindex)のセット(=基本周期の半分まで抽出)
+    cut_off_index = voice_fundamental_freq // 2
+    if cut_off_index < 30:
+        cut_off_index = 30
+    print("cut_off_index = ", cut_off_index)
 
     # ケプストラム波形へのLPL(=Low-Pass-Lifter)の適用 (高次ケフレンシー成分の0化)
-    cepstrum_data_lpl = cepstrum_data.copy()    # 独立したリストとして複製
     cepstrum_data_lpl[cut_off_index:len(cepstrum_data_lpl) - cut_off_index] = 0
 
     # ケプストラム波形データ 1次元配列のDFT(離散フーリエ変換)を実施し、
@@ -56,5 +69,6 @@ def gen_quef_domain_data(discrete_data, samplerate, dbref):
 
     # amp_envelope_normalized   : 正規化後 スペクトル包絡データ振幅成分 1次元配列
     # cepstrum_data             : ケプストラムデータ(対数値)[dB] 1次元配列
-    # cepstrum_data_lpl         : LPL(=Low-Pass-Lifter)適用後 ケプストラムデータ(対数値)[dB] 1次元配列
+    # cepstrum_data_lpl         : LPL(=Low-Pass-Lifter)適用後
+    #                             ケプストラムデータ(対数値)[dB] 1次元配列
     return amp_envelope_normalized, cepstrum_data, cepstrum_data_lpl
