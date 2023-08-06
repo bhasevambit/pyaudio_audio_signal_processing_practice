@@ -55,6 +55,6 @@ def gen_quef_domain_data(discrete_data, samplerate, dbref):
         amp_envelope_normalized = db(amp_envelope_normalized, dbref)
 
     # amp_envelope_normalized   : 正規化後 スペクトル包絡データ振幅成分 1次元配列
-    # cepstrum_data             : ケプストラムデータ[dB]
+    # cepstrum_data             : ケプストラムデータ(対数値)[dB] 1次元配列
     # quef_data                 : ケプストラムデータに対応したケフレンシー軸データ 1次元配列
     return amp_envelope_normalized, cepstrum_data, quef_data
