@@ -3,7 +3,7 @@ from modules.get_mic_index import get_mic_index
 from modules.audio_stream import audio_stream_start
 from modules.audio_stream import audio_stream_stop
 from modules.gen_time_domain_data import gen_time_domain_data
-# from modules.gen_freq_domain_data import gen_freq_domain_data
+from modules.gen_freq_domain_data import gen_freq_domain_data
 from modules.gen_quef_domain_data import gen_quef_domain_data
 from modules.plot_matplot_graph import gen_graph_figure_for_cepstrum
 from modules.plot_matplot_graph import plot_time_and_quef
@@ -110,16 +110,28 @@ if __name__ == '__main__':
             # time_normalized : 時間領域波形データ(正規化済)に対応した時間軸データ
 
             # === 周波数特性データ生成 ===
-            # spectrum_normalized, amp_normalized, phase_normalized, freq_normalized = gen_freq_domain_data(
-            #     data_normalized, samplerate, dbref, A)
-            # # spectrum_normalized   : 正規化後 DFTデータ 1次元配列
-            # # amp_normalized        : 正規化後 DFTデータ振幅成分 1次元配列
-            # # phase_normalized      : 正規化後 DFTデータ位相成分 1次元配列
-            # # freq_normalized       : 正規化後 周波数軸データ 1次元配列
+            spectrum_normalized, amp_normalized, phase_normalized, freq_normalized = gen_freq_domain_data(
+                data_normalized, samplerate, dbref, A)
+            # spectrum_normalized   : 正規化後 DFTデータ 1次元配列
+            # amp_normalized        : 正規化後 DFTデータ振幅成分 1次元配列
+            # phase_normalized      : 正規化後 DFTデータ位相成分 1次元配列
+            # freq_normalized       : 正規化後 周波数軸データ 1次元配列
+            print("len(amp_normalized) = ", len(amp_normalized))
+            print("len(freq_normalized) = ", len(freq_normalized))
 
             # === ケプストラムデータ生成 ===
             cepstrum_db, spectrum_db_amp, cepstrum_db_low_amp, freq, quef = gen_quef_domain_data(
                 data_normalized, samplerate, dbref)
+            print("len(cepstrum_db_low_amp) = ", len(cepstrum_db_low_amp))
+            print("len(freq) = ", len(freq))
+
+            # cepstrum_db_low_ampは、負の周波数領域データも含むため、
+            # 正の周波数領域データをスライス抽出 (開始要素から「要素数(len(cepstrum_db_low_amp) / 2」までの要素)
+            cepstrum_db_low_amp_normalized = cepstrum_db_low_amp[:int(
+                len(cepstrum_db_low_amp) / 2)]
+            print(
+                "len(cepstrum_db_low_amp_normalized) = ",
+                len(cepstrum_db_low_amp_normalized))
 
             # === グラフ表示 ===
             plot_time_and_quef(
@@ -130,11 +142,11 @@ if __name__ == '__main__':
                 data_normalized,
                 time_normalized,
                 time_range,
-                spectrum_db_amp,
-                freq,
+                amp_normalized,
+                freq_normalized,
                 freq_range,
                 cepstrum_db,
-                cepstrum_db_low_amp,
+                cepstrum_db_low_amp_normalized,
                 dbref,
                 A,
                 selected_mode
