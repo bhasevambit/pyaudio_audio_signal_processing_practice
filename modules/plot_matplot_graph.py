@@ -486,10 +486,10 @@ def plot_time_and_quef(
         freq_fig.set_yticks(np.arange(0, 100, 20))  # 20[dB]刻み(範囲:0〜100[dB])
 
     # ケプストラム 軸目盛り設定
-    quef_fig.set_xlim(0, time_range)
+    quef_fig.set_xlim(0, time_range / 15)
     if (dbref > 0):
-        quef_fig.set_ylim(-10, 90)  # -10[dB] 〜 90[dB]
-        quef_fig.set_yticks(np.arange(0, 100, 20))  # 20[dB]刻み(範囲:0〜100[dB])
+        quef_fig.set_ylim(-5, 45)  # -10[dB] 〜50[dB]
+        quef_fig.set_yticks(np.arange(0, 50, 5))  # 5[dB]刻み(範囲:0〜50[dB])
 
     # plot.figure.tight_layout()実行時の「UserWarning: The figure layout has
     # changed to tight」Warning文の抑止
