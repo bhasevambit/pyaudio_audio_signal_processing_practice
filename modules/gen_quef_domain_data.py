@@ -25,16 +25,18 @@ def gen_quef_domain_data(discrete_data, samplerate, dbref):
     spectrum_data = scipy.fft.fft(discrete_data)
 
     # スペクトルを対数(dB)に変換
-    spectrum_db = db(spectrum_data, dbref)
+    log_spectrum = db(spectrum_data, dbref)
 
-    # 対数スペクトルをIDFT(逆離散フーリエ変換)を実施し、ケプストラム波形を作成
-    # (IFFT結果の実数値のみを抽出)
-    cepstrum_db = np.real(scipy.ifft(spectrum_db))
+    # 対数スペクトルをIDFT(逆離散フーリエ変換)を実施
+    spectrum_idft = scipy.ifft(log_spectrum)
+
+    # IFFT結果の実数値のみを抽出し、ケプストラム波形を作成
+    cepstrum_db = np.real(spectrum_idft)
 
     # ローパスリフターのカットオフ指標
     index = 50
 
-    # ケプストラム波形の高次を0にする（ローパスリフター）
+    # ケプストラム波形の高次ケフレンシー成分を0にする（ローパスリフター）
     cepstrum_db[index:len(cepstrum_db) - index] = 0
 
     # ケプストラム波形を再度フーリエ変換してスペクトル包絡を得る
@@ -43,19 +45,15 @@ def gen_quef_domain_data(discrete_data, samplerate, dbref):
     # quefrency軸を作成
     quef = np.arange(0, len(discrete_data)) / samplerate
 
-    # グラフ用に振幅を正規化
-    # 音声スペクトルの振幅成分を計算
-    spectrum_db_amp = norm(spectrum_db, 2e-5)
-    # ローパスリフター後のスペクトル包絡の振幅成分を計算
-    cepstrum_db_low_amp = norm(cepstrum_db_low, 2e-5)
+    # ローパスリフター適用後のスペクトル包絡の振幅成分を算出(正規化)
+    amp_envelope = norm(cepstrum_db_low, 2e-5)
 
-    # cepstrum_db_low_ampは、負の周波数領域データも含むため、
-    # 正の周波数領域データをスライス抽出 (開始要素から「要素数(len(cepstrum_db_low_amp) / 2」までの要素)
-    amp_envelope_normalized = cepstrum_db_low_amp[:int(
-        len(cepstrum_db_low_amp) / 2)]
+    # amp_envelopeは、負の周波数領域データも含むため、
+    # 正の周波数領域データをスライス抽出 (開始要素から「要素数(len(amp_envelope) / 2」までの要素)
+    amp_envelope_normalized = amp_envelope[:int(len(amp_envelope) / 2)]
 
     # amp_envelope_normalized   : 正規化後 スペクトル包絡データ 1次元配列
     # cepstrum_db                       : ケプストラムデータ[dB]
     # spectrum_db_amp                   :
     # quef                      : ケプストラムデータに対応したケフレンシー軸データ
-    return amp_envelope_normalized, cepstrum_db, spectrum_db_amp, quef
+    return amp_envelope_normalized, cepstrum_db, quef
