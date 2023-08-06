@@ -24,8 +24,9 @@ def gen_freq_domain_data(discrete_data, samplerate, dbref, A):
     freq_data = scipy.fft.fftfreq(len(discrete_data), d=dt)
 
     # DFT(離散フーリエ変換)データの正規化を実施
+    # (振幅成分の正規化 & 負の周波数領域の除外)
     spectrum_normalized, amp_normalized, phase_normalized = dft_normalize(
-        discrete_data, spectrum_data
+        spectrum_data
     )
 
     # 周波数軸データの正規化(負の周波数領域の除外)を実施
@@ -185,7 +186,7 @@ def gen_freq_domain_data_of_stft(
 
         # DFT(離散フーリエ変換)データの正規化を実施
         spectrum_normalized, amp_normalized, phase_normalized = dft_normalize(
-            time_array_after_window[i], spectrum_data
+            spectrum_data
         )
 
         # 窓関数補正値(acf)を乗算

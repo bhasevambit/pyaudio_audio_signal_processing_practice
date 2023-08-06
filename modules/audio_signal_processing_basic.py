@@ -68,33 +68,32 @@ def gen_time_axis_data(discrete_data, samplerate):
     return time_axis_data
 
 
-def dft_normalize(discrete_data, spectrum_data):
+def dft_normalize(spectrum_data):
     # ===============================================
     # === DFT(離散フーリエ変換)データの正規化関数 ===
     # ===============================================
-    # discrete_data : 離散データ 1次元配列 (DFT元データ)
     # spectrum_data : DFTデータ 1次元配列
 
-    # === DFTデータの正規化 ===
+    # === DFTデータの正規化(負の周波数領域の除外) ===
     # spectrum_dataは、負の周波数領域データも含むため、
     # 正の周波数領域データをスライス抽出 (開始要素から「要素数(len(spectrum_data) / 2」までの要素)
     spectrum_normalized = spectrum_data[:int(len(spectrum_data) / 2)]
 
-    # === 振幅成分の正規化 ===
+    # === 振幅成分の正規化(スペクトル正規化 & 負の周波数領域の除外) ===
     # 振幅成分算出
     amp = np.abs(spectrum_data)
 
     # 離散フーリエ変換の定義から、求まる振幅ampを入力データの振幅に合わせるため 1/N 倍して振幅を計算する。
-    # 加えて、フーリエ変換された N 個のスペクトル（振幅やパワー） は、サンプリング周波数の 1/2
+    # 加えて、フーリエ変換された N 個のスペクトル(振幅やパワー)は、サンプリング周波数の 1/2
     # の周波数（ナイキスト周波数）を堺に左右対称となる事から、スペクトルの値は対になる対称成分を足し合わせたものが、
     # 入力データの実データと一致するため、スペクトル値をさらに2倍する正規化を施す
-    amp_normalized_pre = (amp / len(discrete_data)) * 2
+    amp_normalized_pre = (amp / len(spectrum_data)) * 2
 
     # amp_normalized_preは、負の周波数領域データも含むため、
     # 正の周波数領域データをスライス抽出 (開始要素から「要素数(len(amp_normalized_pre) / 2」までの要素)
     amp_normalized = amp_normalized_pre[:int(len(amp_normalized_pre) / 2)]
 
-    # === 位相成分の正規化 ===
+    # === 位相成分の正規化(負の周波数領域の除外) ===
     # 位相成分算出 & 位相をラジアンから度に変換
     phase_rad = np.angle(spectrum_data)
     phase = np.degrees(phase_rad)
