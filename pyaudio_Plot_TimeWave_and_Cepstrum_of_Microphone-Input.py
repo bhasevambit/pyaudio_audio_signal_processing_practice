@@ -85,10 +85,10 @@ if __name__ == '__main__':
 
     # === グラフ領域作成 ===
     # (リアルタイムモード向けグラフ描画のためにMain Codeでの生成が必須)
-    fig, wave_fig, freq_fig, quef_fig = gen_graph_figure_for_cepstrum()
+    fig, wave_fig, freq_fig, ceps_fig = gen_graph_figure_for_cepstrum()
     # fig       : 生成したmatplotlib figureインスタンス
     # wave_fig  : 時間領域波形向けmatplotlib Axesインスタンス
-    # quef_fig  : ケプストラム向けmatplotlib Axesインスタンス
+    # ceps_fig  : ケプストラム向けmatplotlib Axesインスタンス
 
     # === Microphone入力音声ストリーム生成 ===
     pa, stream = audio_stream_start(
@@ -120,26 +120,25 @@ if __name__ == '__main__':
             print("len(freq_normalized) = ", len(freq_normalized))
 
             # === ケプストラムデータ生成 ===
-            cepstrum_db, spectrum_db_amp, cepstrum_db_low_amp_normalized, quef = gen_quef_domain_data(
+            cepstrum_db, spectrum_db_amp, amp_envelope, quef = gen_quef_domain_data(
                 data_normalized, samplerate, dbref)
             print(
-                "len(cepstrum_dbcepstrum_db_low_amp_normalized_low_amp) = ",
-                len(cepstrum_db_low_amp_normalized))
+                "len(amp_envelope) = ", len(amp_envelope))
 
             # === グラフ表示 ===
             plot_time_and_quef(
                 fig,
                 wave_fig,
                 freq_fig,
-                quef_fig,
+                ceps_fig,
                 data_normalized,
                 time_normalized,
                 time_range,
                 amp_normalized,
+                amp_envelope,
                 freq_normalized,
                 freq_range,
                 cepstrum_db,
-                cepstrum_db_low_amp_normalized,
                 dbref,
                 A,
                 selected_mode

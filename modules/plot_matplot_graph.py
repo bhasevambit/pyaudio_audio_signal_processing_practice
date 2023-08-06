@@ -415,15 +415,15 @@ def plot_time_and_quef(
     fig,
     wave_fig,
     freq_fig,
-    quef_fig,
+    ceps_fig,
     data_normalized,
     time_normalized,
     time_range,
     amp_normalized,
+    amp_envelope,
     freq_normalized,
     freq_range,
     cepstrum_db,
-    cepstrum_db_low_amp,
     dbref,
     A,
     selected_mode
@@ -434,13 +434,15 @@ def plot_time_and_quef(
     # fig               : 生成したmatplotlib figureインスタンス
     # wave_fig          : 時間領域波形向けmatplotlib Axesインスタンス
     # freq_fig          : 周波数特性向けmatplotlib Axesインスタンス
-    # quef_fig          : ケプストラム向けmatplotlib Axesインスタンス
+    # ceps_fig          : ケプストラム向けmatplotlib Axesインスタンス
     # data_normalized   : 時間領域 波形データ(正規化済)
     # time_normalized   : 時間領域 X軸向けデータ [s]
     # time_range        : 時間領域波形グラフ X軸表示レンジ [sample count]
     # amp_normalized    : 周波数特性 振幅データ(正規化済)
+    # amp_envelope      : スペクトル包絡データ
     # freq_normalized   : 周波数特性 X軸向けデータ [Hz]
     # freq_range        : 周波数特性グラフ X軸表示レンジ [Hz]
+    # cepstrum_db       : ケプストラムデータ[dB]
     # dbref             : デシベル基準値
     # A                 : 聴感補正(A特性)の有効(True)/無効(False)設定
     # selected_mode     : 動作モード (0:レコーディングモード / 1:リアルタイムモード)
@@ -466,13 +468,13 @@ def plot_time_and_quef(
         freq_fig.set_ylabel('Amplitude')
 
     # ケプストラム 軸ラベル設定
-    quef_fig.set_xlabel('Quefrency [s]')
+    ceps_fig.set_xlabel('Quefrency [s]')
     if (dbref > 0) and not (A):
-        quef_fig.set_ylabel('Amplitude [dB spl]')
+        ceps_fig.set_ylabel('Amplitude [dB spl]')
     elif (dbref > 0) and (A):
-        quef_fig.set_ylabel('Amplitude [dB spl(A)]')
+        ceps_fig.set_ylabel('Amplitude [dB spl(A)]')
     else:
-        quef_fig.set_ylabel('Amplitude')
+        ceps_fig.set_ylabel('Amplitude')
 
     # 時間領域波形 軸目盛り設定
     wave_fig.set_xlim(0, time_range)
@@ -486,10 +488,10 @@ def plot_time_and_quef(
         freq_fig.set_yticks(np.arange(0, 100, 20))  # 20[dB]刻み(範囲:0〜100[dB])
 
     # ケプストラム 軸目盛り設定
-    quef_fig.set_xlim(0, time_range / 15)
+    ceps_fig.set_xlim(0, time_range / 15)
     if (dbref > 0):
-        quef_fig.set_ylim(-5, 45)  # -10[dB] 〜50[dB]
-        quef_fig.set_yticks(np.arange(0, 50, 5))  # 5[dB]刻み(範囲:0〜50[dB])
+        ceps_fig.set_ylim(-5, 45)  # -10[dB] 〜50[dB]
+        ceps_fig.set_yticks(np.arange(0, 50, 5))  # 5[dB]刻み(範囲:0〜50[dB])
 
     # plot.figure.tight_layout()実行時の「UserWarning: The figure layout has
     # changed to tight」Warning文の抑止
@@ -517,21 +519,22 @@ def plot_time_and_quef(
     # スペクトル包絡データプロット
     freq_fig.plot(
         freq_normalized,
-        cepstrum_db_low_amp,
+        amp_envelope,
         label="Spectrum Envelope",
         lw=4)
 
     # ケプストラムデータプロット
-    quef_fig.plot(
+    ceps_fig.plot(
         time_normalized,
         cepstrum_db,
         label='Cepstrum',
-        lw=1,
-        color="red"
-    )
+        lw=2,
+        color="red")
 
-    # 周波数特性グラフの凡例表示
-    freq_fig.legend()
+    # グラフの凡例表示
+    wave_fig.legend(loc='upper right', borderaxespad=1, fontsize=8)
+    freq_fig.legend(loc='upper right', borderaxespad=1, fontsize=8)
+    ceps_fig.legend(loc='upper right', borderaxespad=1, fontsize=8)
 
     if selected_mode == 1:
         # リアルタイムモードの場合、matplotlibグラフを更新
@@ -539,4 +542,4 @@ def plot_time_and_quef(
 
         wave_fig.cla()
         freq_fig.cla()
-        quef_fig.cla()
+        ceps_fig.cla()
