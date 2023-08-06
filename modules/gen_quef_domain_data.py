@@ -51,4 +51,4 @@ def gen_quef_domain_data(discrete_data, samplerate, dbref):
     # ローパスリフター後のスペクトル包絡の振幅成分を計算
     cepstrum_db_low_amp = norm(cepstrum_db_low, 2e-5)
 
-    return spectrum_db_amp, cepstrum_db_low_amp, freq, quef
+    return cepstrum_db, spectrum_db_amp, cepstrum_db_low_amp, freq, quef

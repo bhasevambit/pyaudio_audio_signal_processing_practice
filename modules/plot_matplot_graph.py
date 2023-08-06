@@ -422,6 +422,7 @@ def plot_time_and_quef(
     amp_normalized,
     freq_normalized,
     freq_range,
+    cepstrum_db,
     cepstrum_db_low_amp,
     dbref,
     A,
@@ -501,7 +502,7 @@ def plot_time_and_quef(
     wave_fig.plot(
         time_normalized,
         data_normalized,
-        label='Time Waveform',
+        label="Time Waveform",
         lw=1,
         color="blue")
 
@@ -509,14 +510,28 @@ def plot_time_and_quef(
     freq_fig.plot(
         freq_normalized,
         amp_normalized,
-        label='Frequency Response',
+        label="Spectrum",
         lw=1,
         color="dodgerblue")
 
     # スペクトル包絡データプロット
-    freq_fig.plot(freq_normalized, cepstrum_db_low_amp, lw='4')
+    freq_fig.plot(
+        freq_normalized,
+        cepstrum_db_low_amp,
+        label="Spectrum Envelope",
+        lw=4)
 
     # ケプストラムデータプロット
+    quef_fig.plot(
+        time_normalized,
+        cepstrum_db,
+        label='Cepstrum',
+        lw=1,
+        color="red"
+    )
+
+    # 周波数特性グラフの凡例表示
+    freq_fig.legend()
 
     if selected_mode == 1:
         # リアルタイムモードの場合、matplotlibグラフを更新

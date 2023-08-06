@@ -118,7 +118,7 @@ if __name__ == '__main__':
             # # freq_normalized       : 正規化後 周波数軸データ 1次元配列
 
             # === ケプストラムデータ生成 ===
-            spectrum_db_amp, cepstrum_db_low_amp, freq, quef = gen_quef_domain_data(
+            cepstrum_db, spectrum_db_amp, cepstrum_db_low_amp, freq, quef = gen_quef_domain_data(
                 data_normalized, samplerate, dbref)
 
             # === グラフ表示 ===
@@ -133,6 +133,7 @@ if __name__ == '__main__':
                 spectrum_db_amp,
                 freq,
                 freq_range,
+                cepstrum_db,
                 cepstrum_db_low_amp,
                 dbref,
                 A,
