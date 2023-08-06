@@ -72,10 +72,10 @@ if __name__ == '__main__':
     dbref = 2e-5
 
     # 聴感補正(A特性)の有効(True)/無効(False)設定
-    A = True
+    A = False   # ケプストラム導出にあたりA特性補正はOFFとする
 
     # グラフ保存時のファイル名プレフィックス
-    filename_prefix = "time-waveform_and_freq-response_"
+    filename_prefix = "time-waveform_and_Cepstrum_"
     # ------------------------
 
     # === マイクチャンネルを自動取得 ===
