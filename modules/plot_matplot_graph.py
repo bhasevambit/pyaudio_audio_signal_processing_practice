@@ -213,7 +213,7 @@ def plot_time_and_freq(
 
     # plot.figure.tight_layout()実行時の「UserWarning: The figure layout has
     # changed to tight」Warning文の抑止
-    warnings.simplefilter('ignore', UserWarning)
+    warnings.simplefilter("ignore", UserWarning)
 
     # レイアウト設定
     fig.tight_layout()
@@ -222,7 +222,7 @@ def plot_time_and_freq(
     wave_fig.plot(
         time_normalized,
         data_normalized,
-        label='Time Waveform',
+        label="Time Waveform",
         lw=1,
         color="blue")
 
@@ -230,9 +230,13 @@ def plot_time_and_freq(
     freq_fig.plot(
         freq_normalized,
         amp_normalized,
-        label='Frequency Response',
+        label="Spectrum",
         lw=1,
         color="dodgerblue")
+
+    # グラフの凡例表示
+    wave_fig.legend(loc="upper right", borderaxespad=1, fontsize=8)
+    freq_fig.legend(loc="upper right", borderaxespad=1, fontsize=8)
 
     if selected_mode == 1:
         # リアルタイムモードの場合、matplotlibグラフを更新
@@ -321,7 +325,7 @@ def plot_time_and_spectrogram(
 
         # plot.figure.tight_layout()実行時の「UserWarning: The figure layout has
         # changed to tight」Warning文の抑止
-        warnings.simplefilter('ignore', UserWarning)
+        warnings.simplefilter("ignore", UserWarning)
 
         # レイアウト設定
         fig.tight_layout()
@@ -330,7 +334,7 @@ def plot_time_and_spectrogram(
         wave_fig.plot(
             time_normalized,
             data_normalized,
-            label='Time Waveform',
+            label="Time Waveform",
             lw=1,
             color="blue"
         )
@@ -361,6 +365,9 @@ def plot_time_and_spectrogram(
         else:
             cbar.set_label('Sound Pressure [Pa]')
 
+        # グラフの凡例表示
+        wave_fig.legend(loc="upper right", borderaxespad=1, fontsize=8)
+
     else:
         # ================================
         # === リアルタイムモードの場合 ===
@@ -376,7 +383,7 @@ def plot_time_and_spectrogram(
 
         # plot.figure.tight_layout()実行時の「UserWarning: The figure layout has
         # changed to tight」Warning文の抑止
-        warnings.simplefilter('ignore', UserWarning)
+        warnings.simplefilter("ignore", UserWarning)
 
         # レイアウト設定
         fig.tight_layout()
@@ -495,7 +502,7 @@ def plot_time_and_quef(
 
     # plot.figure.tight_layout()実行時の「UserWarning: The figure layout has
     # changed to tight」Warning文の抑止
-    warnings.simplefilter('ignore', UserWarning)
+    warnings.simplefilter("ignore", UserWarning)
 
     # レイアウト設定
     fig.tight_layout()
@@ -527,14 +534,14 @@ def plot_time_and_quef(
     ceps_fig.plot(
         time_normalized,
         cepstrum_db,
-        label='Cepstrum',
+        label="Cepstrum",
         lw=2,
         color="red")
 
     # グラフの凡例表示
-    wave_fig.legend(loc='upper right', borderaxespad=1, fontsize=8)
-    freq_fig.legend(loc='upper right', borderaxespad=1, fontsize=8)
-    ceps_fig.legend(loc='upper right', borderaxespad=1, fontsize=8)
+    wave_fig.legend(loc="upper right", borderaxespad=1, fontsize=8)
+    freq_fig.legend(loc="upper right", borderaxespad=1, fontsize=8)
+    ceps_fig.legend(loc="upper right", borderaxespad=1, fontsize=8)
 
     if selected_mode == 1:
         # リアルタイムモードの場合、matplotlibグラフを更新
