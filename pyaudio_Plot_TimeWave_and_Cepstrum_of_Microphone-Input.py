@@ -116,14 +116,11 @@ if __name__ == '__main__':
             # amp_normalized        : 正規化後 DFTデータ振幅成分 1次元配列
             # phase_normalized      : 正規化後 DFTデータ位相成分 1次元配列
             # freq_normalized       : 正規化後 周波数軸データ 1次元配列
-            print("len(amp_normalized) = ", len(amp_normalized))
-            print("len(freq_normalized) = ", len(freq_normalized))
 
             # === ケプストラムデータ生成 ===
-            cepstrum_db, spectrum_db_amp, amp_envelope, quef = gen_quef_domain_data(
+            amp_envelope_normalized, cepstrum_db, spectrum_db_amp, quef = gen_quef_domain_data(
                 data_normalized, samplerate, dbref)
-            print(
-                "len(amp_envelope) = ", len(amp_envelope))
+            # amp_envelope_normalized   : 正規化後 スペクトル包絡データ 1次元配列
 
             # === グラフ表示 ===
             plot_time_and_quef(
@@ -135,7 +132,7 @@ if __name__ == '__main__':
                 time_normalized,
                 time_range,
                 amp_normalized,
-                amp_envelope,
+                amp_envelope_normalized,
                 freq_normalized,
                 freq_range,
                 cepstrum_db,

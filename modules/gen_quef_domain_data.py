@@ -51,10 +51,11 @@ def gen_quef_domain_data(discrete_data, samplerate, dbref):
 
     # cepstrum_db_low_ampは、負の周波数領域データも含むため、
     # 正の周波数領域データをスライス抽出 (開始要素から「要素数(len(cepstrum_db_low_amp) / 2」までの要素)
-    cepstrum_db_low_amp_normalized = cepstrum_db_low_amp[:int(
+    amp_envelope_normalized = cepstrum_db_low_amp[:int(
         len(cepstrum_db_low_amp) / 2)]
-    print(
-        "len(cepstrum_db_low_amp_normalized) = ",
-        len(cepstrum_db_low_amp_normalized))
 
-    return cepstrum_db, spectrum_db_amp, cepstrum_db_low_amp_normalized, quef
+    # amp_envelope_normalized   : 正規化後 スペクトル包絡データ 1次元配列
+    # cepstrum_db                       : ケプストラムデータ[dB]
+    # spectrum_db_amp                   :
+    # quef                      : ケプストラムデータに対応したケフレンシー軸データ
+    return amp_envelope_normalized, cepstrum_db, spectrum_db_amp, quef
