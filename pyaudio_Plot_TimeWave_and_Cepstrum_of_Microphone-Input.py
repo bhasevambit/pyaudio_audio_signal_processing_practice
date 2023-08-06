@@ -5,7 +5,7 @@ from modules.audio_stream import audio_stream_stop
 from modules.gen_time_domain_data import gen_time_domain_data
 # from modules.gen_freq_domain_data import gen_freq_domain_data
 from modules.gen_quef_domain_data import gen_quef_domain_data
-from modules.plot_matplot_graph import gen_graph_figure
+from modules.plot_matplot_graph import gen_graph_figure_for_cepstrum
 from modules.plot_matplot_graph import plot_time_and_quef
 from modules.save_audio_to_wav_file import save_audio_to_wav_file
 from modules.save_matplot_graph import save_matplot_graph
@@ -85,7 +85,7 @@ if __name__ == '__main__':
 
     # === グラフ領域作成 ===
     # (リアルタイムモード向けグラフ描画のためにMain Codeでの生成が必須)
-    fig, wave_fig, quef_fig = gen_graph_figure(graph_type)
+    fig, wave_fig, freq_fig, quef_fig = gen_graph_figure_for_cepstrum()
     # fig       : 生成したmatplotlib figureインスタンス
     # wave_fig  : 時間領域波形向けmatplotlib Axesインスタンス
     # quef_fig  : ケプストラム向けmatplotlib Axesインスタンス
@@ -125,6 +125,7 @@ if __name__ == '__main__':
             plot_time_and_quef(
                 fig,
                 wave_fig,
+                freq_fig,
                 quef_fig,
                 data_normalized,
                 time_normalized,

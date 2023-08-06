@@ -122,6 +122,34 @@ def gen_graph_figure_for_realtime_spctrgrm(spctrgrm_mode):
     return fig, sub_fig, cbar_fig
 
 
+def gen_graph_figure_for_cepstrum():
+    # ==========================================
+    # === グラフ領域作成関数(ケプストラム用) ===
+    # ==========================================
+
+    # figureインスタンスの作成
+    fig = plt.figure(figsize=[6, 7])
+
+    # Axesインスタンスの作成
+    sub_fig1 = fig.add_subplot(3, 1, 1)
+    sub_fig2 = fig.add_subplot(3, 1, 2)
+    sub_fig3 = fig.add_subplot(3, 1, 3)
+
+    # 上下左右にグラフ目盛線を付与
+    sub_fig1.yaxis.set_ticks_position('both')
+    sub_fig1.xaxis.set_ticks_position('both')
+    sub_fig2.yaxis.set_ticks_position('both')
+    sub_fig2.xaxis.set_ticks_position('both')
+    sub_fig3.yaxis.set_ticks_position('both')
+    sub_fig3.xaxis.set_ticks_position('both')
+
+    # fig       : 生成したmatplotlib figureインスタンス
+    # sub_fig1  : 生成したmatplotlib 第1のAxesインスタンス
+    # sub_fig2  : 生成したmatplotlib 第2のAxesインスタンス
+    # sub_fig3  : 生成したmatplotlib 第3のAxesインスタンス
+    return fig, sub_fig1, sub_fig2, sub_fig3
+
+
 def plot_time_and_freq(
     fig,
     wave_fig,
@@ -210,8 +238,8 @@ def plot_time_and_freq(
         # リアルタイムモードの場合、matplotlibグラフを更新
         plt.pause(0.0001)
 
-        freq_fig.cla()
         wave_fig.cla()
+        freq_fig.cla()
 
 
 def plot_time_and_spectrogram(
@@ -386,6 +414,7 @@ def plot_time_and_spectrogram(
 def plot_time_and_quef(
     fig,
     wave_fig,
+    freq_fig,
     quef_fig,
     data_normalized,
     time_normalized,
@@ -403,6 +432,7 @@ def plot_time_and_quef(
     # ======================================================
     # fig               : 生成したmatplotlib figureインスタンス
     # wave_fig          : 時間領域波形向けmatplotlib Axesインスタンス
+    # freq_fig          : 周波数特性向けmatplotlib Axesインスタンス
     # quef_fig          : ケプストラム向けmatplotlib Axesインスタンス
     # data_normalized   : 時間領域 波形データ(正規化済)
     # time_normalized   : 時間領域 X軸向けデータ [s]
@@ -426,7 +456,16 @@ def plot_time_and_quef(
     wave_fig.set_ylabel('Amplitude')
 
     # 周波数特性 軸ラベル設定
-    quef_fig.set_xlabel('Frequency [Hz]')
+    freq_fig.set_xlabel('Frequency [Hz]')
+    if (dbref > 0) and not (A):
+        freq_fig.set_ylabel('Amplitude [dB spl]')
+    elif (dbref > 0) and (A):
+        freq_fig.set_ylabel('Amplitude [dB spl(A)]')
+    else:
+        freq_fig.set_ylabel('Amplitude')
+
+    # ケプストラム 軸ラベル設定
+    quef_fig.set_xlabel('Quefrency [s]')
     if (dbref > 0) and not (A):
         quef_fig.set_ylabel('Amplitude [dB spl]')
     elif (dbref > 0) and (A):
@@ -440,7 +479,13 @@ def plot_time_and_quef(
     wave_fig.set_yticks([-1, -0.5, 0, 0.5, 1])
 
     # 周波数特性 軸目盛り設定
-    quef_fig.set_xlim(0, freq_range)
+    freq_fig.set_xlim(0, freq_range)
+    if (dbref > 0):
+        freq_fig.set_ylim(-10, 90)  # -10[dB] 〜 90[dB]
+        freq_fig.set_yticks(np.arange(0, 100, 20))  # 20[dB]刻み(範囲:0〜100[dB])
+
+    # ケプストラム 軸目盛り設定
+    quef_fig.set_xlim(0, time_range)
     if (dbref > 0):
         quef_fig.set_ylim(-10, 90)  # -10[dB] 〜 90[dB]
         quef_fig.set_yticks(np.arange(0, 100, 20))  # 20[dB]刻み(範囲:0〜100[dB])
@@ -461,19 +506,22 @@ def plot_time_and_quef(
         color="blue")
 
     # 周波数特性データプロット
-    quef_fig.plot(
+    freq_fig.plot(
         freq_normalized,
         amp_normalized,
         label='Frequency Response',
         lw=1,
         color="dodgerblue")
 
+    # スペクトル包絡データプロット
+    freq_fig.plot(freq_normalized, cepstrum_db_low_amp, lw='4')
+
     # ケプストラムデータプロット
-    quef_fig.plot(freq_normalized, cepstrum_db_low_amp, lw='4')
 
     if selected_mode == 1:
         # リアルタイムモードの場合、matplotlibグラフを更新
         plt.pause(0.0001)
 
-        quef_fig.cla()
         wave_fig.cla()
+        freq_fig.cla()
+        quef_fig.cla()
