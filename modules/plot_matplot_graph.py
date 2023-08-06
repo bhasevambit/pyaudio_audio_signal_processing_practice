@@ -381,3 +381,99 @@ def plot_time_and_spectrogram(
 
         # リアルタイムモードの場合、matplotlibグラフを更新
         plt.pause(0.0001)
+
+
+def plot_time_and_quef(
+    fig,
+    wave_fig,
+    quef_fig,
+    data_normalized,
+    time_normalized,
+    time_range,
+    amp_normalized,
+    freq_normalized,
+    freq_range,
+    cepstrum_db_low_amp,
+    dbref,
+    A,
+    selected_mode
+):
+    # ======================================================
+    # === 時間領域波形 & ケプストラム グラフプロット関数 ===
+    # ======================================================
+    # fig               : 生成したmatplotlib figureインスタンス
+    # wave_fig          : 時間領域波形向けmatplotlib Axesインスタンス
+    # quef_fig          : ケプストラム向けmatplotlib Axesインスタンス
+    # data_normalized   : 時間領域 波形データ(正規化済)
+    # time_normalized   : 時間領域 X軸向けデータ [s]
+    # time_range        : 時間領域波形グラフ X軸表示レンジ [sample count]
+    # amp_normalized    : 周波数特性 振幅データ(正規化済)
+    # freq_normalized   : 周波数特性 X軸向けデータ [Hz]
+    # freq_range        : 周波数特性グラフ X軸表示レンジ [Hz]
+    # dbref             : デシベル基準値
+    # A                 : 聴感補正(A特性)の有効(True)/無効(False)設定
+    # selected_mode     : 動作モード (0:レコーディングモード / 1:リアルタイムモード)
+
+    # フォントサイズ設定
+    plt.rcParams['font.size'] = 10
+
+    # 目盛内側化
+    plt.rcParams['xtick.direction'] = 'in'
+    plt.rcParams['ytick.direction'] = 'in'
+
+    # 時間領域波形 軸ラベル設定
+    wave_fig.set_xlabel('Time [s]')
+    wave_fig.set_ylabel('Amplitude')
+
+    # 周波数特性 軸ラベル設定
+    quef_fig.set_xlabel('Frequency [Hz]')
+    if (dbref > 0) and not (A):
+        quef_fig.set_ylabel('Amplitude [dB spl]')
+    elif (dbref > 0) and (A):
+        quef_fig.set_ylabel('Amplitude [dB spl(A)]')
+    else:
+        quef_fig.set_ylabel('Amplitude')
+
+    # 時間領域波形 軸目盛り設定
+    wave_fig.set_xlim(0, time_range)
+    wave_fig.set_ylim(-1.1, 1.1)
+    wave_fig.set_yticks([-1, -0.5, 0, 0.5, 1])
+
+    # 周波数特性 軸目盛り設定
+    quef_fig.set_xlim(0, freq_range)
+    if (dbref > 0):
+        quef_fig.set_ylim(-10, 90)  # -10[dB] 〜 90[dB]
+        quef_fig.set_yticks(np.arange(0, 100, 20))  # 20[dB]刻み(範囲:0〜100[dB])
+
+    # plot.figure.tight_layout()実行時の「UserWarning: The figure layout has
+    # changed to tight」Warning文の抑止
+    warnings.simplefilter('ignore', UserWarning)
+
+    # レイアウト設定
+    fig.tight_layout()
+
+    # 時間領域波形データプロット
+    wave_fig.plot(
+        time_normalized,
+        data_normalized,
+        label='Time Waveform',
+        lw=1,
+        color="blue")
+
+    # 周波数特性データプロット
+    quef_fig.plot(
+        freq_normalized,
+        amp_normalized,
+        label='Frequency Response',
+        lw=1,
+        color="dodgerblue")
+
+    # ケプストラムデータプロット
+    quef_fig.plot(freq_normalized, cepstrum_db_low_amp, lw='4')
+
+    if selected_mode == 1:
+        # リアルタイムモードの場合、matplotlibグラフを更新
+        plt.pause(0.0001)
+
+        quef_fig.cla()
+        wave_fig.cla()

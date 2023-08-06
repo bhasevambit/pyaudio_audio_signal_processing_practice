@@ -11,7 +11,7 @@ def gen_freq_domain_data(discrete_data, samplerate, dbref, A):
     # === 周波数特性データ生成関数 ===
     # ================================
     # discrete_data     : 時間領域波形 離散データ 1次元配列
-    # samplerate        : サンプリング周波数 [sampling data count/s)]
+    # samplerate        : サンプリング周波数[Hz]
     # dbref             : デシベル基準値
     # A                 : 聴感補正(A特性)の有効(True)/無効(False)設定
 
@@ -58,7 +58,7 @@ def gen_freq_domain_data_of_signal_spctrgrm(
     # === 周波数特性データ生成関数 (scipy.signal.spectrogram版) ===
     # =============================================================
     # data_normalized       : 時間領域 波形データ(正規化済)
-    # samplerate            : サンプリングレート [sampling data count/s)]
+    # samplerate            : サンプリング周波数[Hz]
     # stft_frame_size       : STFT(短時間フーリエ変換)を行う時系列データ数(=STFTフレーム長)
     # overlap_rate          : オーバーラップ率 [%]
     # window_func           : 使用する窓関数
@@ -132,7 +132,7 @@ def gen_freq_domain_data_of_stft(
     # === 周波数特性データ生成関数 (Full Scratch STFT Function版) ===
     # ===============================================================
     # time_array_after_window   : 時間領域 波形データ(正規化/オーバーラップ処理/hanning窓関数適用済)
-    # samplerate                : サンプリングレート [sampling data count/s)]
+    # samplerate                : サンプリング周波数[Hz]
     # stft_frame_size           : STFT(短時間フーリエ変換)を行う時系列データ数(=STFTフレーム長)
     # N_ave                     : オーバーラップ処理における切り出しフレーム数
     # final_time                : オーバーラップ処理で切り出したデータの最終時刻[s]
