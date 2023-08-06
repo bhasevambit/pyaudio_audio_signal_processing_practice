@@ -97,7 +97,7 @@ if __name__ == '__main__':
     # stream    : 生成したpyaudio.PyAudio.Streamオブジェクト
     #             (pyaudio.PyAudio.Stream object)
 
-    # === 時間領域波形 & 周波数特性リアルタイムプロット ===
+    # === 時間領域波形 & 周波数特性プロット ===
     # キーボードインタラプトあるまでループ処理継続
     while True:
         try:
