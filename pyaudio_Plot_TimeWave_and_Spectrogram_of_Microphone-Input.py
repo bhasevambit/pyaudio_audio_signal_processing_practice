@@ -1,18 +1,15 @@
-from modules.get_std_input import get_selected_mode_by_std_input
-from modules.get_mic_index import get_mic_index
-from modules.audio_stream import audio_stream_start
-from modules.audio_stream import audio_stream_stop
+from modules.audio_signal_processing_advanced import overlap, window
+from modules.audio_stream import audio_stream_start, audio_stream_stop
+from modules.gen_freq_domain_data import (
+    gen_freq_domain_data_of_signal_spctrgrm, gen_freq_domain_data_of_stft)
 from modules.gen_time_domain_data import gen_time_domain_data
-from modules.gen_freq_domain_data import gen_freq_domain_data_of_signal_spctrgrm
-from modules.gen_freq_domain_data import gen_freq_domain_data_of_stft
-from modules.audio_signal_processing_advanced import overlap
-from modules.audio_signal_processing_advanced import window
-from modules.plot_matplot_graph import gen_graph_figure
-from modules.plot_matplot_graph import gen_graph_figure_for_realtime_spctrgrm
-from modules.plot_matplot_graph import plot_time_and_spectrogram
+from modules.get_mic_index import get_mic_index
+from modules.get_std_input import get_selected_mode_by_std_input
+from modules.plot_matplot_graph import (gen_graph_figure,
+                                        gen_graph_figure_for_realtime_spctrgrm,
+                                        plot_time_and_spectrogram)
 from modules.save_audio_to_wav_file import save_audio_to_wav_file
 from modules.save_matplot_graph import save_matplot_graph
-
 
 if __name__ == '__main__':
     # =================

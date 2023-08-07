@@ -1,11 +1,10 @@
 # ========================================
 # === Play WAV File with Blocking-mode ===
 # ========================================
-import wave
 import sys
+import wave
 
 import pyaudio
-
 
 CHUNK = 1024
 

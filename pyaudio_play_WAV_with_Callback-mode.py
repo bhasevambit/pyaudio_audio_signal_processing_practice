@@ -1,12 +1,11 @@
 # ========================================
 # === Play WAV File with Callback-mode ===
 # ========================================
-import wave
-import time
 import sys
+import time
+import wave
 
 import pyaudio
-
 
 CHUNK = 1024
 
