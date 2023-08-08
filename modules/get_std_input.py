@@ -21,3 +21,23 @@ def get_selected_mode_by_std_input(mode_count):
     else:
         # input_mode : 標準入力されたモード
         return input_mode
+
+
+def get_strings_by_std_input():
+    # ============================================
+    # === 標準入力にて入力された文字列取得関数 ===
+    # ============================================
+
+    # input関数で入力された文字列を変数input_stringsに代入
+    input_strings = input(">>> Please INPUT : ")
+
+    try:
+        input_strings = str(input_strings)
+
+    except BaseException:
+        print("\n!!! Input Value Error, please Re-Input !!!\n")
+        return get_selected_mode_by_std_input(input_strings)
+
+    else:
+        # input_strings : 標準入力された文字列
+        return input_strings
