@@ -1,9 +1,9 @@
-import scipy
 import numpy as np
-from modules.audio_signal_processing_basic import db
-from modules.audio_signal_processing_basic import dft_normalize
-from modules.audio_signal_processing_basic import dft_negative_freq_domain_exlusion
-from modules.audio_signal_processing_basic import a_weighting
+import scipy
+
+from .audio_signal_processing_basic import (a_weighting, db,
+                                            dft_negative_freq_domain_exlusion,
+                                            dft_normalize)
 
 
 def gen_freq_domain_data(discrete_data, samplerate, dbref, A):

@@ -1,8 +1,8 @@
 import math
 
-from modules.audio_stream import gen_discrete_data_from_audio_stream
-from modules.audio_signal_processing_basic import discrete_data_normalize
-from modules.audio_signal_processing_basic import gen_time_axis_data
+from .audio_signal_processing_basic import (discrete_data_normalize,
+                                            gen_time_axis_data)
+from .audio_stream import gen_discrete_data_from_audio_stream
 
 
 def gen_time_domain_data(stream, frames_per_buffer, samplerate, time):

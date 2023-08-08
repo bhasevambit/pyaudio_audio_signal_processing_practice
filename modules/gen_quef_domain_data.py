@@ -1,8 +1,7 @@
-import scipy
 import numpy as np
-from modules.audio_signal_processing_basic import db
-from modules.audio_signal_processing_basic import liner
-from modules.audio_signal_processing_basic import dft_normalize
+import scipy
+
+from .audio_signal_processing_basic import db, dft_normalize, liner
 
 
 def gen_quef_domain_data(discrete_data, samplerate, dbref):
