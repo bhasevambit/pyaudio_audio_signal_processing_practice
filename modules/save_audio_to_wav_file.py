@@ -1,5 +1,6 @@
-import os
 import datetime
+import os
+
 import soundfile as sf
 
 
@@ -25,3 +26,6 @@ def save_audio_to_wav_file(samplerate, audio_discrete_data):
     sf.write(filename, audio_discrete_data, samplerate)
 
     print("Audio DATA File Save END\n")
+
+    # filename : 保存した音声データをWAVファイル名(拡張子あり)
+    return filename
