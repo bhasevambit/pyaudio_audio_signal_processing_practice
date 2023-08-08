@@ -59,7 +59,7 @@ if __name__ == '__main__':
 
     # 計測時間[s] / 時間領域波形グラフ X軸表示レンジ[s]
     if selected_mode == 0:  # レコーディングモード向け
-        time = 3
+        time = 10
         time_range = time
         freq_range = int(44100 / 4) / 2
     else:                   # リアルタイムモード向け
