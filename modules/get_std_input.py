@@ -41,3 +41,29 @@ def get_strings_by_std_input():
     else:
         # input_strings : 標準入力された文字列
         return input_strings
+
+
+def get_selected_mic_index_by_std_input(mic_list):
+    # ======================================================
+    # === 標準入力にて選択されたMicrophone index取得関数 ===
+    # ======================================================
+    # mic_list : microphone index list
+
+    # input関数で入力された値を変数input_modeに代入
+    mic_index = input(">>> Please INPUT Microphone-index : ")
+
+    try:
+        selected_index = int(mic_index)
+
+    except BaseException:
+        print("\n!!! Input Value Error, please Re-Input !!!\n")
+        return get_selected_mic_index_by_std_input(mic_list)
+
+    if selected_index not in mic_list:
+        # 選択されたmicrophon indexが、mic index listに含まれない場合はinvalid
+        print("\n!!! Invalid input value range, please Re-Input !!!\n")
+        return get_selected_mic_index_by_std_input(mic_list)
+
+    else:
+        # selected_index : 標準入力にて選択されたmicrophone index
+        return selected_index
