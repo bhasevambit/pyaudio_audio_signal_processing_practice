@@ -83,7 +83,6 @@ if __name__ == '__main__':
     print("=================================================================")
     print("")
     mic_list = get_mic_index()
-    print("mic_list = ", mic_list)
     selected_index = get_selected_mic_index_by_std_input(mic_list)
     print("\nUse Microphone Index :", selected_index, "\n")
 
