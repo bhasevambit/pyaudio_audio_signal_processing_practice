@@ -2,7 +2,8 @@ from modules.audio_stream import audio_stream_start, audio_stream_stop
 from modules.gen_freq_domain_data import gen_freq_domain_data
 from modules.gen_time_domain_data import gen_time_domain_data
 from modules.get_mic_index import get_mic_index
-from modules.get_std_input import get_selected_mode_by_std_input
+from modules.get_std_input import (get_selected_mic_index_by_std_input,
+                                   get_selected_mode_by_std_input)
 from modules.plot_matplot_graph import gen_graph_figure, plot_time_and_freq
 from modules.save_audio_to_wav_file import save_audio_to_wav_file
 from modules.save_matplot_graph import save_matplot_graph
@@ -76,8 +77,15 @@ if __name__ == '__main__':
     # ------------------------
 
     # === マイクチャンネルを自動取得 ===
-    index = get_mic_index()[0]
-    print("Use Microphone Index :", index, "\n")
+    # (標準入力にて選択可能とする)
+    print("=================================================================")
+    print("  [ Please Select Microphone index ]")
+    print("=================================================================")
+    print("")
+    mic_list = get_mic_index()
+    print("mic_list = ", mic_list)
+    selected_index = get_selected_mic_index_by_std_input(mic_list)
+    print("\nUse Microphone Index :", selected_index, "\n")
 
     # === グラフ領域作成 ===
     # (リアルタイムモード向けグラフ描画のためにMain Codeでの生成が必須)
@@ -88,7 +96,7 @@ if __name__ == '__main__':
 
     # === Microphone入力音声ストリーム生成 ===
     pa, stream = audio_stream_start(
-        index, mic_mode, samplerate, frames_per_buffer)
+        selected_index, mic_mode, samplerate, frames_per_buffer)
     # pa        : 生成したpyaudio.PyAudioクラスオブジェクト
     #             (pyaudio.PyAudio object)
     # stream    : 生成したpyaudio.PyAudio.Streamオブジェクト
