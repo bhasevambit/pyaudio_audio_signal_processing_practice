@@ -5,17 +5,25 @@ import numpy as np
 import pysptk as sptk
 import pyworld as pw
 from matplotlib import pyplot as plt
+from modules.get_std_input import get_strings_by_std_input
 
 if __name__ == '__main__':
     # =================
     # === Main Code ===
     # =================
 
-    # 音声ファイル
-    audio_path = "wav/recorded-sound_20230804_164759.wav"
+    # 分析対象の音声データファイルの指定
+    # (標準入力にて指定可能とする)
+    print("")
+    print("=================================================================")
+    print("  [ Please INPUT Audio Data File Name (Relative-PATH) ]")
+    print("=================================================================")
+    print("")
+    audio_file_name = get_strings_by_std_input()
+    print("")
 
     # 読み込みモードでWAVファイルを開く
-    with wave.open(audio_path, 'rb') as wr:
+    with wave.open(audio_file_name, 'rb') as wr:
 
         # 情報取得
         ch = wr.getnchannels()
@@ -31,7 +39,7 @@ if __name__ == '__main__':
         print("再生時間: ", 1.0 * fn / fr)
 
     # librosaで音声ファイルを読み込み
-    y, sr = librosa.load(audio_path, sr=fr)
+    y, sr = librosa.load(audio_file_name, sr=fr)
     print("y =", y)
     print("sr =", sr)
 
