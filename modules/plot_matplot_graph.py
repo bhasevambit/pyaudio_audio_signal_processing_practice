@@ -1,6 +1,7 @@
+import warnings
+
 import numpy as np
 from matplotlib import pyplot as plt
-import warnings
 
 
 def gen_graph_figure(graph_type):
@@ -555,6 +556,7 @@ def plot_time_and_quef(
 
     if selected_mode == 1:
         # リアルタイムモードの場合、matplotlibグラフを更新
+        # (当該、pause()メソッドにより、show()メソッド無しでも、matplotlibグラフウィンドウが開く形となる(開いてすぐ閉じるイメージ))
         plt.pause(0.0001)
 
         wave_fig.cla()
