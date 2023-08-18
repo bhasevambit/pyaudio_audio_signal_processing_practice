@@ -1,10 +1,10 @@
 import wave
 
 import librosa
-import matplotlib.pyplot as plt
 import numpy as np
 import pysptk as sptk
 import pyworld as pw
+from matplotlib import pyplot as plt
 
 if __name__ == '__main__':
     # =================
@@ -12,7 +12,7 @@ if __name__ == '__main__':
     # =================
 
     # 音声ファイル
-    audio_path = "./a.wav"
+    audio_path = "wav/recorded-sound_20230804_164759.wav"
 
     # 読み込みモードでWAVファイルを開く
     with wave.open(audio_path, 'rb') as wr:
@@ -32,12 +32,18 @@ if __name__ == '__main__':
 
     # librosaで音声ファイルを読み込み
     y, sr = librosa.load(audio_path, sr=fr)
+    print("y =", y)
+    print("sr =", sr)
 
     # pyworldでスペクトル包絡を取得
-    y = y.astype(np.float)
+    y = y.astype(np.float64)
+    print("y =", y)
+
     _f0, t = pw.dio(y, sr)
     f0 = pw.stonemask(y, _f0, t, sr)
     sp = pw.cheaptrick(y, f0, t, sr)
+    ap = pw.d4c(y, f0, t, sr)
+
     ap = pw.d4c(y, f0, t, sr)
 
     # 元の音声のスペクトル包絡
@@ -53,6 +59,7 @@ if __name__ == '__main__':
     # グラフの表示
     # メルケプストラム
     plt.figure()
+    print("mcep[center_sp] =", mcep[center_sp])
     plt.plot(mcep[center_sp])
     plt.title('Mel-cepstrum')
     # "元のスペクトル包絡"と"メルケプストラムから再合成したスペクトル包絡"
@@ -61,6 +68,8 @@ if __name__ == '__main__':
     plt.plot(np.log10(sp_from_mcep[center_sp]), label="Conversion")
     plt.title('spectral envelope')
     plt.legend()
+
+    plt.show()
 
     print("=================")
     print("= Main Code END =")
