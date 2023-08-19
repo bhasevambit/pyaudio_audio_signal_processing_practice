@@ -498,7 +498,8 @@ def plot_time_and_quef(
         freq_fig.set_yticks(np.arange(0, 100, 20))  # 20[dB]刻み(範囲:0〜100[dB])
 
     # ケプストラム 軸目盛り設定
-    ceps_fig.set_xlim(0, 0.03)  # 0 ～ 30[ms] (低ケフレンシ/高ケフレンシの境界を表示)
+    ceps_fig.set_xlim(0, 0.02)  # 0 ～ 20[ms] (低ケフレンシ/高ケフレンシの境界を表示)
+    ceps_fig.set_xticks(np.arange(0, 0.02, 0.005))  # 5[ms]刻み(範囲:0〜20[ms])
     if (dbref > 0):
         ceps_fig.set_ylim(-1, 4)  # -1[dB] 〜5[dB]
         ceps_fig.set_yticks(np.arange(-2, 5, 1))  # 1[dB]刻み(範囲:-2〜6[dB])
