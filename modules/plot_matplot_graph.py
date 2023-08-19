@@ -84,10 +84,10 @@ def gen_graph_figure_for_realtime_spctrgrm(spctrgrm_mode):
     fig1_axes_width = 0.70
     fig2_axes_width = fig1_axes_width
 
-    fig1_axes_height = 0.36
+    fig1_axes_height = 0.38
     fig2_axes_height = fig1_axes_height
 
-    fig2_axes_bottom = 0.12
+    fig2_axes_bottom = 0.11
     fig1_axes_bottom = fig2_axes_bottom + fig2_axes_height + 0.1
 
     sub_fig1 = fig.add_axes(
@@ -117,7 +117,7 @@ def gen_graph_figure_for_realtime_spctrgrm(spctrgrm_mode):
     # カラーバー用Axesインスタンスの作成
     # add_axesの引数パラメータは「left，bottom，width，height」
     cbar_fig = fig.add_axes(
-        (fig1_axes_left + fig1_axes_width + 0.03,
+        (fig1_axes_left + fig1_axes_width + 0.035,
          fig1_axes_bottom,
          0.03,
          fig1_axes_height)
@@ -212,11 +212,11 @@ def plot_time_and_freq(
     plt.rcParams['ytick.direction'] = 'in'
 
     # 時間領域波形 軸ラベル設定
-    wave_fig.set_xlabel('Time [s]')
+    wave_fig.set_xlabel("Time [s]")
     wave_fig.set_ylabel('Amplitude')
 
     # 周波数特性 軸ラベル設定
-    freq_fig.set_xlabel('Frequency [Hz]')
+    freq_fig.set_xlabel("Frequency [Hz]")
     if (dbref > 0) and not (A):
         freq_fig.set_ylabel('Amplitude [dB spl]')
     elif (dbref > 0) and (A):
@@ -275,6 +275,7 @@ def plot_time_and_spectrogram(
     wave_fig,
     spctrgrm_fig,
     cbar_fig,
+    f0_fig,
     data_normalized,
     time_normalized,
     time_range,
@@ -282,6 +283,8 @@ def plot_time_and_spectrogram(
     time_spctrgrm,
     spectrogram,
     freq_range,
+    f0,
+    time_f0,
     dbref,
     A,
     selected_mode,
@@ -294,6 +297,7 @@ def plot_time_and_spectrogram(
     # wave_fig          : 時間領域波形向けmatplotlib Axesインスタンス
     # spctrgrm_fig      : スペクトログラム向けmatplotlib Axesインスタンス
     # cbar_fig          : スペクトログラム向けmatplotlib カラーバー用Axesインスタンス
+    # f0_fig                    : 基本周波数 時系列波形向けmatplotlib Axesインスタンス
     # data_normalized   : 時間領域 波形データ(正規化済)
     # time_normalized   : 時間領域 X軸向けデータ [ms]
     # time_range        : 時間領域波形グラフ X軸表示レンジ [sample count]
@@ -301,6 +305,8 @@ def plot_time_and_spectrogram(
     # time_spctrgrm     : スペクトログラム x軸向けデータ[s]
     # spectrogram       : スペクトログラム 振幅データ
     # freq_range        : スペクトログラムグラフ Y軸表示レンジ[Hz]
+    # f0                        : 基本周波数 時系列データ 1次元配列
+    # time_f0                   : 基本周波数 時系列データに対応した時間軸データ 1次元配列
     # dbref             : デシベル基準値
     # A                 : 聴感補正(A特性)の有効(True)/無効(False)設定
     # selected_mode     : 動作モード (0:レコーディングモード / 1:リアルタイムモード)
@@ -319,12 +325,12 @@ def plot_time_and_spectrogram(
         wave_fig.tick_params(axis="both", direction="in")
 
         # 時間領域波形 軸ラベル設定
-        wave_fig.set_xlabel('Time [s]')
+        wave_fig.set_xlabel("Time [s]")
         wave_fig.set_ylabel('Amplitude')
 
         # スペクトログラム 軸ラベル設定
-        spctrgrm_fig.set_xlabel('Time [s]')
-        spctrgrm_fig.set_ylabel('Frequency [Hz]')
+        spctrgrm_fig.set_xlabel("Time [s]")
+        spctrgrm_fig.set_ylabel("Frequency [Hz]")
 
         # 時間領域波形 軸目盛り設定
         wave_fig.set_xlim(0, time_range)
@@ -398,12 +404,21 @@ def plot_time_and_spectrogram(
         # ================================
 
         # スペクトログラム 軸ラベル設定
-        spctrgrm_fig.set_xlabel('Time [s]')
-        spctrgrm_fig.set_ylabel('Frequency [Hz]')
+        spctrgrm_fig.set_xlabel("Time [s]")
+        spctrgrm_fig.set_ylabel("Frequency [Hz]")
+
+        # 基本周波数 時系列データ 軸ラベル設定
+        f0_fig.set_xlabel("Time [s]")
+        f0_fig.set_ylabel("Frequency [Hz]")
 
         # スペクトログラム 軸目盛り設定
         spctrgrm_fig.set_xlim(0, time_range)
         spctrgrm_fig.set_ylim(0, freq_range)
+
+        # 基本周波数 時系列データ 軸目盛り設定
+        f0_fig.set_xlim(0, time_range)
+        f0_fig.set_ylim(-20, 1000)  # -20[Hz] 〜 1000[Hz]
+        f0_fig.set_yticks(np.arange(0, 1020, 100))  # 100[Hz]刻み(範囲:0〜1020[Hz])
 
         # plot.figure.tight_layout()実行時の「UserWarning: The figure layout has
         # changed to tight」Warning文の抑止
@@ -438,8 +453,23 @@ def plot_time_and_spectrogram(
         else:
             cbar.set_label('Sound Pressure [Pa]')
 
+        # 基本周波数データプロット
+        f0_fig.plot(
+            time_f0,
+            f0,
+            label="Fundamental Frequency",
+            lw=3,
+            color="forestgreen"
+        )
+
+        # グラフの凡例表示
+        f0_fig.legend(loc="upper right", borderaxespad=1, fontsize=8)
+
         # リアルタイムモードの場合、matplotlibグラフを更新
         plt.pause(0.0001)
+
+        # プロットデータの重なりを防ぐためにプロットデータクリアを実施
+        f0_fig.cla()
 
 
 def plot_time_and_quef(
@@ -494,11 +524,11 @@ def plot_time_and_quef(
     plt.rcParams['ytick.direction'] = 'in'
 
     # 時間領域波形 軸ラベル設定
-    wave_fig.set_xlabel('Time [s]')
+    wave_fig.set_xlabel("Time [s]")
     wave_fig.set_ylabel('Amplitude')
 
     # 周波数特性 軸ラベル設定
-    freq_fig.set_xlabel('Frequency [Hz]')
+    freq_fig.set_xlabel("Frequency [Hz]")
     if (dbref > 0) and not (A):
         freq_fig.set_ylabel('Amplitude [dB spl]')
     elif (dbref > 0) and (A):
@@ -507,8 +537,8 @@ def plot_time_and_quef(
         freq_fig.set_ylabel('Amplitude')
 
     # 基本周波数 時系列データ 軸ラベル設定
-    f0_fig.set_xlabel('Time [s]')
-    f0_fig.set_ylabel('Fundamental Frequency [Hz]')
+    f0_fig.set_xlabel("Time [s]")
+    f0_fig.set_ylabel("Frequency [Hz]")
 
     # ケプストラム 軸ラベル設定
     ceps_fig.set_xlabel('Quefrency [s]')
@@ -611,6 +641,7 @@ def plot_time_and_quef(
         # (当該、pause()メソッドにより、show()メソッド無しでも、matplotlibグラフウィンドウが開く形となる(開いてすぐ閉じるイメージ))
         plt.pause(0.0001)
 
+        # プロットデータの重なりを防ぐためにプロットデータクリアを実施
         wave_fig.cla()
         freq_fig.cla()
         f0_fig.cla()
