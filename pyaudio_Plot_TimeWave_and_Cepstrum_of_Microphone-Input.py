@@ -93,6 +93,7 @@ if __name__ == '__main__':
     fig, wave_fig, freq_fig, ceps_fig = gen_graph_figure_for_cepstrum()
     # fig       : 生成したmatplotlib figureインスタンス
     # wave_fig  : 時間領域波形向けmatplotlib Axesインスタンス
+    # freq_fig  : 周波数特性向けmatplotlib Axesインスタンス
     # ceps_fig  : ケプストラム向けmatplotlib Axesインスタンス
 
     # === Microphone入力音声ストリーム生成 ===
