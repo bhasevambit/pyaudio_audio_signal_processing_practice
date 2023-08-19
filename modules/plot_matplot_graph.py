@@ -129,12 +129,13 @@ def gen_graph_figure_for_cepstrum():
     # ==========================================
 
     # figureインスタンスの作成
-    fig = plt.figure(figsize=[6, 7])
+    fig = plt.figure(figsize=[10, 7])
 
     # Axesインスタンスの作成
-    sub_fig1 = fig.add_subplot(3, 1, 1)
-    sub_fig2 = fig.add_subplot(3, 1, 2)
-    sub_fig3 = fig.add_subplot(3, 1, 3)
+    sub_fig1 = fig.add_subplot(2, 2, 1)
+    sub_fig2 = fig.add_subplot(2, 2, 2)
+    sub_fig3 = fig.add_subplot(2, 2, 3)
+    sub_fig4 = fig.add_subplot(2, 2, 4)
 
     # 上下左右にグラフ目盛線を付与
     sub_fig1.yaxis.set_ticks_position('both')
@@ -143,12 +144,15 @@ def gen_graph_figure_for_cepstrum():
     sub_fig2.xaxis.set_ticks_position('both')
     sub_fig3.yaxis.set_ticks_position('both')
     sub_fig3.xaxis.set_ticks_position('both')
+    sub_fig4.yaxis.set_ticks_position('both')
+    sub_fig4.xaxis.set_ticks_position('both')
 
     # fig       : 生成したmatplotlib figureインスタンス
     # sub_fig1  : 生成したmatplotlib 第1のAxesインスタンス
     # sub_fig2  : 生成したmatplotlib 第2のAxesインスタンス
     # sub_fig3  : 生成したmatplotlib 第3のAxesインスタンス
-    return fig, sub_fig1, sub_fig2, sub_fig3
+    # sub_fig4  : 生成したmatplotlib 第3のAxesインスタンス
+    return fig, sub_fig1, sub_fig2, sub_fig3, sub_fig4
 
 
 def plot_time_and_freq(
