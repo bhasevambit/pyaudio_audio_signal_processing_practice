@@ -1,4 +1,3 @@
-import librosa
 import numpy as np
 import pysptk as sptk
 import pyworld as pw
@@ -8,8 +7,7 @@ from modules.gen_time_domain_data import gen_time_domain_data
 from modules.get_mic_index import get_mic_index
 from modules.get_std_input import (get_selected_mic_index_by_std_input,
                                    get_selected_mode_by_std_input)
-from modules.plot_matplot_graph import (gen_graph_figure_for_cepstrum,
-                                        plot_time_and_quef)
+from modules.plot_matplot_graph import gen_graph_figure_for_cepstrum
 from modules.save_audio_to_wav_file import save_audio_to_wav_file
 from modules.save_matplot_graph import save_matplot_graph
 
@@ -29,7 +27,7 @@ if __name__ == '__main__':
     print("  1 : Real-Time MODE")
     print("=================================================================")
     print("")
-    # selected_mode = get_selected_mode_by_std_input(mode_count=2)
+    selected_mode = get_selected_mode_by_std_input(mode_count=2)
     selected_mode = 0   # 【Debugモード】レコーディングモード固定
 
     if selected_mode == 0:
@@ -79,7 +77,7 @@ if __name__ == '__main__':
     A = False   # ケプストラム導出にあたりA特性補正はOFFとする
 
     # グラフ保存時のファイル名プレフィックス
-    filename_prefix = "time-waveform_and_Cepstrum_"
+    filename_prefix = "time-waveform_and_Mel-Cepstrum_"
     # ------------------
 
     # === マイクチャンネルを自動取得 ===
@@ -118,6 +116,37 @@ if __name__ == '__main__':
             # data_normalized : 時間領域波形データ(正規化済)
             # time_normalized : 時間領域波形データ(正規化済)に対応した時間軸データ
 
+            # pyworldでスペクトル包絡を取得
+            _f0, t = pw.dio(data_normalized, samplerate)
+            f0 = pw.stonemask(data_normalized, _f0, t, samplerate)
+            sp = pw.cheaptrick(data_normalized, f0, t, samplerate)
+            ap = pw.d4c(data_normalized, f0, t, samplerate)
+
+            # 元の音声のスペクトル包絡
+            center_sp = int(len(sp) / 2)  # 定常部分を求める
+
+            # メルケプストラムの算出
+            mcep = sptk.sp2mc(sp, order=19, alpha=0.42)
+            center_mcep = int(len(mcep) / 2)  # 定常部分を求める
+
+            # メルケプストラムからスペクトル包絡に変換
+            sp_from_mcep = sptk.mc2sp(mcep, alpha=0.42, fftlen=1024)
+
+            # === グラフ表示 ===
+            # メルケプストラム
+            plt.figure()
+            print("mcep[center_sp] =", mcep[center_sp])
+            plt.plot(mcep[center_sp])
+            plt.title('Mel-cepstrum')
+            # "元のスペクトル包絡"と"メルケプストラムから再合成したスペクトル包絡"
+            plt.figure()
+            plt.plot(np.log10(sp[center_sp]), label="Original")
+            plt.plot(np.log10(sp_from_mcep[center_sp]), label="Conversion")
+            plt.title('spectral envelope')
+            plt.legend()
+
+            plt.show()
+
             if selected_mode == 0:
                 # レコーディングモードの場合、While処理を1回で抜ける
                 break
@@ -138,47 +167,6 @@ if __name__ == '__main__':
 
     # === Microphone入力音声ストリーム停止 ===
     audio_stream_stop(pa, stream)
-
-    # librosaで音声ファイルを読み込み
-    y, sr = librosa.load(filename, sr=samplerate)
-    print("y =", y)
-    print("sr =", sr)
-
-    # pyworldでスペクトル包絡を取得
-    y = y.astype(np.float64)
-    print("y =", y)
-
-    _f0, t = pw.dio(y, sr)
-    f0 = pw.stonemask(y, _f0, t, sr)
-    sp = pw.cheaptrick(y, f0, t, sr)
-    ap = pw.d4c(y, f0, t, sr)
-
-    ap = pw.d4c(y, f0, t, sr)
-
-    # 元の音声のスペクトル包絡
-    center_sp = int(len(sp) / 2)  # 定常部分を求める
-
-    # メルケプストラムの算出
-    mcep = sptk.sp2mc(sp, order=19, alpha=0.42)
-    center_mcep = int(len(mcep) / 2)  # 定常部分を求める
-
-    # メルケプストラムからスペクトル包絡に変換
-    sp_from_mcep = sptk.mc2sp(mcep, alpha=0.42, fftlen=1024)
-
-    # === グラフ表示 ===
-    # メルケプストラム
-    plt.figure()
-    print("mcep[center_sp] =", mcep[center_sp])
-    plt.plot(mcep[center_sp])
-    plt.title('Mel-cepstrum')
-    # "元のスペクトル包絡"と"メルケプストラムから再合成したスペクトル包絡"
-    plt.figure()
-    plt.plot(np.log10(sp[center_sp]), label="Original")
-    plt.plot(np.log10(sp_from_mcep[center_sp]), label="Conversion")
-    plt.title('spectral envelope')
-    plt.legend()
-
-    plt.show()
 
     print("=================")
     print("= Main Code END =")
