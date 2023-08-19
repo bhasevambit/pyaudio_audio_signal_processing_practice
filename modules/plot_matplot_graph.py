@@ -20,6 +20,13 @@ def gen_graph_figure(graph_type):
         # Axesインスタンスの作成
         sub_fig1 = fig.add_subplot(2, 1, 1)
         sub_fig2 = fig.add_subplot(2, 1, 2)
+        sub_fig3 = 0  # 未使用変数の定義
+
+        # 上下左右にグラフ目盛線を付与
+        sub_fig1.yaxis.set_ticks_position('both')
+        sub_fig1.xaxis.set_ticks_position('both')
+        sub_fig2.yaxis.set_ticks_position('both')
+        sub_fig2.xaxis.set_ticks_position('both')
 
     else:
         # ===============================================
@@ -66,13 +73,13 @@ def gen_graph_figure(graph_type):
             )
         )
 
-    # 上下左右にグラフ目盛線を付与
-    sub_fig1.yaxis.set_ticks_position('both')
-    sub_fig1.xaxis.set_ticks_position('both')
-    sub_fig2.yaxis.set_ticks_position('both')
-    sub_fig2.xaxis.set_ticks_position('both')
-    sub_fig3.yaxis.set_ticks_position('both')
-    sub_fig3.xaxis.set_ticks_position('both')
+        # 上下左右にグラフ目盛線を付与
+        sub_fig1.yaxis.set_ticks_position('both')
+        sub_fig1.xaxis.set_ticks_position('both')
+        sub_fig2.yaxis.set_ticks_position('both')
+        sub_fig2.xaxis.set_ticks_position('both')
+        sub_fig3.yaxis.set_ticks_position('both')
+        sub_fig3.xaxis.set_ticks_position('both')
 
     # fig       : 生成したmatplotlib figureインスタンス
     # sub_fig1  : 生成したmatplotlib 第1のAxesインスタンス
