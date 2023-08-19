@@ -26,17 +26,20 @@ def gen_graph_figure(graph_type):
         # === 時間領域波形&スペクトログラムグラフ向け ===
         # ===============================================
         # figureインスタンスの作成
-        fig = plt.figure(figsize=[8, 8])
+        fig = plt.figure(figsize=[8, 10])
 
         # Axesインスタンスの作成
         # add_axesの引数パラメータは「left，bottom，width，height」
-        axes_left_common = 0.1
-        axes_height_spctrgrm = 0.5
-        axes_height_wave = 0.25
-        axes_bottom_spctrgrm = 0.1
-        axes_bottom_wave = axes_bottom_spctrgrm + axes_height_spctrgrm + 0.1
+        axes_left_common = 0.12
+        axes_height_spctrgrm = 0.4
+        axes_height_wave = 0.15
+        axes_height_f0 = 0.22
+        axes_bottom_f0 = 0.07
+        axes_bottom_spctrgrm = axes_bottom_f0 + axes_height_f0 + 0.06
+        axes_bottom_wave = axes_bottom_spctrgrm + axes_height_spctrgrm + 0.06
         axes_width_spctrgrm = 0.89  # 時間領域波形とスペクトログラムの横軸メモリが合うように微調整
         axes_width_wave = 0.71  # 時間領域波形とスペクトログラムの横軸メモリが合うように微調整
+        axes_width_f0 = axes_width_wave
 
         sub_fig1 = fig.add_axes(
             (
@@ -54,17 +57,28 @@ def gen_graph_figure(graph_type):
                 axes_height_spctrgrm
             )
         )
+        sub_fig3 = fig.add_axes(
+            (
+                axes_left_common,
+                axes_bottom_f0,
+                axes_width_f0,
+                axes_height_f0
+            )
+        )
 
     # 上下左右にグラフ目盛線を付与
     sub_fig1.yaxis.set_ticks_position('both')
     sub_fig1.xaxis.set_ticks_position('both')
     sub_fig2.yaxis.set_ticks_position('both')
     sub_fig2.xaxis.set_ticks_position('both')
+    sub_fig3.yaxis.set_ticks_position('both')
+    sub_fig3.xaxis.set_ticks_position('both')
 
     # fig       : 生成したmatplotlib figureインスタンス
     # sub_fig1  : 生成したmatplotlib 第1のAxesインスタンス
     # sub_fig2  : 生成したmatplotlib 第2のAxesインスタンス
-    return fig, sub_fig1, sub_fig2
+    # sub_fig3  : 生成したmatplotlib 第3のAxesインスタンス
+    return fig, sub_fig1, sub_fig2, sub_fig3
 
 
 def gen_graph_figure_for_realtime_spctrgrm(spctrgrm_mode):
@@ -323,6 +337,7 @@ def plot_time_and_spectrogram(
 
         # 目盛内側化
         wave_fig.tick_params(axis="both", direction="in")
+        f0_fig.tick_params(axis="both", direction="in")
 
         # 時間領域波形 軸ラベル設定
         wave_fig.set_xlabel("Time [s]")
@@ -332,6 +347,10 @@ def plot_time_and_spectrogram(
         spctrgrm_fig.set_xlabel("Time [s]")
         spctrgrm_fig.set_ylabel("Frequency [Hz]")
 
+        # 基本周波数 時系列データ 軸ラベル設定
+        f0_fig.set_xlabel("Time [s]")
+        f0_fig.set_ylabel("Frequency [Hz]")
+
         # 時間領域波形 軸目盛り設定
         wave_fig.set_xlim(0, time_range)
         wave_fig.set_ylim(-1, 1)
@@ -340,6 +359,11 @@ def plot_time_and_spectrogram(
         # スペクトログラム 軸目盛り設定
         spctrgrm_fig.set_xlim(0, time_range)
         spctrgrm_fig.set_ylim(0, freq_range)  # 0 ～ 2000[Hz]の範囲
+
+        # 基本周波数 時系列データ 軸目盛り設定
+        f0_fig.set_xlim(0, time_range)
+        f0_fig.set_ylim(-20, 1000)  # -20[Hz] 〜 1000[Hz]
+        f0_fig.set_yticks(np.arange(0, 1020, 100))  # 100[Hz]刻み(範囲:0〜1020[Hz])
 
         # スペクトログラム算出モードテキスト表示設定
         text_ypos = 0.01
@@ -395,13 +419,26 @@ def plot_time_and_spectrogram(
         else:
             cbar.set_label('Sound Pressure [Pa]')
 
+        # 基本周波数データプロット
+        f0_fig.plot(
+            time_f0,
+            f0,
+            label="Fundamental Frequency",
+            lw=3,
+            color="forestgreen"
+        )
+
         # グラフの凡例表示
         wave_fig.legend(loc="upper right", borderaxespad=1, fontsize=8)
+        f0_fig.legend(loc="upper right", borderaxespad=1, fontsize=8)
 
     else:
         # ================================
         # === リアルタイムモードの場合 ===
         # ================================
+
+        # 目盛内側化
+        f0_fig.tick_params(axis="both", direction="in")
 
         # スペクトログラム 軸ラベル設定
         spctrgrm_fig.set_xlabel("Time [s]")
