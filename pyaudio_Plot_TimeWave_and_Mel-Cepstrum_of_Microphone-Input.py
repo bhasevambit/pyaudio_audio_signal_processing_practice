@@ -146,6 +146,7 @@ if __name__ == '__main__':
             print("len(data_normalized) =", len(data_normalized))
 
             # === スペクトル包絡の導出 (pyworld使用) ===
+            # 基本周波数の抽出
             f0, time_f0 = gen_fundamental_freq_data(data_normalized, samplerate)
             # f0        : 基本周波数 時系列データ 1次元配列
             # time_f0   : 基本周波数 時系列データに対応した時間軸データ 1次元配列
