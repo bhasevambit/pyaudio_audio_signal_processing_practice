@@ -7,7 +7,7 @@ from modules.get_mic_index import get_mic_index
 from modules.get_std_input import (get_selected_mic_index_by_std_input,
                                    get_selected_mode_by_std_input)
 from modules.plot_matplot_graph import (gen_graph_figure_for_cepstrum,
-                                        plot_time_and_quef)
+                                        plot_time_freq_quef)
 from modules.save_audio_to_wav_file import save_audio_to_wav_file
 from modules.save_matplot_graph import save_matplot_graph
 
@@ -139,7 +139,7 @@ if __name__ == '__main__':
             # ケプストラムデータ(対数値)[dB] 1次元配列
 
             # === グラフ表示 ===
-            plot_time_and_quef(
+            plot_time_freq_quef(
                 fig,
                 wave_fig,
                 freq_fig,
