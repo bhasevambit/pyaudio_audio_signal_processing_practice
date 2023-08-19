@@ -678,6 +678,7 @@ def plot_time_and_quef(
     # グラフの凡例表示
     wave_fig.legend(loc="upper right", borderaxespad=1, fontsize=8)
     freq_fig.legend(loc="upper right", borderaxespad=1, fontsize=8)
+    f0_fig.legend(loc="upper right", borderaxespad=1, fontsize=8)
     ceps_fig.legend(loc="upper right", borderaxespad=1, fontsize=8)
 
     if selected_mode == 1:
