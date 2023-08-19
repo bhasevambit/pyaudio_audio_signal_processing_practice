@@ -128,16 +128,18 @@ if __name__ == '__main__':
         # fig           : 生成したmatplotlib figureインスタンス
         # wave_fig      : 時間領域波形向けmatplotlib Axesインスタンス
         # spctrgrm_fig  : スペクトログラム向けmatplotlib Axesインスタンス
+        # f0_fig        : 基本周波数 時系列波形向けmatplotlib Axesインスタンス
+
     else:
         # === リアルタイムモードの場合 ===
-        fig, spctrgrm_fig, f0_fig, cbar_fig = gen_graph_figure_for_realtime_spctrgrm(
+        fig, spctrgrm_fig, cbar_fig, f0_fig = gen_graph_figure_for_realtime_spctrgrm(
             spctrgrm_mode
         )
         wave_fig = 0    # 未使用変数の初期化
         # fig           : 生成したmatplotlib figureインスタンス
-        # f0_fig        : 基本周波数 時系列波形向けmatplotlib Axesインスタンス
         # spctrgrm_fig  : スペクトログラム向けmatplotlib Axesインスタンス
         # cbar_fig      : スペクトログラムカラーバー向けmatplotlib Axesインスタンス
+        # f0_fig        : 基本周波数 時系列波形向けmatplotlib Axesインスタンス
 
     # === Microphone入力音声ストリーム生成 ===
     pa, stream = audio_stream_start(

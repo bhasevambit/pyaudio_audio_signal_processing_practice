@@ -78,49 +78,49 @@ def gen_graph_figure_for_realtime_spctrgrm(spctrgrm_mode):
 
     # Axesインスタンスの作成
     # add_axesの引数パラメータは「left，bottom，width，height」
-    fig1_axes_left = 0.12
-    fig2_axes_left = fig1_axes_left
+    spctrgrm_axes_left = 0.12
+    f0_axes_left = spctrgrm_axes_left
 
-    fig1_axes_width = 0.70
-    fig2_axes_width = fig1_axes_width
+    spctrgrm_axes_width = 0.70
+    f0_axes_width = spctrgrm_axes_width
 
-    fig1_axes_height = 0.38
-    fig2_axes_height = fig1_axes_height
+    spctrgrm_axes_height = 0.38
+    f0_axes_height = spctrgrm_axes_height
 
-    fig2_axes_bottom = 0.11
-    fig1_axes_bottom = fig2_axes_bottom + fig2_axes_height + 0.1
+    f0_axes_bottom = 0.11
+    spctrgrm_axes_bottom = f0_axes_bottom + f0_axes_height + 0.1
 
-    sub_fig1 = fig.add_axes(
+    spctrgrm_fig = fig.add_axes(
         (
-            fig1_axes_left,
-            fig1_axes_bottom,
-            fig1_axes_width,
-            fig1_axes_height
+            spctrgrm_axes_left,
+            spctrgrm_axes_bottom,
+            spctrgrm_axes_width,
+            spctrgrm_axes_height
         )
     )
 
-    sub_fig2 = fig.add_axes(
+    f0_fig = fig.add_axes(
         (
-            fig2_axes_left,
-            fig2_axes_bottom,
-            fig2_axes_width,
-            fig2_axes_height
+            f0_axes_left,
+            f0_axes_bottom,
+            f0_axes_width,
+            f0_axes_height
         )
     )
 
     # 上下左右にグラフ目盛線を付与
-    sub_fig1.yaxis.set_ticks_position('both')
-    sub_fig1.xaxis.set_ticks_position('both')
-    sub_fig2.yaxis.set_ticks_position('both')
-    sub_fig2.xaxis.set_ticks_position('both')
+    spctrgrm_fig.yaxis.set_ticks_position('both')
+    spctrgrm_fig.xaxis.set_ticks_position('both')
+    f0_fig.yaxis.set_ticks_position('both')
+    f0_fig.xaxis.set_ticks_position('both')
 
     # カラーバー用Axesインスタンスの作成
     # add_axesの引数パラメータは「left，bottom，width，height」
     cbar_fig = fig.add_axes(
-        (fig1_axes_left + fig1_axes_width + 0.035,
-         fig1_axes_bottom,
+        (spctrgrm_axes_left + spctrgrm_axes_width + 0.035,
+         spctrgrm_axes_bottom,
          0.03,
-         fig1_axes_height)
+         spctrgrm_axes_height)
     )
 
     # スペクトログラム算出モードテキスト表示設定
@@ -135,11 +135,11 @@ def gen_graph_figure_for_realtime_spctrgrm(spctrgrm_mode):
 
     fig.text(text_xpos, text_ypos, text_word)
 
-    # fig       : 生成したmatplotlib figureインスタンス
-    # sub_fig1  : 生成したmatplotlib 第1のAxesインスタンス
-    # sub_fig2  : 生成したmatplotlib 第2のAxesインスタンス
-    # cbar_fig  : 生成したmatplotlib カラーバー用Axesインスタンス
-    return fig, sub_fig1, sub_fig2, cbar_fig
+    # fig           : 生成したmatplotlib figureインスタンス
+    # spctrgrm_fig  : スペクトログラム向けmatplotlib Axesインスタンス
+    # cbar_fig      : スペクトログラムカラーバー向けmatplotlib Axesインスタンス
+    # f0_fig        : 基本周波数 時系列波形向けmatplotlib Axesインスタンス
+    return fig, spctrgrm_fig, cbar_fig, f0_fig
 
 
 def gen_graph_figure_for_cepstrum():
