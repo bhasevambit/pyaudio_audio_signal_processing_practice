@@ -27,5 +27,5 @@ def save_audio_to_wav_file(samplerate, audio_discrete_data):
 
     print("Audio DATA File Save END\n")
 
-    # filename : 保存した音声データをWAVファイル名(拡張子あり)
+    # filename : 保存した音声データのWAVファイル名(拡張子あり:相対PATH)
     return filename
