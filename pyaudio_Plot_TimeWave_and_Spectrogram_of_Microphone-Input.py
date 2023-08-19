@@ -1,7 +1,8 @@
 from modules.audio_signal_processing_advanced import overlap, window
 from modules.audio_stream import audio_stream_start, audio_stream_stop
 from modules.gen_freq_domain_data import (
-    gen_freq_domain_data_of_signal_spctrgrm, gen_freq_domain_data_of_stft)
+    gen_freq_domain_data_of_signal_spctrgrm, gen_freq_domain_data_of_stft,
+    gen_fundamental_freq_data)
 from modules.gen_time_domain_data import gen_time_domain_data
 from modules.get_mic_index import get_mic_index
 from modules.get_std_input import (get_selected_mic_index_by_std_input,
@@ -198,12 +199,18 @@ if __name__ == '__main__':
                 # time_spctrgrm         : スペクトログラム x軸向けデータ[s]
                 # spectrogram           : スペクトログラム 振幅データ
 
+            # === 基本周波数 時系列データ生成 ===
+            f0, time_f0 = gen_fundamental_freq_data(data_normalized, samplerate)
+            # f0        : 基本周波数 時系列データ 1次元配列
+            # time_f0   : 基本周波数 時系列データに対応した時間軸データ 1次元配列
+
             # === グラフ表示 ===
             plot_time_and_spectrogram(
                 fig,
                 wave_fig,
                 spctrgrm_fig,
                 cbar_fig,
+                f0_fig,
                 data_normalized,
                 time_normalized,
                 time_range,
@@ -211,6 +218,8 @@ if __name__ == '__main__':
                 time_spctrgrm,
                 spectrogram,
                 freq_range,
+                f0,
+                time_f0,
                 dbref,
                 A,
                 selected_mode,
