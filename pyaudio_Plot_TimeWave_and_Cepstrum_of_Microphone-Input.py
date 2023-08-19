@@ -1,5 +1,6 @@
 from modules.audio_stream import audio_stream_start, audio_stream_stop
-from modules.gen_freq_domain_data import gen_freq_domain_data
+from modules.gen_freq_domain_data import (gen_freq_domain_data,
+                                          gen_fundamental_freq_data)
 from modules.gen_quef_domain_data import gen_quef_domain_data
 from modules.gen_time_domain_data import gen_time_domain_data
 from modules.get_mic_index import get_mic_index
@@ -93,8 +94,8 @@ if __name__ == '__main__':
     fig, wave_fig, freq_fig, f0_fig, ceps_fig = gen_graph_figure_for_cepstrum()
     # fig       : 生成したmatplotlib figureインスタンス
     # wave_fig  : 時間領域波形向けmatplotlib Axesインスタンス
-    # f0_fig    : 基本周波数 時系列波形向けmatplotlib Axesインスタンス
     # freq_fig  : 周波数特性向けmatplotlib Axesインスタンス
+    # f0_fig    : 基本周波数 時系列波形向けmatplotlib Axesインスタンス
     # ceps_fig  : ケプストラム向けmatplotlib Axesインスタンス
 
     # === Microphone入力音声ストリーム生成 ===
@@ -124,6 +125,11 @@ if __name__ == '__main__':
             # phase_normalized      : 正規化後 DFTデータ位相成分 1次元配列
             # freq_normalized       : 正規化後 周波数軸データ 1次元配列
 
+            # === 基本周波数 時系列データ生成 ===
+            f0, time_f0 = gen_fundamental_freq_data(data_normalized, samplerate)
+            # f0        : 基本周波数 時系列データ 1次元配列
+            # time_f0   : 基本周波数 時系列データに対応した時間軸データ 1次元配列
+
             # === ケプストラムデータ生成 ===
             amp_envelope_normalized, cepstrum_data, cepstrum_data_lpl = gen_quef_domain_data(
                 data_normalized, samplerate, dbref)
@@ -137,6 +143,7 @@ if __name__ == '__main__':
                 fig,
                 wave_fig,
                 freq_fig,
+                f0_fig,
                 ceps_fig,
                 data_normalized,
                 time_normalized,
@@ -145,6 +152,8 @@ if __name__ == '__main__':
                 amp_envelope_normalized,
                 freq_normalized,
                 freq_range,
+                f0,
+                time_f0,
                 cepstrum_data,
                 cepstrum_data_lpl,
                 dbref,
