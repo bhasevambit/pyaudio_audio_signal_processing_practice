@@ -11,7 +11,8 @@ from modules.get_mic_index import get_mic_index
 from modules.get_std_input import (get_selected_mic_index_by_std_input,
                                    get_selected_mode_by_std_input)
 from modules.plot_matplot_graph import (gen_graph_figure_for_cepstrum,
-                                        plot_time_and_quef)
+                                        plot_time_freq_quef,
+                                        plot_time_freq_quef_for_mel)
 from modules.save_audio_to_wav_file import save_audio_to_wav_file
 from modules.save_matplot_graph import save_matplot_graph
 
@@ -170,7 +171,7 @@ if __name__ == '__main__':
             sp_from_mcep = pysptk.mc2sp(mcep, alpha=0.42, fftlen=1024)
 
             # === グラフ表示 ===
-            plot_time_and_quef(
+            plot_time_freq_quef(
                 fig1,
                 wave_fig1,
                 freq_fig1,
@@ -192,7 +193,7 @@ if __name__ == '__main__':
                 selected_mode
             )
 
-            plot_time_and_quef(
+            plot_time_freq_quef_for_mel(
                 fig2,
                 wave_fig2,
                 freq_fig2,
