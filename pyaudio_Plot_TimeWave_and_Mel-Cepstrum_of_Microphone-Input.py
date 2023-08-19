@@ -3,7 +3,8 @@ import pysptk
 import pyworld
 from matplotlib import pyplot as plt
 from modules.audio_stream import audio_stream_start, audio_stream_stop
-from modules.gen_freq_domain_data import gen_freq_domain_data
+from modules.gen_freq_domain_data import (gen_freq_domain_data,
+                                          gen_fundamental_freq_data)
 from modules.gen_quef_domain_data import gen_quef_domain_data
 from modules.gen_time_domain_data import gen_time_domain_data
 from modules.get_mic_index import get_mic_index
@@ -145,21 +146,20 @@ if __name__ == '__main__':
             print("len(data_normalized) =", len(data_normalized))
 
             # === スペクトル包絡の導出 (pyworld使用) ===
-            # 基本周波数(_f0)の抽出 (raw pitch extractor)
-            _f0, t = pyworld.dio(data_normalized, samplerate)
-            # 基本周波数の修正 (pitch refinement)
-            f0 = pyworld.stonemask(data_normalized, _f0, t, samplerate)
-            # f0 : 修正後 基本周波数
+            f0, time_f0 = gen_fundamental_freq_data(data_normalized, samplerate)
+            # f0        : 基本周波数 時系列データ 1次元配列
+            # time_f0   : 基本周波数 時系列データに対応した時間軸データ 1次元配列
+
             print("\nf0 =", f0, "\n")
             print("len(f0) =", len(f0))
-            print("\nt =", t, "\n")
-            print("len(t) =", len(t))
+            print("\ntime_f0 =", time_f0, "\n")
+            print("len(time_f0) =", len(time_f0))
 
             # スペクトログラム(スムース処理適用版)の抽出 (extract smoothed spectrogram)
-            sp = pyworld.cheaptrick(data_normalized, f0, t, samplerate)
+            sp = pyworld.cheaptrick(data_normalized, f0, time_f0, samplerate)
 
             # 非周期性指標の抽出 (extract aperiodicity)
-            ap = pyworld.d4c(data_normalized, f0, t, samplerate)
+            ap = pyworld.d4c(data_normalized, f0, time_f0, samplerate)
 
             # 元の音声のスペクトル包絡の算出
             center_sp = int(len(sp) / 2)  # 定常部分を求める
@@ -205,10 +205,10 @@ if __name__ == '__main__':
 
             # 基本周波数 時間領域波形
             plt.figure()
-            plt.plot(t, f0)
+            plt.plot(time_f0, f0)
             plt.title('Pitch Time wave')
             plt.xlabel("Time [s]")
-            plt.ylabel("Fundamental Frequency [Hz]")
+            plt.ylabel("Fundamental Frequency (f0) [Hz]")
 
             plt.show()
 
