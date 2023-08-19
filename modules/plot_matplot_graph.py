@@ -427,6 +427,7 @@ def plot_time_and_quef(
     fig,
     wave_fig,
     freq_fig,
+    f0_fig,
     ceps_fig,
     data_normalized,
     time_normalized,
@@ -435,6 +436,8 @@ def plot_time_and_quef(
     amp_envelope_normalized,
     freq_normalized,
     freq_range,
+    f0,
+    time_f0,
     cepstrum_db,
     cepstrum_data_lpl,
     dbref,
@@ -447,6 +450,7 @@ def plot_time_and_quef(
     # fig                       : 生成したmatplotlib figureインスタンス
     # wave_fig                  : 時間領域波形向けmatplotlib Axesインスタンス
     # freq_fig                  : 周波数特性向けmatplotlib Axesインスタンス
+    # f0_fig                    : 基本周波数 時系列波形向けmatplotlib Axesインスタンス
     # ceps_fig                  : ケプストラム向けmatplotlib Axesインスタンス
     # data_normalized           : 時間領域 波形データ(正規化済)
     # time_normalized           : 時間領域 X軸向けデータ [s]
@@ -455,6 +459,8 @@ def plot_time_and_quef(
     # amp_envelope_normalized   : スペクトル包絡データ(正規化済)
     # freq_normalized           : 周波数特性 X軸向けデータ [Hz]
     # freq_range                : 周波数特性グラフ X軸表示レンジ [Hz]
+    # f0                        : 基本周波数 時系列データ 1次元配列
+    # time_f0                   : 基本周波数 時系列データに対応した時間軸データ 1次元配列
     # cepstrum_data             : ケプストラムデータ(対数値)[dB] 1次元配列
     # cepstrum_data_lpl         : LPL(=Low-Pass-Lifter)適用後 ケプストラムデータ(対数値)[dB] 1次元配列
     # dbref                     : デシベル基準値
@@ -481,6 +487,10 @@ def plot_time_and_quef(
     else:
         freq_fig.set_ylabel('Amplitude')
 
+    # 基本周波数 時系列データ 軸ラベル設定
+    f0_fig.set_xlabel('Time [s]')
+    f0_fig.set_ylabel('Fundamental Frequency [Hz]')
+
     # ケプストラム 軸ラベル設定
     ceps_fig.set_xlabel('Quefrency [s]')
     if (dbref > 0) and not (A):
@@ -501,12 +511,17 @@ def plot_time_and_quef(
         freq_fig.set_ylim(-10, 90)  # -10[dB] 〜 90[dB]
         freq_fig.set_yticks(np.arange(0, 100, 20))  # 20[dB]刻み(範囲:0〜100[dB])
 
+    # 基本周波数 時系列データ 軸目盛り設定
+    f0_fig.set_xlim(0, time_range)
+    f0_fig.set_ylim(-20, 1000)  # -20[Hz] 〜 1000[Hz]
+    f0_fig.set_yticks(np.arange(0, 1020, 100))  # 100[Hz]刻み(範囲:0〜1020[Hz])
+
     # ケプストラム 軸目盛り設定
     ceps_fig.set_xlim(0, 0.02)  # 0 ～ 20[ms] (低ケフレンシ/高ケフレンシの境界を表示)
-    ceps_fig.set_xticks(np.arange(0, 0.021, 0.005))  # 5[ms]刻み(範囲:0〜21[ms])
+    ceps_fig.set_xticks(np.arange(0, 0.025, 0.005))  # 5[ms]刻み(範囲:0〜25[ms])
     if (dbref > 0):
-        ceps_fig.set_ylim(-1, 4)  # -1[dB] 〜5[dB]
-        ceps_fig.set_yticks(np.arange(-2, 5, 1))  # 1[dB]刻み(範囲:-2〜6[dB])
+        ceps_fig.set_ylim(-1.5, 4)  # -1.5[dB] 〜4[dB]
+        ceps_fig.set_yticks(np.arange(-1, 5, 1))  # 1[dB]刻み(範囲:-1〜5[dB])
 
     # plot.figure.tight_layout()実行時の「UserWarning: The figure layout has
     # changed to tight」Warning文の抑止
@@ -521,7 +536,8 @@ def plot_time_and_quef(
         data_normalized,
         label="Time Waveform",
         lw=1,
-        color="blue")
+        color="blue"
+    )
 
     # 周波数特性データプロット
     freq_fig.plot(
@@ -529,14 +545,25 @@ def plot_time_and_quef(
         amp_normalized,
         label="Spectrum",
         lw=1,
-        color="dodgerblue")
+        color="dodgerblue"
+    )
 
     # スペクトル包絡データプロット
     freq_fig.plot(
         freq_normalized,
         amp_envelope_normalized,
         label="Spectrum Envelope",
-        lw=4)
+        lw=4
+    )
+
+    # 基本周波数データプロット
+    f0_fig.plot(
+        time_f0,
+        f0,
+        label="Fundamental Frequency",
+        lw=3,
+        color="forestgreen"
+    )
 
     # ケプストラムデータプロット
     ceps_fig.plot(
@@ -544,7 +571,8 @@ def plot_time_and_quef(
         cepstrum_db,
         label="Cepstrum",
         lw=1,
-        color="red")
+        color="red"
+    )
 
     ceps_fig.plot(
         time_normalized,
@@ -566,4 +594,5 @@ def plot_time_and_quef(
 
         wave_fig.cla()
         freq_fig.cla()
+        f0_fig.cla()
         ceps_fig.cla()
