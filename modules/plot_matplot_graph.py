@@ -698,18 +698,15 @@ def plot_time_freq_quef_for_mel(
     wave_fig,
     freq_fig,
     f0_fig,
-    ceps_fig,
+    melceps_fig,
     data_normalized,
     time_normalized,
     time_range,
-    amp_normalized,
-    amp_envelope_normalized,
-    freq_normalized,
-    freq_range,
     f0,
     time_f0,
-    cepstrum_db,
-    cepstrum_data_lpl,
+    mcep,
+    sp_log,
+    sp_from_mcep_log,
     dbref,
     A,
     selected_mode
@@ -721,7 +718,7 @@ def plot_time_freq_quef_for_mel(
     # wave_fig                  : 時間領域波形向けmatplotlib Axesインスタンス
     # freq_fig                  : 周波数特性向けmatplotlib Axesインスタンス
     # f0_fig                    : 基本周波数 時系列波形向けmatplotlib Axesインスタンス
-    # ceps_fig                  : ケプストラム向けmatplotlib Axesインスタンス
+    # melceps_fig               : メルケプストラム向けmatplotlib Axesインスタンス
     # data_normalized           : 時間領域 波形データ(正規化済)
     # time_normalized           : 時間領域 X軸向けデータ [s]
     # time_range                : 時間領域波形グラフ X軸表示レンジ [sample count]
@@ -749,26 +746,26 @@ def plot_time_freq_quef_for_mel(
     wave_fig.set_ylabel('Amplitude')
 
     # 周波数特性 軸ラベル設定
-    freq_fig.set_xlabel("Frequency [Hz]")
-    if (dbref > 0) and not (A):
-        freq_fig.set_ylabel('Amplitude [dB spl]')
-    elif (dbref > 0) and (A):
-        freq_fig.set_ylabel('Amplitude [dB spl(A)]')
-    else:
-        freq_fig.set_ylabel('Amplitude')
+    # freq_fig.set_xlabel("Frequency [Hz]")
+    # if (dbref > 0) and not (A):
+    #     freq_fig.set_ylabel('Amplitude [dB spl]')
+    # elif (dbref > 0) and (A):
+    #     freq_fig.set_ylabel('Amplitude [dB spl(A)]')
+    # else:
+    #     freq_fig.set_ylabel('Amplitude')
 
     # 基本周波数 時系列データ 軸ラベル設定
     f0_fig.set_xlabel("Time [s]")
     f0_fig.set_ylabel("Frequency [Hz]")
 
     # ケプストラム 軸ラベル設定
-    ceps_fig.set_xlabel('Quefrency [s]')
-    if (dbref > 0) and not (A):
-        ceps_fig.set_ylabel('Amplitude [dB spl]')
-    elif (dbref > 0) and (A):
-        ceps_fig.set_ylabel('Amplitude [dB spl(A)]')
-    else:
-        ceps_fig.set_ylabel('Amplitude')
+    # melceps_fig.set_xlabel('Quefrency [s]')
+    # if (dbref > 0) and not (A):
+    #     melceps_fig.set_ylabel('Amplitude [dB spl]')
+    # elif (dbref > 0) and (A):
+    #     melceps_fig.set_ylabel('Amplitude [dB spl(A)]')
+    # else:
+    #     melceps_fig.set_ylabel('Amplitude')
 
     # 時間領域波形 軸目盛り設定
     wave_fig.set_xlim(0, time_range)
@@ -776,10 +773,10 @@ def plot_time_freq_quef_for_mel(
     wave_fig.set_yticks([-1, -0.5, 0, 0.5, 1])
 
     # 周波数特性 軸目盛り設定
-    freq_fig.set_xlim(0, freq_range)
-    if (dbref > 0):
-        freq_fig.set_ylim(-10, 90)  # -10[dB] 〜 90[dB]
-        freq_fig.set_yticks(np.arange(0, 100, 20))  # 20[dB]刻み(範囲:0〜100[dB])
+    # freq_fig.set_xlim(0, freq_range)
+    # if (dbref > 0):
+    #     freq_fig.set_ylim(-10, 90)  # -10[dB] 〜 90[dB]
+    #     freq_fig.set_yticks(np.arange(0, 100, 20))  # 20[dB]刻み(範囲:0〜100[dB])
 
     # 基本周波数 時系列データ 軸目盛り設定
     f0_fig.set_xlim(0, time_range)
@@ -787,11 +784,11 @@ def plot_time_freq_quef_for_mel(
     f0_fig.set_yticks(np.arange(0, 1020, 100))  # 100[Hz]刻み(範囲:0〜1020[Hz])
 
     # ケプストラム 軸目盛り設定
-    ceps_fig.set_xlim(0, 0.02)  # 0 ～ 20[ms] (低ケフレンシ/高ケフレンシの境界を表示)
-    ceps_fig.set_xticks(np.arange(0, 0.025, 0.005))  # 5[ms]刻み(範囲:0〜25[ms])
-    if (dbref > 0):
-        ceps_fig.set_ylim(-1.5, 4)  # -1.5[dB] 〜4[dB]
-        ceps_fig.set_yticks(np.arange(-1, 5, 1))  # 1[dB]刻み(範囲:-1〜5[dB])
+    # melceps_fig.set_xlim(0, 0.02)  # 0 ～ 20[ms] (低ケフレンシ/高ケフレンシの境界を表示)
+    # melceps_fig.set_xticks(np.arange(0, 0.025, 0.005))  # 5[ms]刻み(範囲:0〜25[ms])
+    # if (dbref > 0):
+    #     melceps_fig.set_ylim(-1.5, 4)  # -1.5[dB] 〜4[dB]
+    #     melceps_fig.set_yticks(np.arange(-1, 5, 1))  # 1[dB]刻み(範囲:-1〜5[dB])
 
     # plot.figure.tight_layout()実行時の「UserWarning: The figure layout has
     # changed to tight」Warning文の抑止
@@ -810,21 +807,21 @@ def plot_time_freq_quef_for_mel(
     )
 
     # 周波数特性データプロット
-    freq_fig.plot(
-        freq_normalized,
-        amp_normalized,
-        label="Spectrum",
-        lw=1,
-        color="dodgerblue"
-    )
+    # freq_fig.plot(
+    #     freq_normalized,
+    #     amp_normalized,
+    #     label="Spectrum",
+    #     lw=1,
+    #     color="dodgerblue"
+    # )
 
     # スペクトル包絡データプロット
-    freq_fig.plot(
-        freq_normalized,
-        amp_envelope_normalized,
-        label="Spectrum Envelope",
-        lw=4
-    )
+    # freq_fig.plot(
+    #     freq_normalized,
+    #     amp_envelope_normalized,
+    #     label="Spectrum Envelope",
+    #     lw=4
+    # )
 
     # 基本周波数データプロット
     f0_fig.plot(
@@ -836,27 +833,34 @@ def plot_time_freq_quef_for_mel(
     )
 
     # ケプストラムデータプロット
-    ceps_fig.plot(
-        time_normalized,
-        cepstrum_db,
-        label="Cepstrum",
-        lw=1,
-        color="red"
-    )
+    # ceps_fig.plot(
+    #     time_normalized,
+    #     cepstrum_db,
+    #     label="Cepstrum",
+    #     lw=1,
+    #     color="red"
+    # )
 
-    ceps_fig.plot(
-        time_normalized,
-        cepstrum_data_lpl,
-        label="Cepstrum(Low-Pass-Lifter)",
-        lw=1,
-        color="royalblue"
-    )
+    # ceps_fig.plot(
+    #     time_normalized,
+    #     cepstrum_data_lpl,
+    #     label="Cepstrum(Low-Pass-Lifter)",
+    #     lw=1,
+    #     color="royalblue"
+    # )
+
+    melceps_fig.plot(mcep)
+
+    freq_fig.plot(sp_log, label="Original")
+    freq_fig.plot(sp_from_mcep_log, label="Conversion")
+
+    plt.show()
 
     # グラフの凡例表示
     wave_fig.legend(loc="upper right", borderaxespad=1, fontsize=8)
     freq_fig.legend(loc="upper right", borderaxespad=1, fontsize=8)
     f0_fig.legend(loc="upper right", borderaxespad=1, fontsize=8)
-    ceps_fig.legend(loc="upper right", borderaxespad=1, fontsize=8)
+    melceps_fig.legend(loc="upper right", borderaxespad=1, fontsize=8)
 
     if selected_mode == 1:
         # リアルタイムモードの場合、matplotlibグラフを更新
@@ -867,4 +871,4 @@ def plot_time_freq_quef_for_mel(
         wave_fig.cla()
         freq_fig.cla()
         f0_fig.cla()
-        ceps_fig.cla()
+        melceps_fig.cla()

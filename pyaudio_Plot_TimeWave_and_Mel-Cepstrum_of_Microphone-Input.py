@@ -1,7 +1,6 @@
 import numpy as np
 import pysptk
 import pyworld
-from matplotlib import pyplot as plt
 from modules.audio_stream import audio_stream_start, audio_stream_stop
 from modules.gen_freq_domain_data import (gen_freq_domain_data,
                                           gen_fundamental_freq_data)
@@ -97,19 +96,19 @@ if __name__ == '__main__':
 
     # === グラフ領域作成 ===
     # (リアルタイムモード向けグラフ描画のためにMain Codeでの生成が必須)
-    fig1, wave_fig1, freq_fig1, f0_fig1, ceps_fig1 = gen_graph_figure_for_cepstrum()
+    fig1, wave_fig1, freq_fig1, f0_fig1, ceps_fig = gen_graph_figure_for_cepstrum()
     # fig       : 生成したmatplotlib figureインスタンス
     # wave_fig  : 時間領域波形向けmatplotlib Axesインスタンス
     # freq_fig  : 周波数特性向けmatplotlib Axesインスタンス
     # f0_fig    : 基本周波数 時系列波形向けmatplotlib Axesインスタンス
     # ceps_fig  : ケプストラム向けmatplotlib Axesインスタンス
 
-    fig2, wave_fig2, freq_fig2, f0_fig2, ceps_fig2 = gen_graph_figure_for_cepstrum()
-    # fig       : 生成したmatplotlib figureインスタンス
-    # wave_fig  : 時間領域波形向けmatplotlib Axesインスタンス
-    # freq_fig  : 周波数特性向けmatplotlib Axesインスタンス
-    # f0_fig    : 基本周波数 時系列波形向けmatplotlib Axesインスタンス
-    # ceps_fig  : ケプストラム向けmatplotlib Axesインスタンス
+    fig2, wave_fig2, freq_fig2, f0_fig2, melceps_fig = gen_graph_figure_for_cepstrum()
+    # fig           : 生成したmatplotlib figureインスタンス
+    # wave_fig      : 時間領域波形向けmatplotlib Axesインスタンス
+    # freq_fig      : 周波数特性向けmatplotlib Axesインスタンス
+    # f0_fig        : 基本周波数 時系列波形向けmatplotlib Axesインスタンス
+    # melceps_fig   : メルケプストラム向けmatplotlib Axesインスタンス
 
     # === Microphone入力音声ストリーム生成 ===
     pa, stream = audio_stream_start(
@@ -151,24 +150,35 @@ if __name__ == '__main__':
             # cepstrum_data_lpl         : LPL(=Low-Pass-Lifter)適用後
             # ケプストラムデータ(対数値)[dB] 1次元配列
 
-            print("len(data_normalized) =", len(data_normalized))
+            print("--- For Debug ---")
+            print("len(data_normalized) = ", len(data_normalized))
+            print("len(freq_normalized) = ", len(freq_normalized))
 
-            # === スペクトル包絡の導出 (pyworld使用) ===
-            # スペクトログラム(スムース処理適用版)の抽出 (extract smoothed spectrogram)
-            sp = pyworld.cheaptrick(data_normalized, f0, time_f0, samplerate)
+            # スペクトル包絡の抽出 (pyworld使用)
+            sp = pyworld.cheaptrick(x=data_normalized, f0=f0, temporal_positions=time_f0, fs=samplerate)
+            # sp : Spectral envelope (squared magnitude) [ndarray]
+            print("type(sp) = ", type(sp))
+            print("sp.shape = ", sp.shape)
 
             # 非周期性指標の抽出 (extract aperiodicity)
-            ap = pyworld.d4c(data_normalized, f0, time_f0, samplerate)
+            ap = pyworld.d4c(x=data_normalized, f0=f0, temporal_positions=time_f0, fs=samplerate)
+            # ap : Aperiodicity (envelope, linear magnitude relative to spectral envelope) [ndarray]
+            print("type(ap) = ", type(ap))
+            print("ap.shape = ", ap.shape)
 
             # 元の音声のスペクトル包絡の算出
             center_sp = int(len(sp) / 2)  # 定常部分を求める
+            print("center_sp = ", center_sp)
 
             # === メルケプストラムの算出 (pysptk使用) ===
             mcep = pysptk.sp2mc(sp, order=19, alpha=0.42)
             center_mcep = int(len(mcep) / 2)  # 定常部分を求める
+            print("center_mcep = ", center_mcep)
 
             # メルケプストラムからスペクトル包絡に変換
             sp_from_mcep = pysptk.mc2sp(mcep, alpha=0.42, fftlen=1024)
+            print("type(sp_from_mcep) = ", type(sp_from_mcep))
+            print("sp_from_mcep.shape = ", sp_from_mcep.shape)
 
             # === グラフ表示 ===
             plot_time_freq_quef(
@@ -176,7 +186,7 @@ if __name__ == '__main__':
                 wave_fig1,
                 freq_fig1,
                 f0_fig1,
-                ceps_fig1,
+                ceps_fig,
                 data_normalized,
                 time_normalized,
                 time_range,
@@ -198,36 +208,19 @@ if __name__ == '__main__':
                 wave_fig2,
                 freq_fig2,
                 f0_fig2,
-                ceps_fig2,
+                melceps_fig,
                 data_normalized,
                 time_normalized,
                 time_range,
-                amp_normalized,
-                amp_envelope_normalized,
-                freq_normalized,
-                freq_range,
                 f0,
                 time_f0,
-                cepstrum_data,
-                cepstrum_data_lpl,
+                mcep[center_sp],
+                np.log10(sp[center_sp]),
+                np.log10(sp_from_mcep[center_sp]),
                 dbref,
                 A,
                 selected_mode
             )
-
-            # メルケプストラム
-            plt.figure()
-            plt.plot(mcep[center_sp])
-            plt.title('Mel-cepstrum')
-
-            # "元のスペクトル包絡"と"メルケプストラムから再合成したスペクトル包絡"
-            plt.figure()
-            plt.plot(np.log10(sp[center_sp]), label="Original")
-            plt.plot(np.log10(sp_from_mcep[center_sp]), label="Conversion")
-            plt.title('spectral envelope')
-            plt.legend()
-
-            plt.show()
 
             if selected_mode == 0:
                 # レコーディングモードの場合、While処理を1回で抜ける
