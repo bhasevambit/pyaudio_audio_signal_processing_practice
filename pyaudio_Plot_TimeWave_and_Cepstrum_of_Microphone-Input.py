@@ -90,9 +90,10 @@ if __name__ == '__main__':
 
     # === グラフ領域作成 ===
     # (リアルタイムモード向けグラフ描画のためにMain Codeでの生成が必須)
-    fig, wave_fig, freq_fig, ceps_fig = gen_graph_figure_for_cepstrum()
+    fig, wave_fig, freq_fig, f0_fig, ceps_fig = gen_graph_figure_for_cepstrum()
     # fig       : 生成したmatplotlib figureインスタンス
     # wave_fig  : 時間領域波形向けmatplotlib Axesインスタンス
+    # f0_fig    : 基本周波数 時系列波形向けmatplotlib Axesインスタンス
     # freq_fig  : 周波数特性向けmatplotlib Axesインスタンス
     # ceps_fig  : ケプストラム向けmatplotlib Axesインスタンス
 
