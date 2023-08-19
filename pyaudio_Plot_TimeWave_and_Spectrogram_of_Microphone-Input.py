@@ -123,7 +123,7 @@ if __name__ == '__main__':
     # (リアルタイムモード向けグラフ描画のためにMain Codeでの生成が必須)
     if selected_mode == 0:
         # === レコーディングモードの場合 ===
-        fig, wave_fig, spctrgrm_fig = gen_graph_figure(graph_type)
+        fig, wave_fig, spctrgrm_fig, f0_fig = gen_graph_figure(graph_type)
         cbar_fig = 0    # 未使用変数の初期化
         # fig           : 生成したmatplotlib figureインスタンス
         # wave_fig      : 時間領域波形向けmatplotlib Axesインスタンス
