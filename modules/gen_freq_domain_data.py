@@ -1,4 +1,5 @@
 import numpy as np
+import pyworld
 import scipy
 
 from .audio_signal_processing_basic import (a_weighting, db,
@@ -219,3 +220,29 @@ def gen_freq_domain_data_of_stft(
     # time_spctrgrm         : スペクトログラム x軸向けデータ[s]
     # spectrogram           : スペクトログラム 振幅データ
     return freq_spctrgrm, time_spctrgrm, spectrogram
+
+
+def gen_fundamental_freq_data(discrete_data, samplerate):
+    # =======================================
+    # === 基本周波数 時系列データ生成関数 ===
+    # =======================================
+    # discrete_data     : 時間領域波形 離散データ 1次元配列
+    # samplerate        : サンプリング周波数[Hz]
+
+    # === 基本周波数Rawデータの抽出
+
+    # 基本周波数Rawデータ抽出における時間分解能 frame_period(ms単位)
+    # (サンプリング周期の20倍の時間長とする)
+    frame_period = (np.float64(1 / samplerate) * 1000) * 20
+
+    f0_raw, time_f0 = pyworld.dio(x=discrete_data, fs=samplerate, frame_period=frame_period)
+    # f0_raw    : 基本周波数 時系列データ 1次元配列(Rawデータ)
+    # time_f0   : 基本周波数 時系列データに対応した時間軸データ 1次元配列
+
+    # "StoneMask F0 refinement algorithm"を用いた基本周波数の補正(Refinement)
+    f0 = pyworld.stonemask(x=discrete_data, f0=f0_raw, temporal_positions=time_f0, fs=samplerate)
+    # f0        : 基本周波数 時系列データ 1次元配列
+
+    # f0        : 基本周波数 時系列データ 1次元配列
+    # time_f0   : 基本周波数 時系列データに対応した時間軸データ 1次元配列
+    return f0, time_f0
