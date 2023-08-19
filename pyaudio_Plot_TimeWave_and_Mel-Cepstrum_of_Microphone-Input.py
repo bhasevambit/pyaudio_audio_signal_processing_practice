@@ -96,17 +96,19 @@ if __name__ == '__main__':
 
     # === グラフ領域作成 ===
     # (リアルタイムモード向けグラフ描画のためにMain Codeでの生成が必須)
-    fig1, wave_fig, freq_fig, ceps_fig = gen_graph_figure_for_cepstrum()
-    # fig1      : 生成したmatplotlib figureインスタンス
+    fig1, wave_fig1, freq_fig1, f0_fig1, ceps_fig1 = gen_graph_figure_for_cepstrum()
+    # fig       : 生成したmatplotlib figureインスタンス
     # wave_fig  : 時間領域波形向けmatplotlib Axesインスタンス
     # freq_fig  : 周波数特性向けmatplotlib Axesインスタンス
+    # f0_fig    : 基本周波数 時系列波形向けmatplotlib Axesインスタンス
     # ceps_fig  : ケプストラム向けmatplotlib Axesインスタンス
 
-    fig2, mel_wave_fig, mel_freq_fig, mel_ceps_fig = gen_graph_figure_for_cepstrum()
-    # fig2          : 生成したmatplotlib figureインスタンス
-    # mel_wave_fig  : メルケプストラム向け時間領域波形向けmatplotlib Axesインスタンス
-    # mel_freq_fig  : メルケプストラム向け周波数特性向けmatplotlib Axesインスタンス
-    # mel_ceps_fig  : メルケプストラム向けmatplotlib Axesインスタンス
+    fig2, wave_fig2, freq_fig2, f0_fig2, ceps_fig2 = gen_graph_figure_for_cepstrum()
+    # fig       : 生成したmatplotlib figureインスタンス
+    # wave_fig  : 時間領域波形向けmatplotlib Axesインスタンス
+    # freq_fig  : 周波数特性向けmatplotlib Axesインスタンス
+    # f0_fig    : 基本周波数 時系列波形向けmatplotlib Axesインスタンス
+    # ceps_fig  : ケプストラム向けmatplotlib Axesインスタンス
 
     # === Microphone入力音声ストリーム生成 ===
     pa, stream = audio_stream_start(
@@ -135,6 +137,11 @@ if __name__ == '__main__':
             # phase_normalized      : 正規化後 DFTデータ位相成分 1次元配列
             # freq_normalized       : 正規化後 周波数軸データ 1次元配列
 
+            # === 基本周波数 時系列データ生成 ===
+            f0, time_f0 = gen_fundamental_freq_data(data_normalized, samplerate)
+            # f0        : 基本周波数 時系列データ 1次元配列
+            # time_f0   : 基本周波数 時系列データに対応した時間軸データ 1次元配列
+
             # === ケプストラムデータ生成 ===
             amp_envelope_normalized, cepstrum_data, cepstrum_data_lpl = gen_quef_domain_data(
                 data_normalized, samplerate, dbref)
@@ -146,16 +153,6 @@ if __name__ == '__main__':
             print("len(data_normalized) =", len(data_normalized))
 
             # === スペクトル包絡の導出 (pyworld使用) ===
-            # 基本周波数の抽出
-            f0, time_f0 = gen_fundamental_freq_data(data_normalized, samplerate)
-            # f0        : 基本周波数 時系列データ 1次元配列
-            # time_f0   : 基本周波数 時系列データに対応した時間軸データ 1次元配列
-
-            print("\nf0 =", f0, "\n")
-            print("len(f0) =", len(f0))
-            print("\ntime_f0 =", time_f0, "\n")
-            print("len(time_f0) =", len(time_f0))
-
             # スペクトログラム(スムース処理適用版)の抽出 (extract smoothed spectrogram)
             sp = pyworld.cheaptrick(data_normalized, f0, time_f0, samplerate)
 
@@ -175,9 +172,10 @@ if __name__ == '__main__':
             # === グラフ表示 ===
             plot_time_and_quef(
                 fig1,
-                wave_fig,
-                freq_fig,
-                ceps_fig,
+                wave_fig1,
+                freq_fig1,
+                f0_fig1,
+                ceps_fig1,
                 data_normalized,
                 time_normalized,
                 time_range,
@@ -185,6 +183,30 @@ if __name__ == '__main__':
                 amp_envelope_normalized,
                 freq_normalized,
                 freq_range,
+                f0,
+                time_f0,
+                cepstrum_data,
+                cepstrum_data_lpl,
+                dbref,
+                A,
+                selected_mode
+            )
+
+            plot_time_and_quef(
+                fig2,
+                wave_fig2,
+                freq_fig2,
+                f0_fig2,
+                ceps_fig2,
+                data_normalized,
+                time_normalized,
+                time_range,
+                amp_normalized,
+                amp_envelope_normalized,
+                freq_normalized,
+                freq_range,
+                f0,
+                time_f0,
                 cepstrum_data,
                 cepstrum_data_lpl,
                 dbref,
@@ -203,13 +225,6 @@ if __name__ == '__main__':
             plt.plot(np.log10(sp_from_mcep[center_sp]), label="Conversion")
             plt.title('spectral envelope')
             plt.legend()
-
-            # 基本周波数 時間領域波形
-            plt.figure()
-            plt.plot(time_f0, f0)
-            plt.title('Pitch Time wave')
-            plt.xlabel("Time [s]")
-            plt.ylabel("Fundamental Frequency (f0) [Hz]")
 
             plt.show()
 
