@@ -88,10 +88,11 @@ if __name__ == '__main__':
 
     # === グラフ領域作成 ===
     # (リアルタイムモード向けグラフ描画のためにMain Codeでの生成が必須)
-    fig, wave_fig, freq_fig = gen_graph_figure(graph_type)
-    # fig       : 生成したmatplotlib figureインスタンス
-    # wave_fig  : 時間領域波形向けmatplotlib Axesインスタンス
-    # freq_fig  : 周波数特性向けmatplotlib Axesインスタンス
+    fig, wave_fig, freq_fig, no_use_sub_fig = gen_graph_figure(graph_type)
+    # fig               : 生成したmatplotlib figureインスタンス
+    # wave_fig          : 時間領域波形向けmatplotlib Axesインスタンス
+    # freq_fig          : 周波数特性向けmatplotlib Axesインスタンス
+    # no_use_sub_fig    :未使用戻り値
 
     # === Microphone入力音声ストリーム生成 ===
     pa, stream = audio_stream_start(
