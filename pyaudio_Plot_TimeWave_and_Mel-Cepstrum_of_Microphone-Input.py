@@ -1,13 +1,16 @@
 import numpy as np
-import pysptk as sptk
-import pyworld as pw
+import pysptk
+import pyworld
 from matplotlib import pyplot as plt
 from modules.audio_stream import audio_stream_start, audio_stream_stop
+from modules.gen_freq_domain_data import gen_freq_domain_data
+from modules.gen_quef_domain_data import gen_quef_domain_data
 from modules.gen_time_domain_data import gen_time_domain_data
 from modules.get_mic_index import get_mic_index
 from modules.get_std_input import (get_selected_mic_index_by_std_input,
                                    get_selected_mode_by_std_input)
-from modules.plot_matplot_graph import gen_graph_figure_for_cepstrum
+from modules.plot_matplot_graph import (gen_graph_figure_for_cepstrum,
+                                        plot_time_and_quef)
 from modules.save_audio_to_wav_file import save_audio_to_wav_file
 from modules.save_matplot_graph import save_matplot_graph
 
@@ -116,23 +119,69 @@ if __name__ == '__main__':
             # data_normalized : 時間領域波形データ(正規化済)
             # time_normalized : 時間領域波形データ(正規化済)に対応した時間軸データ
 
-            # pyworldでスペクトル包絡を取得
-            _f0, t = pw.dio(data_normalized, samplerate)
-            f0 = pw.stonemask(data_normalized, _f0, t, samplerate)
-            sp = pw.cheaptrick(data_normalized, f0, t, samplerate)
-            ap = pw.d4c(data_normalized, f0, t, samplerate)
+            # === 周波数特性データ生成 ===
+            spectrum_normalized, amp_normalized, phase_normalized, freq_normalized = gen_freq_domain_data(
+                data_normalized, samplerate, dbref, A)
+            # spectrum_normalized   : 正規化後 DFTデータ 1次元配列
+            # amp_normalized        : 正規化後 DFTデータ振幅成分 1次元配列
+            # phase_normalized      : 正規化後 DFTデータ位相成分 1次元配列
+            # freq_normalized       : 正規化後 周波数軸データ 1次元配列
 
-            # 元の音声のスペクトル包絡
+            # === ケプストラムデータ生成 ===
+            amp_envelope_normalized, cepstrum_data, cepstrum_data_lpl = gen_quef_domain_data(
+                data_normalized, samplerate, dbref)
+            # amp_envelope_normalized   : 正規化後 スペクトル包絡データ振幅成分 1次元配列
+            # cepstrum_data             : ケプストラムデータ(対数値)[dB] 1次元配列
+            # cepstrum_data_lpl         : LPL(=Low-Pass-Lifter)適用後
+            # ケプストラムデータ(対数値)[dB] 1次元配列
+
+            print("len(data_normalized) =", len(data_normalized))
+
+            # === スペクトル包絡の導出 (pyworld使用) ===
+            # 基本周波数(_f0)の抽出 (raw pitch extractor)
+            _f0, t = pyworld.dio(data_normalized, samplerate)
+            # 基本周波数の修正 (pitch refinement)
+            f0 = pyworld.stonemask(data_normalized, _f0, t, samplerate)
+            # f0 : 修正後 基本周波数
+            print("\nf0 =", f0, "\n")
+            print("len(f0) =", len(f0))
+
+            # スペクトログラム(スムース処理適用版)の抽出 (extract smoothed spectrogram)
+            sp = pyworld.cheaptrick(data_normalized, f0, t, samplerate)
+
+            # 非周期性指標の抽出 (extract aperiodicity)
+            ap = pyworld.d4c(data_normalized, f0, t, samplerate)
+
+            # 元の音声のスペクトル包絡の算出
             center_sp = int(len(sp) / 2)  # 定常部分を求める
 
-            # メルケプストラムの算出
-            mcep = sptk.sp2mc(sp, order=19, alpha=0.42)
+            # === メルケプストラムの算出 (pysptk使用) ===
+            mcep = pysptk.sp2mc(sp, order=19, alpha=0.42)
             center_mcep = int(len(mcep) / 2)  # 定常部分を求める
 
             # メルケプストラムからスペクトル包絡に変換
-            sp_from_mcep = sptk.mc2sp(mcep, alpha=0.42, fftlen=1024)
+            sp_from_mcep = pysptk.mc2sp(mcep, alpha=0.42, fftlen=1024)
 
             # === グラフ表示 ===
+            plot_time_and_quef(
+                fig,
+                wave_fig,
+                freq_fig,
+                ceps_fig,
+                data_normalized,
+                time_normalized,
+                time_range,
+                amp_normalized,
+                amp_envelope_normalized,
+                freq_normalized,
+                freq_range,
+                cepstrum_data,
+                cepstrum_data_lpl,
+                dbref,
+                A,
+                selected_mode
+            )
+
             # メルケプストラム
             plt.figure()
             print("mcep[center_sp] =", mcep[center_sp])
@@ -159,8 +208,7 @@ if __name__ == '__main__':
         # レコーディングモードの場合、音声およびグラフを保存する
 
         # === レコーディング音声のwavファイル保存 ===
-        filename = save_audio_to_wav_file(samplerate, data_normalized)
-        # filename : 保存した音声データのWAVファイル名(拡張子あり:相対PATH)
+        save_audio_to_wav_file(samplerate, data_normalized)
 
         # === グラフ保存 ===
         save_matplot_graph(filename_prefix)
