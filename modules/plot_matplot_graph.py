@@ -74,35 +74,53 @@ def gen_graph_figure_for_realtime_spctrgrm(spctrgrm_mode):
     # spctrgrm_mode : スペクトログラムデータ算出モード
 
     # figureインスタンスの作成
-    fig = plt.figure(figsize=[7, 4])
+    fig = plt.figure(figsize=[7, 7])
 
     # Axesインスタンスの作成
     # add_axesの引数パラメータは「left，bottom，width，height」
-    axes_left = 0.12
-    axes_width = 0.70
-    axes_bottom = 0.17
-    axes_height = 0.80
+    fig1_axes_left = 0.12
+    fig2_axes_left = fig1_axes_left
 
-    sub_fig = fig.add_axes(
+    fig1_axes_width = 0.70
+    fig2_axes_width = fig1_axes_width
+
+    fig1_axes_height = 0.36
+    fig2_axes_height = fig1_axes_height
+
+    fig2_axes_bottom = 0.12
+    fig1_axes_bottom = fig2_axes_bottom + fig2_axes_height + 0.1
+
+    sub_fig1 = fig.add_axes(
         (
-            axes_left,
-            axes_bottom,
-            axes_width,
-            axes_height
+            fig1_axes_left,
+            fig1_axes_bottom,
+            fig1_axes_width,
+            fig1_axes_height
+        )
+    )
+
+    sub_fig2 = fig.add_axes(
+        (
+            fig2_axes_left,
+            fig2_axes_bottom,
+            fig2_axes_width,
+            fig2_axes_height
         )
     )
 
     # 上下左右にグラフ目盛線を付与
-    sub_fig.yaxis.set_ticks_position('both')
-    sub_fig.xaxis.set_ticks_position('both')
+    sub_fig1.yaxis.set_ticks_position('both')
+    sub_fig1.xaxis.set_ticks_position('both')
+    sub_fig2.yaxis.set_ticks_position('both')
+    sub_fig2.xaxis.set_ticks_position('both')
 
     # カラーバー用Axesインスタンスの作成
     # add_axesの引数パラメータは「left，bottom，width，height」
     cbar_fig = fig.add_axes(
-        (axes_left + axes_width + 0.03,
-         axes_bottom,
+        (fig1_axes_left + fig1_axes_width + 0.03,
+         fig1_axes_bottom,
          0.03,
-         axes_height)
+         fig1_axes_height)
     )
 
     # スペクトログラム算出モードテキスト表示設定
@@ -118,9 +136,10 @@ def gen_graph_figure_for_realtime_spctrgrm(spctrgrm_mode):
     fig.text(text_xpos, text_ypos, text_word)
 
     # fig       : 生成したmatplotlib figureインスタンス
-    # sub_fig   : 生成したmatplotlib Axesインスタンス
+    # sub_fig1  : 生成したmatplotlib 第1のAxesインスタンス
+    # sub_fig2  : 生成したmatplotlib 第2のAxesインスタンス
     # cbar_fig  : 生成したmatplotlib カラーバー用Axesインスタンス
-    return fig, sub_fig, cbar_fig
+    return fig, sub_fig1, sub_fig2, cbar_fig
 
 
 def gen_graph_figure_for_cepstrum():
