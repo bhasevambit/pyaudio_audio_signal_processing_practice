@@ -95,10 +95,17 @@ if __name__ == '__main__':
 
     # === グラフ領域作成 ===
     # (リアルタイムモード向けグラフ描画のためにMain Codeでの生成が必須)
-    fig, wave_fig, freq_fig, ceps_fig = gen_graph_figure_for_cepstrum()
-    # fig       : 生成したmatplotlib figureインスタンス
+    fig1, wave_fig, freq_fig, ceps_fig = gen_graph_figure_for_cepstrum()
+    # fig1      : 生成したmatplotlib figureインスタンス
     # wave_fig  : 時間領域波形向けmatplotlib Axesインスタンス
+    # freq_fig  : 周波数特性向けmatplotlib Axesインスタンス
     # ceps_fig  : ケプストラム向けmatplotlib Axesインスタンス
+
+    fig2, mel_wave_fig, mel_freq_fig, mel_ceps_fig = gen_graph_figure_for_cepstrum()
+    # fig2          : 生成したmatplotlib figureインスタンス
+    # mel_wave_fig  : メルケプストラム向け時間領域波形向けmatplotlib Axesインスタンス
+    # mel_freq_fig  : メルケプストラム向け周波数特性向けmatplotlib Axesインスタンス
+    # mel_ceps_fig  : メルケプストラム向けmatplotlib Axesインスタンス
 
     # === Microphone入力音声ストリーム生成 ===
     pa, stream = audio_stream_start(
@@ -145,6 +152,8 @@ if __name__ == '__main__':
             # f0 : 修正後 基本周波数
             print("\nf0 =", f0, "\n")
             print("len(f0) =", len(f0))
+            print("\nt =", t, "\n")
+            print("len(t) =", len(t))
 
             # スペクトログラム(スムース処理適用版)の抽出 (extract smoothed spectrogram)
             sp = pyworld.cheaptrick(data_normalized, f0, t, samplerate)
@@ -164,7 +173,7 @@ if __name__ == '__main__':
 
             # === グラフ表示 ===
             plot_time_and_quef(
-                fig,
+                fig1,
                 wave_fig,
                 freq_fig,
                 ceps_fig,
@@ -184,15 +193,22 @@ if __name__ == '__main__':
 
             # メルケプストラム
             plt.figure()
-            print("mcep[center_sp] =", mcep[center_sp])
             plt.plot(mcep[center_sp])
             plt.title('Mel-cepstrum')
+
             # "元のスペクトル包絡"と"メルケプストラムから再合成したスペクトル包絡"
             plt.figure()
             plt.plot(np.log10(sp[center_sp]), label="Original")
             plt.plot(np.log10(sp_from_mcep[center_sp]), label="Conversion")
             plt.title('spectral envelope')
             plt.legend()
+
+            # 基本周波数 時間領域波形
+            plt.figure()
+            plt.plot(t, f0)
+            plt.title('Pitch Time wave')
+            plt.xlabel("Time [s]")
+            plt.ylabel("Fundamental Frequency [Hz]")
 
             plt.show()
 
