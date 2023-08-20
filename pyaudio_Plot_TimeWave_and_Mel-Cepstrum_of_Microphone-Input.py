@@ -194,7 +194,7 @@ if __name__ == '__main__':
             print("ap.shape = ", ap.shape)
 
             # 元の音声のスペクトル包絡の算出
-            center_sp = int(len(sp) / 2)  # 定常部分を求める(=観測期間ので真ん中の時間を示すindexを求める)
+            center_sp = int(len(sp) / 2)  # 定常部分を求める(=観測期間ので真ん中の時間を示す時間軸indexを求める)
             print("center_sp = ", center_sp)
 
             # === メルケプストラムの算出 (pysptk使用) ===
@@ -220,11 +220,6 @@ if __name__ == '__main__':
 
             # メルケプストラムの可視化
             matplotlib.pyplot.figure()
-            # スペクトル包絡に合わせてアスペクト比の調節
-            # matplotlib.pyplot.imshow(mcep.T, aspect=mcep.shape[0] / mcep.shape[1] / 3.7, origin='lower')
-            # matplotlib.pyplot.colorbar()
-            # matplotlib.pyplot.title('Mel-cepstrum coefficients')
-
             matplotlib.pyplot.pcolormesh(
                 mcep_time,
                 mcep_yaxis,
@@ -237,13 +232,42 @@ if __name__ == '__main__':
             matplotlib.pyplot.ylabel("Mel Cepstrum (data count : 20)")
             matplotlib.pyplot.title('Mel-cepstrum coefficients')
 
-            center_mcep = int(len(mcep) / 2)  # 定常部分を求める
+            center_mcep = int(len(mcep) / 2)  # 定常部分を求める(=観測期間ので真ん中の時間を示す時間軸indexを求める)
             print("center_mcep = ", center_mcep)
 
             # メルケプストラムからスペクトル包絡に変換
-            sp_from_mcep = pysptk.mc2sp(mcep, alpha=0.42, fftlen=1024)
+            sp_from_mcep = pysptk.mc2sp(mc=mcep, alpha=0.42, fftlen=1024)
+            # mc : Mel-spectrum
+            # alpha : All-pass constant
+            # fftlen  : FFT length
+            # sp_from_mcep : Power spectrum (shape : fftlen//2 + 1)
             print("type(sp_from_mcep) = ", type(sp_from_mcep))
             print("sp_from_mcep.shape = ", sp_from_mcep.shape)
+
+            # sp_from_mcepに対応した時間軸データ
+            sp_from_mcep_time = np.linspace(0, time_range, len(sp_from_mcep))
+            print("sp_from_mcep_time = ", sp_from_mcep_time)
+            print("len(sp_from_mcep_time) = ", len(sp_from_mcep_time))
+
+            # spに対応した周波数軸データ
+            sp_from_mcep_low, sp_from_mcep_column = sp_from_mcep.shape
+            sp_from_mcep_freq = np.linspace(0, samplerate / 2, sp_from_mcep_column)
+            print("sp_from_mcep_freq = ", sp_from_mcep_freq)
+            print("len(sp_from_mcep_freq) = ", len(sp_from_mcep_freq))
+
+            # メルケプストラムから導出されたスペクトル包絡を可視化
+            matplotlib.pyplot.figure()
+            matplotlib.pyplot.pcolormesh(
+                sp_from_mcep_time,
+                sp_from_mcep_freq,
+                np.log10(sp_from_mcep).T,
+                cmap="jet"
+            )
+            matplotlib.pyplot.ylim(0, 2000)
+            matplotlib.pyplot.yticks(np.arange(0, 2020, 100))
+            matplotlib.pyplot.xlabel("Time [s] (data count : 6605)")
+            matplotlib.pyplot.ylabel("Frequency [Hz] (data count : 513)")
+            matplotlib.pyplot.title('spectral envelope by Mel-Cepstrum')
 
             # === グラフ表示 ===
             plot_time_freq_quef(
