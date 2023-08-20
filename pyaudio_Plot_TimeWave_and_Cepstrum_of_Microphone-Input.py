@@ -1,7 +1,7 @@
 from modules.audio_stream import audio_stream_start, audio_stream_stop
+from modules.gen_cepstrum_data import gen_cepstrum_data
 from modules.gen_freq_domain_data import (gen_freq_domain_data,
                                           gen_fundamental_freq_data)
-from modules.gen_quef_domain_data import gen_quef_domain_data
 from modules.gen_time_domain_data import gen_time_domain_data
 from modules.get_mic_index import get_mic_index
 from modules.get_std_input import (get_selected_mic_index_by_std_input,
@@ -131,7 +131,7 @@ if __name__ == '__main__':
             # time_f0   : 基本周波数 時系列データに対応した時間軸データ 1次元配列
 
             # === ケプストラムデータ生成 ===
-            amp_envelope_normalized, cepstrum_data, cepstrum_data_lpl = gen_quef_domain_data(
+            amp_envelope_normalized, cepstrum_data, cepstrum_data_lpl = gen_cepstrum_data(
                 data_normalized, samplerate, dbref)
             # amp_envelope_normalized   : 正規化後 スペクトル包絡データ振幅成分 1次元配列
             # cepstrum_data             : ケプストラムデータ(対数値)[dB] 1次元配列
