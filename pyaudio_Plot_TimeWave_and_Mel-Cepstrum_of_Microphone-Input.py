@@ -1,20 +1,13 @@
-import matplotlib
-import numpy as np
-import pysptk
-import pyworld
-from modules.audio_signal_processing_advanced import gen_mel_filter_bank
-from modules.audio_signal_processing_basic import gen_melfreq_axis_data
 from modules.audio_stream import audio_stream_start, audio_stream_stop
+from modules.gen_cepstrum_data import gen_cepstrum_data, gen_mel_cepstrum_data
 from modules.gen_freq_domain_data import (gen_freq_domain_data,
                                           gen_fundamental_freq_data)
-from modules.gen_quef_domain_data import gen_quef_domain_data
 from modules.gen_time_domain_data import gen_time_domain_data
 from modules.get_mic_index import get_mic_index
 from modules.get_std_input import (get_selected_mic_index_by_std_input,
                                    get_selected_mode_by_std_input)
 from modules.plot_matplot_graph import (gen_graph_figure_for_cepstrum,
-                                        plot_time_freq_quef,
-                                        plot_time_freq_quef_for_mel)
+                                        plot_time_freq_melfreq)
 from modules.save_audio_to_wav_file import save_audio_to_wav_file
 from modules.save_matplot_graph import save_matplot_graph
 
@@ -35,7 +28,6 @@ if __name__ == '__main__':
     print("=================================================================")
     print("")
     selected_mode = get_selected_mode_by_std_input(mode_count=2)
-    selected_mode = 0   # 【Debugモード】レコーディングモード固定
 
     if selected_mode == 0:
         selected_mode_name = "'Recording MODE'"
@@ -102,19 +94,12 @@ if __name__ == '__main__':
 
     # === グラフ領域作成 ===
     # (リアルタイムモード向けグラフ描画のためにMain Codeでの生成が必須)
-    fig1, wave_fig1, freq_fig1, f0_fig1, ceps_fig = gen_graph_figure_for_cepstrum()
-    # fig       : 生成したmatplotlib figureインスタンス
-    # wave_fig  : 時間領域波形向けmatplotlib Axesインスタンス
-    # freq_fig  : 周波数特性向けmatplotlib Axesインスタンス
-    # f0_fig    : 基本周波数 時系列波形向けmatplotlib Axesインスタンス
-    # ceps_fig  : ケプストラム向けmatplotlib Axesインスタンス
-
-    fig2, wave_fig2, freq_fig2, f0_fig2, melceps_fig = gen_graph_figure_for_cepstrum()
-    # fig           : 生成したmatplotlib figureインスタンス
-    # wave_fig      : 時間領域波形向けmatplotlib Axesインスタンス
-    # freq_fig      : 周波数特性向けmatplotlib Axesインスタンス
-    # f0_fig        : 基本周波数 時系列波形向けmatplotlib Axesインスタンス
-    # melceps_fig   : メルケプストラム向けmatplotlib Axesインスタンス
+    fig, wave_fig, freq_fig, f0_fig, melfilbank_fig = gen_graph_figure_for_cepstrum()
+    # fig               : 生成したmatplotlib figureインスタンス
+    # wave_fig          : 時間領域波形向けmatplotlib Axesインスタンス
+    # freq_fig          : 周波数特性向けmatplotlib Axesインスタンス
+    # f0_fig            : 基本周波数 時系列波形向けmatplotlib Axesインスタンス
+    # melfilbank_fig    : メルフィルタバンク伝達関数向けmatplotlib Axesインスタンス
 
     # === Microphone入力音声ストリーム生成 ===
     pa, stream = audio_stream_start(
@@ -149,175 +134,27 @@ if __name__ == '__main__':
             # time_f0   : 基本周波数 時系列データに対応した時間軸データ 1次元配列
 
             # === ケプストラムデータ生成 ===
-            amp_envelope_normalized, cepstrum_data, cepstrum_data_lpl = gen_quef_domain_data(
+            amp_envelope_normalized, cepstrum_data, cepstrum_data_lpl = gen_cepstrum_data(
                 data_normalized, samplerate, dbref)
             # amp_envelope_normalized   : 正規化後 スペクトル包絡データ振幅成分 1次元配列
             # cepstrum_data             : ケプストラムデータ(対数値)[dB] 1次元配列
             # cepstrum_data_lpl         : LPL(=Low-Pass-Lifter)適用後
             #                             ケプストラムデータ(対数値)[dB] 1次元配列
 
-            # === メルフィルタバンクの作成 ===
-            mel_filter_bank = gen_mel_filter_bank(data_normalized, samplerate, mel_filter_number)
-            # mel_filter_bank : メルフィルタバンク伝達関数(周波数特性) 1次元配列
-
-            # メルフィルタバンク伝達関数(周波数特性)のグラフ表示 [For Debug]
-            # matplotlib.pyplot.figure()
-
-            # for i in range(mel_filter_number):
-            #     matplotlib.pyplot.plot(freq_normalized, mel_filter_bank[i])
-
-            # matplotlib.pyplot.xlim(0, samplerate / 2)
-            # matplotlib.pyplot.xlabel('frequency [Hz]')
-            # matplotlib.pyplot.grid(color='black', linestyle='dotted')
-            # matplotlib.pyplot.title(f'mel filter bank (num filters: {mel_filter_number})')
-            # matplotlib.pyplot.show()
-
-            # === 周波数特性の周波数軸データをメル周波数軸データに変換 ===
-            melfreq_normalized = gen_melfreq_axis_data(freq_normalized)
-
-            matplotlib.pyplot.figure()
-            matplotlib.pyplot.plot(
-                freq_normalized,
-                amp_normalized,
-                label="Spectrum",
-                lw=1,
-                color="dodgerblue")
-            matplotlib.pyplot.xlim(0, freq_range)
-            if (dbref > 0):
-                matplotlib.pyplot.ylim(-10, 90)  # -10[dB] 〜 90[dB]
-                matplotlib.pyplot.yticks(np.arange(0, 100, 20))  # 20[dB]刻み(範囲:0〜100[dB])
-            matplotlib.pyplot.xlabel("Frequency [Hz]")
-
-            matplotlib.pyplot.figure()
-            matplotlib.pyplot.plot(
-                melfreq_normalized,
-                amp_normalized,
-                label="Mel-Spectrum",
-                lw=1,
-                color="forestgreen")
-            matplotlib.pyplot.xlabel("Frequency [Mel]")
-
-            # スペクトル包絡の抽出 (pyworld使用)
-            sp = pyworld.cheaptrick(x=data_normalized, f0=f0, temporal_positions=time_f0, fs=samplerate)
-            # sp : Spectral envelope (パワースペクトル(振幅の2乗値) [ndarray]
-            print("type(sp) = ", type(sp))
-            print("sp.shape = ", sp.shape)
-            print("len(sp) = ", len(sp))
-
-            # spに対応した時間軸データ
-            sp_time = np.linspace(0, time_range, len(sp))
-            print("sp_time = ", sp_time)
-            print("len(sp_time) = ", len(sp_time))
-
-            # spに対応した周波数軸データ
-            sp_low, sp_column = sp.shape
-            sp_freq = np.linspace(0, samplerate / 2, sp_column)
-            print("sp_freq = ", sp_freq)
-            print("len(sp_freq) = ", len(sp_freq))
-
-            # メルケプストラムに変換前のスペクトル包絡を可視化
-            # matplotlib.pyplot.figure()
-            # matplotlib.pyplot.pcolormesh(
-            #     sp_time,
-            #     sp_freq,
-            #     np.log10(sp).T,
-            #     cmap="jet"
-            # )
-            # matplotlib.pyplot.ylim(0, 2000)
-            # matplotlib.pyplot.yticks(np.arange(0, 2020, 100))
-            # matplotlib.pyplot.xlabel("Time [s] (data count : 6605)")
-            # matplotlib.pyplot.ylabel("Frequency [Hz] (data count : 1025)")
-            # matplotlib.pyplot.title('spectral envelope')
-
-            # 非周期性指標の抽出 (extract aperiodicity)
-            ap = pyworld.d4c(x=data_normalized, f0=f0, temporal_positions=time_f0, fs=samplerate)
-            # ap : Aperiodicity (envelope, linear magnitude relative to spectral envelope) [ndarray]
-            print("type(ap) = ", type(ap))
-            print("ap.shape = ", ap.shape)
-
-            # 元の音声のスペクトル包絡の算出
-            center_sp = int(len(sp) / 2)  # 定常部分を求める(=観測期間ので真ん中の時間を示す時間軸indexを求める)
-            print("center_sp = ", center_sp)
-
-            # === メルケプストラムの算出 (pysptk使用) ===
-            mcep = pysptk.sp2mc(powerspec=sp, order=19, alpha=0.42)
-            # powerspec : Power spectrum
-            # order     : Order of mel-cepstrum
-            # alpha     : All-pass constant
-            # mcep      : mel-cepstrum (shape : order+1)
-            print("mcep = ", mcep)
-            print("mcep.shape = ", mcep.shape)
-            print("len(mcep) = ", len(mcep))
-
-            # mcepに対応した時間軸データ
-            mcep_time = np.linspace(0, time_range, len(mcep))
-            print("mcep_time = ", mcep_time)
-            print("len(mcep_time) = ", len(mcep_time))
-
-            # mcepに対応したメルケプストラムデータ
-            mcep_low, mcep_column = mcep.shape
-            mcep_yaxis = np.linspace(0, mcep_column, mcep_column)
-            print("mcep_yaxis = ", mcep_yaxis)
-            print("len(mcep_yaxis) = ", len(mcep_yaxis))
-
-            # メルケプストラムの可視化
-            # matplotlib.pyplot.figure()
-            # matplotlib.pyplot.pcolormesh(
-            #     mcep_time,
-            #     mcep_yaxis,
-            #     mcep.T,
-            #     cmap="jet"
-            # )
-            # matplotlib.pyplot.ylim(-0.5, 21)
-            # matplotlib.pyplot.yticks(np.arange(-1, 21.5, 1))
-            # matplotlib.pyplot.xlabel("Time [s] (data count : 6605)")
-            # matplotlib.pyplot.ylabel("Mel Cepstrum (data count : 20)")
-            # matplotlib.pyplot.title('Mel-cepstrum coefficients')
-
-            center_mcep = int(len(mcep) / 2)  # 定常部分を求める(=観測期間ので真ん中の時間を示す時間軸indexを求める)
-            print("center_mcep = ", center_mcep)
-
-            # メルケプストラムからスペクトル包絡に変換
-            sp_from_mcep = pysptk.mc2sp(mc=mcep, alpha=0.42, fftlen=1024)
-            # mc : Mel-spectrum
-            # alpha : All-pass constant
-            # fftlen  : FFT length
-            # sp_from_mcep : Power spectrum (shape : fftlen//2 + 1)
-            print("type(sp_from_mcep) = ", type(sp_from_mcep))
-            print("sp_from_mcep.shape = ", sp_from_mcep.shape)
-
-            # sp_from_mcepに対応した時間軸データ
-            sp_from_mcep_time = np.linspace(0, time_range, len(sp_from_mcep))
-            print("sp_from_mcep_time = ", sp_from_mcep_time)
-            print("len(sp_from_mcep_time) = ", len(sp_from_mcep_time))
-
-            # spに対応した周波数軸データ
-            sp_from_mcep_low, sp_from_mcep_column = sp_from_mcep.shape
-            sp_from_mcep_freq = np.linspace(0, samplerate / 2, sp_from_mcep_column)
-            print("sp_from_mcep_freq = ", sp_from_mcep_freq)
-            print("len(sp_from_mcep_freq) = ", len(sp_from_mcep_freq))
-
-            # メルケプストラムから導出されたスペクトル包絡を可視化
-            # matplotlib.pyplot.figure()
-            # matplotlib.pyplot.pcolormesh(
-            #     sp_from_mcep_time,
-            #     sp_from_mcep_freq,
-            #     np.log10(sp_from_mcep).T,
-            #     cmap="jet"
-            # )
-            # matplotlib.pyplot.ylim(0, 2000)
-            # matplotlib.pyplot.yticks(np.arange(0, 2020, 100))
-            # matplotlib.pyplot.xlabel("Time [s] (data count : 6605)")
-            # matplotlib.pyplot.ylabel("Frequency [Hz] (data count : 513)")
-            # matplotlib.pyplot.title('spectral envelope by Mel-Cepstrum')
+            # === メルケプストラムデータ生成 ===
+            mel_amp_normalized, mel_freq_normalized, mel_filter_bank = gen_mel_cepstrum_data(
+                data_normalized, samplerate, mel_filter_number, dbref)
+            # mel_amp_normalized    : メルフィルタバンク適用によるスペクトル包絡データ振幅成分 1次元配列
+            # mel_freq_normalized   : メル周波数軸データ 1次元配列
+            # mel_filter_bank       : メルフィルタバンク伝達関数(周波数特性) 1次元配列
 
             # === グラフ表示 ===
-            plot_time_freq_quef(
-                fig1,
-                wave_fig1,
-                freq_fig1,
-                f0_fig1,
-                ceps_fig,
+            plot_time_freq_melfreq(
+                fig,
+                wave_fig,
+                freq_fig,
+                f0_fig,
+                melfilbank_fig,
                 data_normalized,
                 time_normalized,
                 time_range,
@@ -327,27 +164,10 @@ if __name__ == '__main__':
                 freq_range,
                 f0,
                 time_f0,
-                cepstrum_data,
-                cepstrum_data_lpl,
-                dbref,
-                A,
-                selected_mode
-            )
-
-            plot_time_freq_quef_for_mel(
-                fig2,
-                wave_fig2,
-                freq_fig2,
-                f0_fig2,
-                melceps_fig,
-                data_normalized,
-                time_normalized,
-                time_range,
-                f0,
-                time_f0,
-                mcep[center_sp],
-                np.log10(sp[center_sp]),
-                np.log10(sp_from_mcep[center_sp]),
+                mel_amp_normalized,
+                mel_freq_normalized,
+                mel_filter_number,
+                mel_filter_bank,
                 dbref,
                 A,
                 selected_mode
