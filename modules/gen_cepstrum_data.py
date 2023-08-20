@@ -119,4 +119,5 @@ def gen_mel_cepstrum_data(discrete_data, samplerate, mel_filter_number, dbref):
 
     # mel_amp_normalized    : メルフィルタバンク適用によるスペクトル包絡データ振幅成分 1次元配列
     # mel_freq_normalized   : メル周波数軸データ 1次元配列
-    return mel_amp_normalized, mel_freq_normalized
+    # mel_filter_bank       : メルフィルタバンク伝達関数(周波数特性) 1次元配列
+    return mel_amp_normalized, mel_freq_normalized, mel_filter_bank
