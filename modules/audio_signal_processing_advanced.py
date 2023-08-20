@@ -1,3 +1,4 @@
+import librosa
 import scipy
 
 
@@ -83,3 +84,22 @@ def window(data_overlaped, stft_frame_size, N_ave, window_func):
     # data_applied_window   : 窓関数適用後 離散データ 1次元配列
     # acf                   : 振幅補正係数(Amplitude Correction Factor)
     return data_applied_window, acf
+
+
+def gen_mel_filter_bank(discrete_data, samplerate, mel_filter_number):
+    # ==================================
+    # === メルフィルタバンク作成関数 ===
+    # ==================================
+    # discrete_data     : 離散データ 1次元配列
+    # samplerate        : サンプリング周波数 [sampling data count/s]
+    # mel_filter_number : メルフィルタバンク フィルタ数
+
+    mel_filter_bank = librosa.filters.mel(
+        sr=samplerate,
+        n_fft=len(discrete_data) - 1,
+        n_mels=mel_filter_number,
+        fmax=samplerate // 2
+    )
+
+    # mel_filter_bank : メルフィルタバンク伝達関数(周波数特性) 1次元配列
+    return mel_filter_bank
