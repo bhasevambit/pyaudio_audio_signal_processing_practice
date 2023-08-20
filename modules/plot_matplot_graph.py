@@ -693,7 +693,7 @@ def plot_time_freq_quef(
         ceps_fig.cla()
 
 
-def plot_time_freq_quef_for_mel(
+def plot_time_freq_melfreq(
     fig,
     wave_fig,
     freq_fig,
