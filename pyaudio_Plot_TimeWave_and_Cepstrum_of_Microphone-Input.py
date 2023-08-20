@@ -136,7 +136,7 @@ if __name__ == '__main__':
             # amp_envelope_normalized   : 正規化後 スペクトル包絡データ振幅成分 1次元配列
             # cepstrum_data             : ケプストラムデータ(対数値)[dB] 1次元配列
             # cepstrum_data_lpl         : LPL(=Low-Pass-Lifter)適用後
-            # ケプストラムデータ(対数値)[dB] 1次元配列
+            #                             ケプストラムデータ(対数値)[dB] 1次元配列
 
             # === グラフ表示 ===
             plot_time_freq_quef(
