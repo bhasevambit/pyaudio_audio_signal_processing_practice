@@ -1,3 +1,4 @@
+import matplotlib
 import numpy as np
 import pysptk
 import pyworld
@@ -156,9 +157,35 @@ if __name__ == '__main__':
 
             # スペクトル包絡の抽出 (pyworld使用)
             sp = pyworld.cheaptrick(x=data_normalized, f0=f0, temporal_positions=time_f0, fs=samplerate)
-            # sp : Spectral envelope (squared magnitude) [ndarray]
+            # sp : Spectral envelope (パワースペクトル(振幅の2乗値) [ndarray]
             print("type(sp) = ", type(sp))
             print("sp.shape = ", sp.shape)
+            print("len(sp) = ", len(sp))
+
+            # spに対応した時間軸データ
+            sp_time = np.linspace(0, time_range, len(sp))
+            print("sp_time = ", sp_time)
+            print("len(sp_time) = ", len(sp_time))
+
+            # spに対応した周波数軸データ
+            sp_low, sp_column = sp.shape
+            sp_freq = np.linspace(0, samplerate / 2, sp_column)
+            print("sp_freq = ", sp_freq)
+            print("len(sp_freq) = ", len(sp_freq))
+
+            # メルケプストラムに変換前のスペクトル包絡を可視化
+            matplotlib.pyplot.figure()
+            matplotlib.pyplot.pcolormesh(
+                sp_time,
+                sp_freq,
+                np.log10(sp).T,
+                cmap="jet"
+            )
+            matplotlib.pyplot.ylim(0, 2000)
+            matplotlib.pyplot.yticks(np.arange(0, 2020, 100))
+            matplotlib.pyplot.xlabel("Time [s] (data count : 6605)")
+            matplotlib.pyplot.ylabel("Frequency [Hz] (data count : 1025)")
+            matplotlib.pyplot.title('spectral envelope')
 
             # 非周期性指標の抽出 (extract aperiodicity)
             ap = pyworld.d4c(x=data_normalized, f0=f0, temporal_positions=time_f0, fs=samplerate)
@@ -167,11 +194,49 @@ if __name__ == '__main__':
             print("ap.shape = ", ap.shape)
 
             # 元の音声のスペクトル包絡の算出
-            center_sp = int(len(sp) / 2)  # 定常部分を求める
+            center_sp = int(len(sp) / 2)  # 定常部分を求める(=観測期間ので真ん中の時間を示すindexを求める)
             print("center_sp = ", center_sp)
 
             # === メルケプストラムの算出 (pysptk使用) ===
-            mcep = pysptk.sp2mc(sp, order=19, alpha=0.42)
+            mcep = pysptk.sp2mc(powerspec=sp, order=19, alpha=0.42)
+            # powerspec : Power spectrum
+            # order     : Order of mel-cepstrum
+            # alpha     : All-pass constant
+            # mcep      : mel-cepstrum (shape : order+1)
+            print("mcep = ", mcep)
+            print("mcep.shape = ", mcep.shape)
+            print("len(mcep) = ", len(mcep))
+
+            # mcepに対応した時間軸データ
+            mcep_time = np.linspace(0, time_range, len(mcep))
+            print("mcep_time = ", mcep_time)
+            print("len(mcep_time) = ", len(mcep_time))
+
+            # mcepに対応したメルケプストラムデータ
+            mcep_low, mcep_column = mcep.shape
+            mcep_yaxis = np.linspace(0, mcep_column, mcep_column)
+            print("mcep_yaxis = ", mcep_yaxis)
+            print("len(mcep_yaxis) = ", len(mcep_yaxis))
+
+            # メルケプストラムの可視化
+            matplotlib.pyplot.figure()
+            # スペクトル包絡に合わせてアスペクト比の調節
+            # matplotlib.pyplot.imshow(mcep.T, aspect=mcep.shape[0] / mcep.shape[1] / 3.7, origin='lower')
+            # matplotlib.pyplot.colorbar()
+            # matplotlib.pyplot.title('Mel-cepstrum coefficients')
+
+            matplotlib.pyplot.pcolormesh(
+                mcep_time,
+                mcep_yaxis,
+                mcep.T,
+                cmap="jet"
+            )
+            matplotlib.pyplot.ylim(-0.5, 21)
+            matplotlib.pyplot.yticks(np.arange(-1, 21.5, 1))
+            matplotlib.pyplot.xlabel("Time [s] (data count : 6605)")
+            matplotlib.pyplot.ylabel("Mel Cepstrum (data count : 20)")
+            matplotlib.pyplot.title('Mel-cepstrum coefficients')
+
             center_mcep = int(len(mcep) / 2)  # 定常部分を求める
             print("center_mcep = ", center_mcep)
 
