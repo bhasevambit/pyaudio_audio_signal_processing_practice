@@ -1,8 +1,8 @@
-import librosa
 import matplotlib
 import numpy as np
 import pysptk
 import pyworld
+from modules.audio_signal_processing_advanced import gen_mel_filter_bank
 from modules.audio_signal_processing_basic import gen_melfreq_axis_data
 from modules.audio_stream import audio_stream_start, audio_stream_stop
 from modules.gen_freq_domain_data import (gen_freq_domain_data,
@@ -83,7 +83,7 @@ if __name__ == '__main__':
     # 聴感補正(A特性)の有効(True)/無効(False)設定
     A = False   # ケプストラム導出にあたりA特性補正はOFFとする
 
-    # メルフィルタバンク フィルター数
+    # メルフィルタバンク フィルタ数
     mel_filter_number = 20
 
     # グラフ保存時のファイル名プレフィックス
@@ -157,19 +157,20 @@ if __name__ == '__main__':
             #                             ケプストラムデータ(対数値)[dB] 1次元配列
 
             # === メルフィルタバンクの作成 ===
-            mel_filter_bank = librosa.filters.mel(sr=samplerate, n_fft=len(
-                data_normalized) - 1, n_mels=mel_filter_number, fmax=samplerate // 2)
-            frequencies = librosa.fft_frequencies(sr=samplerate, n_fft=len(
-                data_normalized) - 1)
+            mel_filter_bank = gen_mel_filter_bank(data_normalized, samplerate, mel_filter_number)
+            # mel_filter_bank : メルフィルタバンク伝達関数(周波数特性) 1次元配列
 
-            matplotlib.pyplot.figure()
+            # メルフィルタバンク伝達関数(周波数特性)のグラフ表示 [For Debug]
+            # matplotlib.pyplot.figure()
 
-            for i in range(mel_filter_number):
-                matplotlib.pyplot.plot(frequencies, mel_filter_bank[i])
-            matplotlib.pyplot.xlim(0, samplerate / 2)
-            matplotlib.pyplot.xlabel('frequency [Hz]')
-            matplotlib.pyplot.grid(color='black', linestyle='dotted')
-            matplotlib.pyplot.title(f'mel filter bank (num filters: {mel_filter_number})')
+            # for i in range(mel_filter_number):
+            #     matplotlib.pyplot.plot(freq_normalized, mel_filter_bank[i])
+
+            # matplotlib.pyplot.xlim(0, samplerate / 2)
+            # matplotlib.pyplot.xlabel('frequency [Hz]')
+            # matplotlib.pyplot.grid(color='black', linestyle='dotted')
+            # matplotlib.pyplot.title(f'mel filter bank (num filters: {mel_filter_number})')
+            # matplotlib.pyplot.show()
 
             # === 周波数特性の周波数軸データをメル周波数軸データに変換 ===
             melfreq_normalized = gen_melfreq_axis_data(freq_normalized)
