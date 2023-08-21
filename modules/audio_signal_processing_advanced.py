@@ -97,9 +97,11 @@ def gen_mel_filter_bank(discrete_data, samplerate, mel_filter_number):
     mel_filter_bank = librosa.filters.mel(
         sr=samplerate,
         n_fft=len(discrete_data) - 1,
-        n_mels=mel_filter_number,
-        fmax=samplerate // 2
+        n_mels=mel_filter_number
     )
+    # sr : sampling rate of the incoming signal
+    # n_fft : number of FFT components
+    # n_mels : number of Mel bands to generate
 
     # mel_filter_bank : メルフィルタバンク伝達関数(周波数特性) 1次元配列
     return mel_filter_bank
