@@ -141,12 +141,12 @@ if __name__ == '__main__':
             # cepstrum_data_lpl         : LPL(=Low-Pass-Lifter)適用後
             #                             ケプストラムデータ(対数値)[dB] 1次元配列
 
-            # === メルケプストラムデータ生成 ===
-            mel_amp_normalized, mel_freq_normalized, mel_filter_bank = gen_mel_cepstrum_data(
+            # === メルスケール(メル尺度)スペクトル包絡データ生成 ===
+            melscale_amp_normalized, melscale_freq_normalized, mel_filter_bank = gen_mel_cepstrum_data(
                 data_normalized, samplerate, mel_filter_number, dbref)
-            # mel_amp_normalized    : メルフィルタバンク適用によるスペクトル包絡データ振幅成分 1次元配列
-            # mel_freq_normalized   : メル周波数軸データ 1次元配列
-            # mel_filter_bank       : メルフィルタバンク伝達関数(周波数特性) 1次元配列
+            # melscale_amp_normalized    : メルスケール(メル尺度)スペクトル包絡データ振幅成分 1次元配列
+            # melscale_freq_normalized   : メル周波数軸データ 1次元配列
+            # mel_filter_bank           : メルフィルタバンク伝達関数(周波数特性) 1次元配列
 
             # === グラフ表示 ===
             plot_time_freq_melfreq(
@@ -164,8 +164,8 @@ if __name__ == '__main__':
                 freq_range,
                 f0,
                 time_f0,
-                mel_amp_normalized,
-                mel_freq_normalized,
+                melscale_amp_normalized,
+                melscale_freq_normalized,
                 mel_filter_number,
                 mel_filter_bank,
                 dbref,
