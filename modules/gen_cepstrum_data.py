@@ -76,9 +76,9 @@ def gen_cepstrum_data(discrete_data, samplerate, dbref):
 
 
 def gen_mel_cepstrum_data(discrete_data, samplerate, mel_filter_number, dbref):
-    # ======================================
-    # === メルケプストラムデータ生成関数 ===
-    # ======================================
+    # ==========================================================
+    # === メルスケール(メル尺度)スペクトル包絡データ生成関数 ===
+    # ==========================================================
     # discrete_data     : 時間領域波形 離散データ 1次元配列
     # samplerate        : サンプリング周波数[Hz]
     # mel_filter_number : メルフィルタバンク フィルタ数
@@ -96,28 +96,30 @@ def gen_mel_cepstrum_data(discrete_data, samplerate, mel_filter_number, dbref):
     # (振幅成分の正規化 & 負の周波数領域の除外)
     spectrum_normalized, amp_normalized, phase_normalized = dft_normalize(spectrum_data)
 
-    print("len(amp_normalized) = ", len(amp_normalized))
     print("len(mel_filter_bank) = ", len(mel_filter_bank))
+    print("len(amp_normalized) = ", len(amp_normalized))
 
-    # 正規化後 DFTデータ振幅成分 1次元配列へのメルフィルタバンク伝達関数の適用
-    mel_amp_normalized = np.dot(mel_filter_bank, amp_normalized)
-    print("len(mel_amp_normalized) = ", len(mel_amp_normalized))
+    # メルスケール(メル尺度)スペクトル包絡データ生成
+    # (正規化後 DFTデータ振幅成分 1次元配列へのメルフィルタバンク伝達関数を適用する)
+    melscale_amp_normalized = np.dot(mel_filter_bank, amp_normalized)
+    print("len( np.dot(mel_filter_bank, amp_normalized) ) = ", len(melscale_amp_normalized))
 
     # メル周波数軸データの作成
-    mel_freq_normalized = librosa.mel_frequencies(n_mels=mel_filter_number + 2, fmin=0.0, fmax=samplerate / 2, htk=True)
+    melscale_freq_normalized = librosa.mel_frequencies(
+        n_mels=mel_filter_number + 2, fmin=0.0, fmax=samplerate / 2, htk=True
+    )
     # n_mels : Number of mel bins
     # htk : If True, use HTK formula to convert Hz to mel. Otherwise (False), use Slaney's Auditory Toolbox.
-    print("len(mel_freq_normalized) = ", len(mel_freq_normalized))
 
     # mel_freq_normalizedリストの先頭と末尾を除いた上で、メル周波数軸データとする
-    mel_freq_normalized = mel_freq_normalized[1:-1]
-    print("len(mel_freq_normalized) = ", len(mel_freq_normalized))
+    melscale_freq_normalized = melscale_freq_normalized[1:-1]
+    print("len(melscale_freq_normalized) = ", len(melscale_freq_normalized))
 
     # dbrefが0以上の時にdB変換する
     if dbref > 0:
-        mel_amp_normalized = db(mel_amp_normalized, dbref)
+        melscale_amp_normalized = db(melscale_amp_normalized, dbref)
 
-    # mel_amp_normalized    : メルフィルタバンク適用によるスペクトル包絡データ振幅成分 1次元配列
-    # mel_freq_normalized   : メル周波数軸データ 1次元配列
-    # mel_filter_bank       : メルフィルタバンク伝達関数(周波数特性) 1次元配列
-    return mel_amp_normalized, mel_freq_normalized, mel_filter_bank
+    # melscale_amp_normalized    : メルスケール(メル尺度)スペクトル包絡データ振幅成分 1次元配列
+    # melscale_freq_normalized   : メル周波数軸データ 1次元配列
+    # mel_filter_bank           : メルフィルタバンク伝達関数(周波数特性) 1次元配列
+    return melscale_amp_normalized, melscale_freq_normalized, mel_filter_bank
