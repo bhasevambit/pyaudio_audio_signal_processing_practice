@@ -96,13 +96,13 @@ def gen_mel_cepstrum_data(discrete_data, samplerate, mel_filter_number, dbref):
     # (振幅成分の正規化 & 負の周波数領域の除外)
     spectrum_normalized, amp_normalized, phase_normalized = dft_normalize(spectrum_data)
 
-    print("len(mel_filter_bank) = ", len(mel_filter_bank))
-    print("len(amp_normalized) = ", len(amp_normalized))
+    print("mel_filter_bank.shape = ", mel_filter_bank.shape)
+    print("amp_normalized.shape = ", amp_normalized.shape)
 
     # メルスケール(メル尺度)スペクトル包絡データ生成
     # (正規化後 DFTデータ振幅成分 1次元配列へのメルフィルタバンク伝達関数を適用する)
     melscale_amp_normalized = np.dot(mel_filter_bank, amp_normalized)
-    print("len( np.dot(mel_filter_bank, amp_normalized) ) = ", len(melscale_amp_normalized))
+    print("(np.dot(mel_filter_bank, amp_normalized).shape  = ", melscale_amp_normalized.shape)
 
     # メル周波数軸データの作成
     melscale_freq_normalized = librosa.mel_frequencies(
