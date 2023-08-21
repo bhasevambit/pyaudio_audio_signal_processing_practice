@@ -148,6 +148,9 @@ if __name__ == '__main__':
             # melscale_freq_normalized   : メル周波数軸データ 1次元配列
             # mel_filter_bank           : メルフィルタバンク伝達関数(周波数特性) 1次元配列
 
+            # === メル周波数ケプストラム係数(Mel-Frequency Cepstrum Coefficients: MFCC) 生成 ===
+            # ToDo : メル周波数ケプストラム係数算出のための関数作成 & プロット追加
+
             # === グラフ表示 ===
             plot_time_freq_melfreq(
                 fig,
