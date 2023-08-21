@@ -119,7 +119,8 @@ if __name__ == '__main__':
 
             # === 周波数特性データ生成 ===
             spectrum_normalized, amp_normalized, phase_normalized, freq_normalized = gen_freq_domain_data(
-                data_normalized, samplerate, dbref, A)
+                data_normalized, samplerate, dbref, A
+            )
             # spectrum_normalized   : 正規化後 DFTデータ 1次元配列
             # amp_normalized        : 正規化後 DFTデータ振幅成分 1次元配列
             # phase_normalized      : 正規化後 DFTデータ位相成分 1次元配列
@@ -132,7 +133,8 @@ if __name__ == '__main__':
 
             # === ケプストラムデータ生成 ===
             amp_envelope_normalized, cepstrum_data, cepstrum_data_lpl = gen_cepstrum_data(
-                data_normalized, samplerate, dbref)
+                data_normalized, samplerate, dbref
+            )
             # amp_envelope_normalized   : 正規化後 スペクトル包絡データ振幅成分 1次元配列
             # cepstrum_data             : ケプストラムデータ(対数値)[dB] 1次元配列
             # cepstrum_data_lpl         : LPL(=Low-Pass-Lifter)適用後
