@@ -1,5 +1,7 @@
 from modules.audio_stream import audio_stream_start, audio_stream_stop
-from modules.gen_cepstrum_data import gen_cepstrum_data, gen_mel_cepstrum_data
+from modules.gen_cepstrum_data import (gen_cepstrum_data,
+                                       gen_melscale_spctrm_env_data,
+                                       gen_mfcc_spctrm_env_data)
 from modules.gen_freq_domain_data import (gen_freq_domain_data,
                                           gen_fundamental_freq_data)
 from modules.gen_time_domain_data import gen_time_domain_data
@@ -76,7 +78,10 @@ if __name__ == '__main__':
     A = False   # ケプストラム導出にあたりA特性補正はOFFとする
 
     # メルフィルタバンク フィルタ数
-    mel_filter_number = 20
+    mel_filter_number = 32
+
+    # メル周波数ケプストラム係数(MFCC) 次元数
+    mfcc_dim = 12
 
     # グラフ保存時のファイル名プレフィックス
     filename_prefix = "time-waveform_and_Mel-Cepstrum_"
@@ -122,7 +127,8 @@ if __name__ == '__main__':
 
             # === 周波数特性データ生成 ===
             spectrum_normalized, amp_normalized, phase_normalized, freq_normalized = gen_freq_domain_data(
-                data_normalized, samplerate, dbref, A)
+                data_normalized, samplerate, dbref, A
+            )
             # spectrum_normalized   : 正規化後 DFTデータ 1次元配列
             # amp_normalized        : 正規化後 DFTデータ振幅成分 1次元配列
             # phase_normalized      : 正規化後 DFTデータ位相成分 1次元配列
@@ -135,21 +141,24 @@ if __name__ == '__main__':
 
             # === ケプストラムデータ生成 ===
             amp_envelope_normalized, cepstrum_data, cepstrum_data_lpl = gen_cepstrum_data(
-                data_normalized, samplerate, dbref)
+                data_normalized, samplerate, dbref
+            )
             # amp_envelope_normalized   : 正規化後 スペクトル包絡データ振幅成分 1次元配列
             # cepstrum_data             : ケプストラムデータ(対数値)[dB] 1次元配列
             # cepstrum_data_lpl         : LPL(=Low-Pass-Lifter)適用後
             #                             ケプストラムデータ(対数値)[dB] 1次元配列
 
             # === メルスケール(メル尺度)スペクトル包絡データ生成 ===
-            melscale_amp_normalized, melscale_freq_normalized, mel_filter_bank = gen_mel_cepstrum_data(
-                data_normalized, samplerate, mel_filter_number, dbref)
+            melscale_amp_normalized, melscale_freq_normalized, mel_filter_bank = gen_melscale_spctrm_env_data(
+                data_normalized, samplerate, mel_filter_number, dbref
+            )
             # melscale_amp_normalized    : メルスケール(メル尺度)スペクトル包絡データ振幅成分 1次元配列
             # melscale_freq_normalized   : メル周波数軸データ 1次元配列
             # mel_filter_bank           : メルフィルタバンク伝達関数(周波数特性) 1次元配列
 
-            # === メル周波数ケプストラム係数(Mel-Frequency Cepstrum Coefficients: MFCC) 生成 ===
-            # ToDo : メル周波数ケプストラム係数算出のための関数作成 & プロット追加
+            # === メル周波数ケプストラム係数(Mel-Frequency Cepstrum Coefficients: MFCC)スペクトル包絡データ生成 ===
+            mfcc_amp_normalized = gen_mfcc_spctrm_env_data(melscale_amp_normalized, mfcc_dim, mel_filter_number)
+            # mfcc_amp_normalized : MFCCスペクトル包絡データ振幅成分 1次元配列
 
             # === グラフ表示 ===
             plot_time_freq_melfreq(
@@ -171,6 +180,8 @@ if __name__ == '__main__':
                 melscale_freq_normalized,
                 mel_filter_number,
                 mel_filter_bank,
+                mfcc_amp_normalized,
+                mfcc_dim,
                 dbref,
                 A,
                 selected_mode
