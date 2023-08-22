@@ -75,7 +75,7 @@ def gen_cepstrum_data(discrete_data, samplerate, dbref):
     return amp_envelope_normalized, cepstrum_data, cepstrum_data_lpl
 
 
-def gen_mel_cepstrum_data(discrete_data, samplerate, mel_filter_number, dbref):
+def gen_melscale_spctrm_env_data(discrete_data, samplerate, mel_filter_number, dbref):
     # ==========================================================
     # === メルスケール(メル尺度)スペクトル包絡データ生成関数 ===
     # ==========================================================
@@ -123,3 +123,19 @@ def gen_mel_cepstrum_data(discrete_data, samplerate, mel_filter_number, dbref):
     # melscale_freq_normalized   : メル周波数軸データ 1次元配列
     # mel_filter_bank           : メルフィルタバンク伝達関数(周波数特性) 1次元配列
     return melscale_amp_normalized, melscale_freq_normalized, mel_filter_bank
+
+
+def gen_mfcc_spctrm_env_data(melscale_amp_normalized, mfcc_dim, mel_filter_number):
+    # ====================================================================
+    # === メル周波数ケプストラム係数(MFCC)スペクトル包絡データ生成関数 ===
+    # ====================================================================
+    # melscale_amp_normalized       : メルスケール(メル尺度)スペクトル包絡データ振幅成分 1次元配列
+    # mfcc_dim                      : メル周波数ケプストラム係数(MFCC) 次元数
+    # mel_filter_number             : メルフィルタバンク フィルタ数
+
+    mfcc = scipy.fft.dct(melscale_amp_normalized, norm='ortho')
+    mfcc = mfcc[:mfcc_dim]
+    mfcc_amp_normalized = scipy.fft.idct(mfcc, n=mel_filter_number, norm='ortho')
+
+    # mfcc_amp_normalized : MFCCスペクトル包絡データ振幅成分 1次元配列
+    return mfcc_amp_normalized
