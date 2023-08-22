@@ -708,10 +708,12 @@ def plot_time_freq_melfreq(
     freq_range,
     f0,
     time_f0,
-    mel_amp_normalized,
-    mel_freq_normalized,
+    melscale_amp_normalized,
+    melscale_freq_normalized,
     mel_filter_number,
     mel_filter_bank,
+    mfcc_amp_normalized,
+    mfcc_dim,
     dbref,
     A,
     selected_mode
@@ -733,10 +735,12 @@ def plot_time_freq_melfreq(
     # freq_range                : 周波数特性グラフ X軸表示レンジ [Hz]
     # f0                        : 基本周波数 時系列データ 1次元配列
     # time_f0                   : 基本周波数 時系列データに対応した時間軸データ 1次元配列
-    # mel_amp_normalized        : メルフィルタバンク適用によるスペクトル包絡データ振幅成分 1次元配列
-    # mel_freq_normalized       : メル周波数軸データ 1次元配列
+    # melscale_amp_normalized        : メルフィルタバンク適用によるスペクトル包絡データ振幅成分 1次元配列
+    # melscale_freq_normalized       : メル周波数軸データ 1次元配列
     # mel_filter_number         : メルフィルタバンク フィルタ数
     # mel_filter_bank           : メルフィルタバンク伝達関数(周波数特性) 1次元配列
+    # mfcc_amp_normalized       : MFCCスペクトル包絡データ振幅成分 1次元配列
+    # mfcc_dim                  : メル周波数ケプストラム係数(MFCC) 次元数
     # dbref                     : デシベル基準値
     # A                         : 聴感補正(A特性)の有効(True)/無効(False)設定
     # selected_mode             : 動作モード (0:レコーディングモード / 1:リアルタイムモード)
@@ -817,16 +821,25 @@ def plot_time_freq_melfreq(
         freq_normalized,
         amp_envelope_normalized,
         label="Spectrum Envelope",
-        lw=4
+        lw=3
     )
 
-    # メルフィルタバンク適用によるスペクトル包絡データプロット
+    # メルスケール(メル尺度)スペクトル包絡データプロット
     freq_fig.plot(
-        mel_freq_normalized,
-        mel_amp_normalized,
-        label=f"Mel Spectrum Envelope (num filters: {mel_filter_number})",
+        melscale_freq_normalized,
+        melscale_amp_normalized,
+        label=f"Mel-Scale Spectrum Envelope (Mel-filter nums: {mel_filter_number})",
         lw=1,
         marker='.'
+    )
+
+    # メル周波数ケプストラム係数(MFCC)スペクトル包絡データプロット
+    freq_fig.plot(
+        melscale_freq_normalized,
+        mfcc_amp_normalized,
+        label=f"MFCC Spectrum Envelope (MFCC dimensions: {mfcc_dim})",
+        lw=2,
+        color="limegreen"
     )
 
     # 基本周波数データプロット
