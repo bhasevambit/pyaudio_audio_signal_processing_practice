@@ -37,9 +37,9 @@ if __name__ == '__main__':
 
     # サンプリング周波数[Hz]
     if selected_mode == 0:  # レコーディングモード向け
-        samplerate = 44100
+        samplerate = 16000
     else:                   # リアルタイムモード向け
-        samplerate = int(44100 / 4)
+        samplerate = int(16000 / 2)
     print("\nSampling Frequency[Hz] = ", samplerate)
 
     # 入力音声ストリームバッファあたりのサンプリングデータ数

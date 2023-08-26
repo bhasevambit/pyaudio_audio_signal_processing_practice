@@ -60,9 +60,9 @@ if __name__ == '__main__':
 
     # サンプリング周波数[Hz]
     if selected_mode == 0:  # レコーディングモード向け
-        samplerate = 44100
+        samplerate = 16000
     else:                   # リアルタイムモード向け
-        samplerate = int(44100 / 8)
+        samplerate = int(16000 / 2)
     print("\nSampling Frequency[Hz] = ", samplerate)
 
     # 入力音声ストリームバッファあたりのサンプリングデータ数
@@ -83,7 +83,7 @@ if __name__ == '__main__':
     if selected_mode == 0:  # レコーディングモード向け
         time = 5
         time_range = time
-        freq_range = int(44100 / 8) / 2
+        freq_range = samplerate / 2
     else:                   # リアルタイムモード向け
         time = 0  # リアルタイムモードの場合は"0"を設定する
         time_range = (1 / samplerate) * frames_per_buffer
@@ -97,7 +97,7 @@ if __name__ == '__main__':
 
     # STFT(短時間フーリエ変換)を行う時系列データ数(=STFTフレーム長)
     if selected_mode == 0:
-        stft_frame_size = 1536
+        stft_frame_size = frames_per_buffer * 2
     else:
         stft_frame_size = int(frames_per_buffer / 35)
     # オーバーラップ率 [%]
