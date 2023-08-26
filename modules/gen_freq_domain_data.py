@@ -33,13 +33,16 @@ def gen_freq_domain_data(discrete_data, samplerate, dbref, A):
     # 周波数軸データの正規化(負の周波数領域の除外)を実施
     freq_normalized = dft_negative_freq_domain_exlusion(freq_data)
 
-    # dbrefが0以上の時にdB変換する
+    # dbrefが0以上の場合、音圧レベル(dB SPL)に変換
     if dbref > 0:
         amp_normalized = db(amp_normalized, dbref)
 
         # dB変換されていてAがTrueの時に聴感補正する
         if A:
             amp_normalized += a_weighting(freq_normalized)
+    else:
+        # 正規化後 DFTデータ振幅成分を対数パワースペクトル(=10 * log10(amp^2))に変換
+        amp_normalized = 20 * np.log10(amp_normalized)
 
     # spectrum_normalized   : 正規化後 DFTデータ 1次元配列
     # amp_normalized        : 正規化後 DFTデータ振幅成分 1次元配列
@@ -100,10 +103,10 @@ def gen_freq_domain_data_of_signal_spctrgrm(
     a_scale = a_weighting(freq_spctrgrm)
     print("a_scale.shape = ", a_scale.shape)
 
-    # dbrefが0以上の時にdB変換する
+    # dbrefが0以上の場合、音圧レベル(dB SPL)に変換
     if dbref > 0:
         spectrogram = db(spectrogram, dbref)
-        print("spectrogram.shape [dB] = ", spectrogram.shape)
+        print("spectrogram.shape [dB SPL] = ", spectrogram.shape)
 
         # A=Trueの場合に、A特性補正を行う
         if A:
@@ -111,7 +114,11 @@ def gen_freq_domain_data_of_signal_spctrgrm(
                 # 各時間軸データ(freq_spctrgrmと同じ次元サイズ)に対して、A特性補正を実施
                 spectrogram[:, i] += a_scale
 
-            print("spectrogram.shape [dB(A)]= ", spectrogram.shape)
+            print("spectrogram.shape [dB SPL(A)]= ", spectrogram.shape)
+    else:
+        # スペクトログラム 振幅データを対数パワースペクトル(=10 * log10(amp^2))に変換
+        spectrogram = 20 * np.log10(spectrogram)
+        print("spectrogram.shape [dB FS] = ", spectrogram.shape)
 
     print("")
     # freq_spctrgrm         : スペクトログラム y軸向けデータ[Hz]
@@ -193,11 +200,14 @@ def gen_freq_domain_data_of_stft(
         # 窓関数補正値(acf)を乗算
         amp_normaliazed_acf = amp_normalized * acf
 
-        # dbrefが0以上の場合は、dB変換する
+        # dbrefが0以上の場合、音圧レベル(dB SPL)に変換
         if dbref > 0:
             amp_normaliazed_acf = db(
                 amp_normaliazed_acf, dbref
             )
+        else:
+            # DFT(離散フーリエ変換)データ 振幅成分を対数パワースペクトル(=10 * log10(amp^2))に変換
+            amp_normaliazed_acf = 20 * np.log10(amp_normaliazed_acf)
 
         # spectrogram配列に追加
         spectrogram.append(amp_normaliazed_acf)
