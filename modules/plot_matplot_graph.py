@@ -624,9 +624,8 @@ def plot_time_freq_quef(
     # ケプストラム 軸目盛り設定
     ceps_fig.set_xlim(0, 0.02)  # 0 ～ 20[ms] (低ケフレンシ/高ケフレンシの境界を表示)
     ceps_fig.set_xticks(np.arange(0, 0.025, 0.005))  # 5[ms]刻み(範囲:0〜25[ms])
-    if (dbref > 0):
-        ceps_fig.set_ylim(-1.5, 4)  # -1.5[dB] 〜4[dB]
-        ceps_fig.set_yticks(np.arange(-1, 5, 1))  # 1[dB]刻み(範囲:-1〜5[dB])
+    ceps_fig.set_ylim(-1.5, 4)  # -1.5[dB] 〜4[dB]
+    ceps_fig.set_yticks(np.arange(-1, 5, 1))  # 1[dB]刻み(範囲:-1〜5[dB])
 
     # plot.figure.tight_layout()実行時の「UserWarning: The figure layout has
     # changed to tight」Warning文の抑止
