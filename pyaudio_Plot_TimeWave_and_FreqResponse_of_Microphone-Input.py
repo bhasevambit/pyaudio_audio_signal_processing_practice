@@ -60,7 +60,7 @@ if __name__ == '__main__':
     if selected_mode == 0:  # レコーディングモード向け
         time = 3
         time_range = time
-        freq_range = int(44100 / 4) / 2
+        freq_range = samplerate / 2
     else:                   # リアルタイムモード向け
         time = 0  # リアルタイムモードの場合は"0"を設定する
         time_range = ((1 / samplerate) * frames_per_buffer) / 10
