@@ -239,11 +239,11 @@ def plot_time_and_freq(
     # 周波数特性 軸ラベル設定
     freq_fig.set_xlabel("Frequency [Hz]")
     if (dbref > 0) and not (A):
-        freq_fig.set_ylabel('Amplitude [dB spl]')
+        freq_fig.set_ylabel("Amplitude [dB spl]")
     elif (dbref > 0) and (A):
-        freq_fig.set_ylabel('Amplitude [dB spl(A)]')
+        freq_fig.set_ylabel("Amplitude [dB spl(A)]")
     else:
-        freq_fig.set_ylabel("Amplitude")
+        freq_fig.set_ylabel("Log Power Spectrum [dB FS]")
 
     # 時間領域波形 軸目盛り設定
     wave_fig.set_xlim(0, time_range)
@@ -255,6 +255,8 @@ def plot_time_and_freq(
     if (dbref > 0):
         freq_fig.set_ylim(-10, 90)  # -10[dB] 〜 90[dB]
         freq_fig.set_yticks(np.arange(0, 100, 20))  # 20[dB]刻み(範囲:0〜100[dB])
+    else:
+        freq_fig.set_ylim(-100, 0)  # -10[dB] 〜 90[dB]
 
     # plot.figure.tight_layout()実行時の「UserWarning: The figure layout has
     # changed to tight」Warning文の抑止
@@ -401,10 +403,14 @@ def plot_time_and_spectrogram(
         )
 
         # スペクトログラムデータ範囲指定
-        # スペクトログラムデータがdB単位の場合
         if dbref > 0:
+            # スペクトログラムデータがdB SPLの場合
             colorbar_min = 0    # カラーバー最小値[dB]
             colorvar_max = 90   # カラーバー最大値[dB]
+        else:
+            # スペクトログラムデータがdB FSの場合
+            colorbar_min = -100     # カラーバー最小値[dB]
+            colorvar_max = 0        # カラーバー最大値[dB]
 
         # スペクトログラムデータプロット
         spctrgrm_im = spctrgrm_fig.pcolormesh(
@@ -420,11 +426,11 @@ def plot_time_and_spectrogram(
         cbar = fig.colorbar(spctrgrm_im)
 
         if (dbref > 0) and not (A):
-            cbar.set_label('Sound Pressure [dB spl]')
+            cbar.set_label("Sound Pressure [dB spl]")
         elif (dbref > 0) and (A):
-            cbar.set_label('Sound Pressure [dB spl(A)]')
+            cbar.set_label("Sound Pressure [dB spl(A)]")
         else:
-            cbar.set_label('Sound Pressure [Pa]')
+            cbar.set_label("Log Power Spectrum [dB FS]")
 
         # 基本周波数データプロット
         f0_fig.plot(
@@ -472,10 +478,14 @@ def plot_time_and_spectrogram(
         fig.tight_layout()
 
         # スペクトログラムデータ範囲指定
-        # スペクトログラムデータがdB単位の場合
         if dbref > 0:
+            # スペクトログラムデータがdB SPLの場合
             colorbar_min = 0    # カラーバー最小値[dB]
             colorvar_max = 90   # カラーバー最大値[dB]
+        else:
+            # スペクトログラムデータがdB FSの場合
+            colorbar_min = -100     # カラーバー最小値[dB]
+            colorvar_max = 0        # カラーバー最大値[dB]
 
         # スペクトログラムデータプロット
         spctrgrm_im = spctrgrm_fig.pcolormesh(
@@ -491,11 +501,11 @@ def plot_time_and_spectrogram(
         cbar = plt.colorbar(spctrgrm_im, orientation='vertical', cax=cbar_fig)
 
         if (dbref > 0) and not (A):
-            cbar.set_label('Sound Pressure [dB spl]')
+            cbar.set_label("Sound Pressure [dB spl]")
         elif (dbref > 0) and (A):
-            cbar.set_label('Sound Pressure [dB spl(A)]')
+            cbar.set_label("Sound Pressure [dB spl(A)]")
         else:
-            cbar.set_label('Sound Pressure [Pa]')
+            cbar.set_label("Log Power Spectrum [dB FS]")
 
         # 基本周波数データプロット
         f0_fig.plot(
@@ -574,24 +584,24 @@ def plot_time_freq_quef(
     # 周波数特性 軸ラベル設定
     freq_fig.set_xlabel("Frequency [Hz]")
     if (dbref > 0) and not (A):
-        freq_fig.set_ylabel('Amplitude [dB spl]')
+        freq_fig.set_ylabel("Amplitude [dB spl]")
     elif (dbref > 0) and (A):
-        freq_fig.set_ylabel('Amplitude [dB spl(A)]')
+        freq_fig.set_ylabel("Amplitude [dB spl(A)]")
     else:
-        freq_fig.set_ylabel("Amplitude")
+        freq_fig.set_ylabel("Log Power Spectrum [dB FS]")
 
     # 基本周波数 時系列データ 軸ラベル設定
     f0_fig.set_xlabel("Time [s]")
     f0_fig.set_ylabel("Frequency [Hz]")
 
     # ケプストラム 軸ラベル設定
-    ceps_fig.set_xlabel('Quefrency [s]')
+    ceps_fig.set_xlabel("Quefrency [s]")
     if (dbref > 0) and not (A):
-        ceps_fig.set_ylabel('Amplitude [dB spl]')
+        ceps_fig.set_ylabel("Amplitude [dB spl]")
     elif (dbref > 0) and (A):
-        ceps_fig.set_ylabel('Amplitude [dB spl(A)]')
+        ceps_fig.set_ylabel("Amplitude [dB spl(A)]")
     else:
-        ceps_fig.set_ylabel("Amplitude")
+        ceps_fig.set_ylabel("Log Power Spectrum [dB FS]")
 
     # 時間領域波形 軸目盛り設定
     wave_fig.set_xlim(0, time_range)
@@ -603,6 +613,8 @@ def plot_time_freq_quef(
     if (dbref > 0):
         freq_fig.set_ylim(-10, 90)  # -10[dB] 〜 90[dB]
         freq_fig.set_yticks(np.arange(0, 100, 20))  # 20[dB]刻み(範囲:0〜100[dB])
+    else:
+        freq_fig.set_ylim(-100, 0)  # -10[dB] 〜 90[dB]
 
     # 基本周波数 時系列データ 軸目盛り設定
     f0_fig.set_xlim(0, time_range)
@@ -759,11 +771,11 @@ def plot_time_freq_melfreq(
     # 周波数特性 軸ラベル設定
     freq_fig.set_xlabel("Frequency [Hz]")
     if (dbref > 0) and not (A):
-        freq_fig.set_ylabel('Amplitude [dB spl]')
+        freq_fig.set_ylabel("Amplitude [dB spl]")
     elif (dbref > 0) and (A):
-        freq_fig.set_ylabel('Amplitude [dB spl(A)]')
+        freq_fig.set_ylabel("Amplitude [dB spl(A)]")
     else:
-        freq_fig.set_ylabel("Amplitude")
+        freq_fig.set_ylabel("Log Power Spectrum [dB FS]")
 
     # 基本周波数 時系列データ 軸ラベル設定
     f0_fig.set_xlabel("Time [s]")
@@ -782,6 +794,8 @@ def plot_time_freq_melfreq(
     if (dbref > 0):
         freq_fig.set_ylim(-10, 90)  # -10[dB] 〜 90[dB]
         freq_fig.set_yticks(np.arange(0, 100, 20))  # 20[dB]刻み(範囲:0〜100[dB])
+    else:
+        freq_fig.set_ylim(-100, 0)  # -10[dB] 〜 90[dB]
 
     # 基本周波数 時系列データ 軸目盛り設定
     f0_fig.set_xlim(0, time_range)
