@@ -66,8 +66,10 @@ if __name__ == '__main__':
         time_range = ((1 / samplerate) * frames_per_buffer) / 10
         freq_range = samplerate / 2
 
-    # デシベル基準値(最小可聴値 20[μPa]を設定)
-    dbref = 2e-5
+    # デシベル基準値
+    # (dB FS(Full Scale)を算出する場合は、"0"を設定)
+    # (dB SPLを算出する場合は、最小可聴値20[μPa] ="2e-5"を設定)
+    dbref = 0
 
     # 聴感補正(A特性)の有効(True)/無効(False)設定
     A = True
