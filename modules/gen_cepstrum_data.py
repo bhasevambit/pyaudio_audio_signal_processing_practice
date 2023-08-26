@@ -18,8 +18,12 @@ def gen_cepstrum_data(discrete_data, samplerate, dbref):
     # (scipy.fft.fft()の出力結果spectrumは複素数)
     spectrum_data = scipy.fft.fft(discrete_data)
 
-    # DFTデータ(複素数)を対数[dB](dbref基準)に変換
-    spectrum_data_log = db(spectrum_data, dbref)
+    if dbref > 0:
+        # DFTデータ(複素数)を音圧レベル(dB SPL)に変換
+        spectrum_data_log = db(spectrum_data, dbref)
+    else:
+        # DFTデータ(複素数)を対数パワースペクトル(=10 * log10(spectrum_data^2))に変換
+        spectrum_data_log = 20 * np.log10(spectrum_data)
 
     # 対数DFTデータ(複素数対数)に対して、IDFT(逆離散フーリエ変換)を実施
     spectrum_idft = scipy.ifft(spectrum_data_log)
@@ -57,16 +61,24 @@ def gen_cepstrum_data(discrete_data, samplerate, dbref):
     spectrum_envelope_log = scipy.fft.fft(cepstrum_data_lpl)
 
     # 正規化のために、複素数対数を複素数リニア値に変換
-    spectrum_envelope_data = liner(spectrum_envelope_log, dbref)
+    if dbref > 0:
+        # スペクトル包絡データ(=対数DFTデータ(複素数対数))が、音圧レベル(dB SPL)の場合
+        spectrum_envelope_data = liner(spectrum_envelope_log, dbref)
+    else:
+        # スペクトル包絡データ(=対数DFTデータ(複素数対数))が、対数パワースペクトル(dB FS)の場合
+        spectrum_envelope_data = 10 ** (spectrum_envelope_log / 20)
 
     # スペクトル包絡データ(=DFT(離散フーリエ変換)データ)の正規化を実施
     # (振幅成分の正規化 & 負の周波数領域の除外)
     spectrum_envelope_normalized, amp_envelope_normalized, phase_envelope_normalized = dft_normalize(
         spectrum_envelope_data)
 
-    # dbrefが0以上の時にdB変換する
+    # dbrefが0以上の場合、音圧レベル(dB SPL)に変換
     if dbref > 0:
         amp_envelope_normalized = db(amp_envelope_normalized, dbref)
+    else:
+        # 正規化後 スペクトル包絡データ振幅成分を対数パワースペクトル(=10 * log10(amp^2))に変換
+        amp_envelope_normalized = 20 * np.log10(amp_envelope_normalized)
 
     # amp_envelope_normalized   : 正規化後 スペクトル包絡データ振幅成分 1次元配列
     # cepstrum_data             : ケプストラムデータ(対数値)[dB] 1次元配列
@@ -115,9 +127,12 @@ def gen_melscale_spctrm_env_data(discrete_data, samplerate, mel_filter_number, d
     melscale_freq_normalized = melscale_freq_normalized[1:-1]
     print("len(melscale_freq_normalized) = ", len(melscale_freq_normalized))
 
-    # dbrefが0以上の時にdB変換する
+    # dbrefが0以上の場合、音圧レベル(dB SPL)に変換
     if dbref > 0:
         melscale_amp_normalized = db(melscale_amp_normalized, dbref)
+    else:
+        # メルスケールスペクトル包絡データ振幅成分を対数パワースペクトル(=10 * log10(amp^2))に変換
+        melscale_amp_normalized = 20 * np.log10(melscale_amp_normalized)
 
     # melscale_amp_normalized    : メルスケール(メル尺度)スペクトル包絡データ振幅成分 1次元配列
     # melscale_freq_normalized   : メル周波数軸データ 1次元配列
