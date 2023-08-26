@@ -131,7 +131,6 @@ if __name__ == '__main__':
                 time_range,
                 amp_normalized,
                 freq_normalized,
-
                 freq_range,
                 dbref,
                 A,
