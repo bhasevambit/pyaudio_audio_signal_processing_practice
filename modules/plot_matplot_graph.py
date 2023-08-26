@@ -15,7 +15,7 @@ def gen_graph_figure(graph_type):
         # === 時間領域波形&周波数特性グラフ向け ===
         # =========================================
         # figureインスタンスの作成
-        fig = plt.figure()
+        fig = plt.figure(figsize=[7, 7])
 
         # Axesインスタンスの作成
         sub_fig1 = fig.add_subplot(2, 1, 1)
