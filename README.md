@@ -1,6 +1,6 @@
-# PyAudio Audio-Signal-Processing Training
+# PyAudio Audio-Signal-Processing Practice
 
-This repository is PyAudio Audio-Signal-Processing Training Test Code.
+This repository is PyAudio Audio-Signal-Processing Practice Test Code.
 
 ## Python Version
 
